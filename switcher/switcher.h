@@ -35,7 +35,6 @@ extern "C" {
  *
  *     uint16_t SWITCHER_VIRTUAL_HOLD_KEY = KC_LGUI;
  */
-
 extern uint16_t SWITCHER_VIRTUAL_HOLD_KEY;
 
 /**
@@ -47,7 +46,6 @@ extern uint16_t SWITCHER_VIRTUAL_HOLD_KEY;
  *
  *     uint16_t SWITCHER_VIRTUAL_TAP_KEY = KC_TAB;
  */
-
 extern uint16_t SWITCHER_VIRTUAL_TAP_KEY;
 
 /**
@@ -61,7 +59,8 @@ typedef struct {
     uint16_t virtual_keycode;
 } switcher_key_t;
 
-/** Table of switcher secondary keys.
+/** 
+ *  @brief Table of Switcher Secondary Keys
  * 
  *  Define any secondary keys to be used while in Switcher mode in your keymap.c,
  *  as follows:
@@ -81,7 +80,6 @@ typedef struct {
  *  processing.
  * 
  * */
-
 extern const switcher_key_t switcher_secondary_keys[];
 
 #ifdef __cplusplus
