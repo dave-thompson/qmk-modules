@@ -1,0 +1,11 @@
+{
+    "module_name": "Switcher",
+    "maintainer": "dave-thompson",
+    "license": "AGPL-3.0-or-later",
+    "url": "https://github.com/dave-thompson/qmk-modules/switcher",
+    "keycodes": [
+        {
+            "key": "SWITCHER"
+        }
+    ]
+}
