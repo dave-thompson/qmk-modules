@@ -23,7 +23,7 @@ uint16_t switcher_secondary_keys_count(void);
 const switcher_key_t* switcher_secondary_keys_get(uint16_t index);
 
 static void begin_timer(uint16_t *timer, uint16_t duration) {
-    if (duration != 0) // 0 disables caching
+    if (duration != 0) // 0 disables timed feature (either caching or idle timeout)
     {
         // The bitwise OR here, "| 1", increments any even number by 1 to make it odd. This addresses the 
         // corner case where the computed value is 0 (which otherwise would happen roughly 1 in 65k times:
@@ -101,12 +101,13 @@ static void process_ending_key(keyrecord_t *record) {
 }
 
 void process_cached_keys(void) {
-    // Process any cached secondary keys
-    for (uint8_t i = 0; i < cache_count; i++) {
-        uint16_t cached_secondary_key = key_cache[i];
-        process_secondary_key(cached_secondary_key);
-    }
+    // Check size of cache & prepare to re-cache keys if necessary (in case the processing of a cached key leads to an additional boot delay)
+    uint16_t keys_to_process = cache_count;
     cache_count = 0;
+    // Process any cached secondary keys
+    for (uint8_t i = 0; i < keys_to_process; i++) {
+        process_secondary_key(key_cache[i]);
+    }
     // Process any cached ending key
     if (received_ending_record) {
         process_ending_key(&ending_record);
@@ -120,15 +121,13 @@ bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
             if (!switcher_active) { // start of the switching sequence
                 // hold the hold key
                 register_code(SWITCHER_VIRTUAL_HOLD_KEY);
+                begin_timer(&initial_boot_timer, SWITCHER_BOOT_DURATION);
+                switcher_active = true;
             }
             // tap the tap_key
             register_code(SWITCHER_VIRTUAL_TAP_KEY);
         } else {
             unregister_code(SWITCHER_VIRTUAL_TAP_KEY);
-            if (!switcher_active) {
-                begin_timer(&initial_boot_timer, SWITCHER_BOOT_DURATION);
-                switcher_active = true;
-            }
         }
         return false;
     } else if (switcher_active) { // switcher active; some key (other than primary trigger) pressed / released
