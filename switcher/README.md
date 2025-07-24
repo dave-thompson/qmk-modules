@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-07-17</td></tr>
+<tr><td><b>Version</b></td><td>2025-07-24</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
