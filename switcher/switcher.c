@@ -9,8 +9,8 @@ static bool window_mode = false; // Are we in window switcher mode or app switch
 static uint16_t idle_timer = 0;
 static bool switcher_key_held = false;
 
-#define SWITCHER_BOOT_DURATION 200 // Estimated time in ms for the switcher _software_ to boot up after the SWITCHER keystroke is sent; during this time window, any keystrokes will be cached and then sent once boot is expected to have completed
-#define SWITCHER_WINDOWS_BOOT_DURATION 10000// 400 // Maximum time in ms for the switcher _software_ to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
+#define SWITCHER_BOOT_DURATION 180 // Estimated time in ms for the switcher _software_ to boot up after the SWITCHER keystroke is sent; during this time window, any keystrokes will be cached and then sent once boot is expected to have completed
+#define SWITCHER_WINDOWS_BOOT_DURATION 400 // Maximum time in ms for the switcher _software_ to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
 static uint16_t initial_boot_timer = 0; // Estimated switcher _software_ boot completion time; 0 if and only if app switcher not currently booting
 static uint16_t window_boot_timer = 0; // Estimated switcher _software_ window mode boot completion time; 0 if and only if window mode not currently booting
 
