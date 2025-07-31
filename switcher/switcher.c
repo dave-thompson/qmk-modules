@@ -2,29 +2,56 @@
 
 ASSERT_COMMUNITY_MODULES_MIN_API_VERSION(1, 0, 0);
 
-static bool switcher_active = false; // Is the switcher in use?
-static bool window_mode = false; // Are we in window switcher mode or app switcher mode?
-
-#define SWITCHER_IDLE_TIMEOUT 0 // Max time between keypresses before Switcher closes automatically, selectimg the highlighted item
-static uint16_t idle_timer = 0;
+/* BASIC STATUS */
 static bool switcher_key_held = false;
+static bool switcher_active = false; // Is the switcher in use?
+#ifdef SWITCHER_MACOS_APP_SWITCHER
+    static bool window_mode = false; // Are we in window switcher mode or app switcher mode?
+#endif
 
-#define SWITCHER_BOOT_DURATION 180 // Estimated time in ms for the switcher _software_ to boot up after the SWITCHER keystroke is sent; during this time window, any keystrokes will be cached and then sent once boot is expected to have completed
-#define SWITCHER_WINDOWS_BOOT_DURATION 400 // Maximum time in ms for the switcher _software_ to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
-static uint16_t initial_boot_timer = 0; // Estimated switcher _software_ boot completion time; 0 if and only if app switcher not currently booting
-static uint16_t window_boot_timer = 0; // Estimated switcher _software_ window mode boot completion time; 0 if and only if window mode not currently booting
+/* IDLE TIMER */
+#ifdef SWITCHER_IDLE_TIMEOUT // Max time between keypresses before Switcher closes automatically, selectimg the highlighted item
+    static void begin_timer(uint16_t *timer, uint16_t duration);
+    static uint16_t idle_timer = 0;
+    static inline void reset_idle_timer(void) { begin_timer(&idle_timer, SWITCHER_IDLE_TIMEOUT); }
+#else
+    static inline void reset_idle_timer(void) { }
+#endif
 
-// Boot cache
-// MacOS only caches Cmd-tab for basic app switching; other keycodes need to be cached at the keyboard level
-#define CACHE_SIZE 8
-static uint16_t key_cache[CACHE_SIZE];
-static uint8_t cache_count = 0;
+/* SECONDARY KEYS */
+#ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+    // Defined in introspection.c
+    uint16_t switcher_secondary_keys_count(void);
+    switcher_key_t* switcher_secondary_keys_get(uint16_t index);
+#endif
+
+/* BOOT CACHE */
+// (MacOS only caches Cmd-tab for basic app switching; secondary keycodes need to be cached at the keyboard level.)
+#ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+    #define SECONDARY_KEY_CACHE_SIZE 8
+    static uint16_t secondary_key_cache[SECONDARY_KEY_CACHE_SIZE];
+    static uint8_t secondary_key_cache_count = 0;
+#endif
+
 static keyrecord_t ending_record;
 static bool ending_record_cached = false;
 
-// Defined in introspection.c
-uint16_t switcher_secondary_keys_count(void);
-const switcher_key_t* switcher_secondary_keys_get(uint16_t index);
+/* BOOT TIMERS */
+#ifndef SWITCHER_BOOT_DURATION // Maximum time in ms for the switcher _software_ to boot up after the SWITCHER keystroke is sent; during this time window, any keystrokes will be cached and then sent once boot is expected to have completed
+    #define SWITCHER_BOOT_DURATION 180
+#endif
+
+#if defined(SWITCHER_MACOS_APP_SWITCHER) && !defined(SWITCHER_WINDOWS_BOOT_DURATION) // Maximum time in ms for the stock MacOS App Switcher to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
+    #define SWITCHER_WINDOWS_BOOT_DURATION 400
+#endif
+
+static uint16_t initial_boot_timer = 0; // Estimated switcher _software_ boot completion time; 0 if and only if app switcher not currently booting
+#ifdef SWITCHER_MACOS_APP_SWITCHER
+    static uint16_t window_boot_timer = 0; // Estimated MacOS App Switcher window mode boot completion time; 0 if and only if window mode not currently booting
+    static inline bool loading(void) { return initial_boot_timer || window_boot_timer; }
+#else
+    static inline bool loading(void) { return initial_boot_timer; }
+#endif
 
 static void begin_timer(uint16_t *timer, uint16_t duration) {
     if (duration != 0) // 0 disables timed feature (either caching or idle timeout)
@@ -46,62 +73,69 @@ static bool timer_just_ended(uint16_t *timer) {
     return false;
 }
 
-static void reset_idle_timer(void) {
-    begin_timer(&idle_timer, SWITCHER_IDLE_TIMEOUT);
-}
-
-static bool loading(void) {
-    return initial_boot_timer || window_boot_timer;
-}
-
-static void cache_keycode(uint16_t keycode) {
-    if (cache_count < CACHE_SIZE) {
-        key_cache[cache_count] = keycode;
-        cache_count++;
+#ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+    static void cache_secondary_keycode(uint16_t keycode) {
+        if (secondary_key_cache_count < SECONDARY_KEY_CACHE_SIZE) {
+            secondary_key_cache[secondary_key_cache_count] = keycode;
+            secondary_key_cache_count++;
+        }
     }
-}
+#endif
 
 static void exit_switcher(void) {
     unregister_code(SWITCHER_VIRTUAL_HOLD_KEY);
-    switcher_active = window_mode = ending_record_cached = false;
-    cache_count = 0;
+    switcher_active = ending_record_cached = false;
+    #ifdef SWITCHER_MACOS_APP_SWITCHER
+        window_mode = false;
+    #endif
+    #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+        secondary_key_cache_count = 0;
+    #endif
 }
 
 static void select_highlighted_item(void) {
-    if (window_mode) { // if window switcher in use: select the highlighted window
-        tap_code(KC_ENTER);
+    #ifdef SWITCHER_MACOS_APP_SWITCHER
+        if (window_mode) { // if window switcher in use: select the highlighted window
+            tap_code(KC_ENTER);
+            exit_switcher();
+        }
+        else { // app switcher in use: hold alt while exiting to instruct macos to open window even if minimised
+            register_code(KC_LALT);
+            exit_switcher();
+            unregister_code(KC_LALT);
+        }
+    #else
         exit_switcher();
-    }
-    else { // app switcher in use: hold alt while exiting to instruct macos to open window even if minimised
-        register_code(KC_LALT);
-        exit_switcher();
-        unregister_code(KC_LALT);
-    }
+    #endif
 }
 
-static void process_secondary_key(uint16_t virtual_keycode) {
-    reset_idle_timer();
-    if (loading()) {
-        cache_keycode(virtual_keycode);
+#ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+    static void process_secondary_key(uint16_t virtual_keycode) {
+        reset_idle_timer();
+        if (loading()) {
+            cache_secondary_keycode(virtual_keycode);
+        }
+        else {
+            tap_code(virtual_keycode);
+            #ifdef SWITCHER_MACOS_APP_SWITCHER
+                // if entering window browsing (expose):
+                if (!window_mode &&
+                    ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
+                    begin_timer(&window_boot_timer, SWITCHER_WINDOWS_BOOT_DURATION);
+                    window_mode = true;
+                }
+                // if the user selected a window themselves: clean up
+                if (window_mode && (virtual_keycode == KC_ENTER)) {
+                    exit_switcher();
+                }
+                // if app switcher cancelled: clean up
+                if ((virtual_keycode == KC_ESC) || (!window_mode && (virtual_keycode == KC_DOT))) {
+                    exit_switcher();
+                }
+            #endif
+        }
     }
-    else {
-        tap_code(virtual_keycode);
-        // if entering window browsing (expose):
-        if (!window_mode &&
-            ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
-            begin_timer(&window_boot_timer, SWITCHER_WINDOWS_BOOT_DURATION);
-            window_mode = true;
-        }
-        // if the user selected a window themselves: clean up
-        if (window_mode && (virtual_keycode == KC_ENTER)) {
-            exit_switcher();
-        }
-        // if app switcher cancelled: clean up
-        if ((virtual_keycode == KC_ESC) || (!window_mode && (virtual_keycode == KC_DOT))) {
-            exit_switcher();
-        }
-    }
-}
+#endif
 
 static void process_ending_key(keyrecord_t *record) {
     if (loading()) { // if loading, cache the record for later processing
@@ -110,19 +144,23 @@ static void process_ending_key(keyrecord_t *record) {
     }
     else {
         select_highlighted_item();
-        process_record(record); // Send the ending key for regular processing
+        #ifndef SWITCHER_SWALLOW_ENDING_KEYCODE
+            process_record(record); // Send the ending key for regular processing
+        #endif
     }
 }
 
 void process_cached_keys(void) {
     reset_idle_timer(); // in case idle timer expired during the preceding boot delay
-    // Prepare to re-cache keys if necessary (in case the processing of a cached key leads to an additional boot delay)
-    uint16_t keys_to_process = cache_count;
-    cache_count = 0;
-    // Process any cached secondary keys
-    for (uint8_t i = 0; i < keys_to_process; i++) {
-        process_secondary_key(key_cache[i]);
-    }
+    #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+        // Prepare to re-cache keys if necessary (in case the processing of a cached key leads to an additional boot delay)
+        uint16_t keys_to_process = secondary_key_cache_count;
+        secondary_key_cache_count = 0;
+        // Process any cached secondary keys
+        for (uint8_t i = 0; i < keys_to_process; i++) {
+            process_secondary_key(secondary_key_cache[i]);
+        }
+    #endif
     // Process any cached ending key
     if (ending_record_cached) {
         process_ending_key(&ending_record);
@@ -149,17 +187,19 @@ bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
         }
         return false;
     } else if (switcher_active) { // switcher active; some key (other than primary trigger) pressed / released
-        for (int i = 0; i < switcher_secondary_keys_count(); ++i) {
-            // if it's a secondary trigger: send the corresponding secondary tap
-            const switcher_key_t* switcher_secondary_key = switcher_secondary_keys_get(i);
-            if (current_keycode == switcher_secondary_key->keycode) {
-                if (record->event.pressed) {
-                    uint16_t virtual_keycode = switcher_secondary_key->virtual_keycode;
-                    process_secondary_key(virtual_keycode);
+        #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
+            for (int i = 0; i < switcher_secondary_keys_count(); ++i) {
+                // if it's a secondary trigger: send the corresponding secondary tap
+                const switcher_key_t* switcher_secondary_key = switcher_secondary_keys_get(i);
+                if (current_keycode == switcher_secondary_key->keycode) {
+                    if (record->event.pressed) {
+                        uint16_t virtual_keycode = switcher_secondary_key->virtual_keycode;
+                        process_secondary_key(virtual_keycode);
+                    }
+                    return false; // swallow the secondary trigger; we don't want it being typed
                 }
-                return false; // swallow the secondary trigger; we don't want it being typed
             }
-        }
+        #endif
         // it's not a secondary trigger: end the switching sequence
         process_ending_key(record);
         return false; // swallow the ending key; process_ending_key will explicitly send it on for additional processing if needed
@@ -170,23 +210,29 @@ bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
 void housekeeping_task_switcher(void){
     // After App Switcher Boot Up:
     if (timer_just_ended(&initial_boot_timer)) {
-        tap_code16(S(KC_TAB)); // Highlight the current app rather than the previous app
+        #ifdef SWITCHER_SELECT_CURRENT_APP_NOT_PREVIOUS
+            tap_code16(S(KC_TAB)); // Highlight the current app rather than the previous app
+        #endif
         process_cached_keys();
     }
 
     // After Window Switcher Boot Up:
-    if (timer_just_ended(&window_boot_timer)) {
-        tap_code(KC_RIGHT); // Select the first window automatically
-        process_cached_keys();
-    }
-
-    // After Idle for SWITCHER_IDLE_TIMEOUT ms
-    if(timer_just_ended(&idle_timer)) {
-        // Automatically choose the highlighted item, unless the switcher key is held down, a new screen is booting, or there are cached keys.
-        //     (If neither boot timer is running, there are no cached keys.)
-        // If this conditional fails, the idle timer is reset when the switcher key is released or a boot timer expires.
-        if ((!switcher_key_held) && (!(initial_boot_timer || window_boot_timer))) {
-            select_highlighted_item();
+    #ifdef SWITCHER_MACOS_APP_SWITCHER
+        if (timer_just_ended(&window_boot_timer)) {
+            tap_code(KC_RIGHT); // Select the first window automatically
+            process_cached_keys();
         }
-    }
+    #endif
+
+    // After Idle Timer Expires:
+    #ifdef SWITCHER_IDLE_TIMEOUT
+        if(timer_just_ended(&idle_timer)) {
+            // Automatically choose the highlighted item, unless the switcher key is held down, a new screen is booting, or there are cached keys.
+            //     (If neither boot timer is running [=== if !loading()], then there are no cached keys.)
+            // If this conditional fails, the idle timer is reset when the switcher key is released or a boot timer expires.
+            if (!switcher_key_held && !loading()) {
+                select_highlighted_item();
+            }
+        }
+    #endif
 }
