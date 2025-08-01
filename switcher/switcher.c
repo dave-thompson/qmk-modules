@@ -34,6 +34,7 @@ static bool switcher_active = false; // Is the switcher in use?
 #endif
 
 static keyrecord_t ending_record;
+static uint16_t ending_keycode;
 static bool ending_record_cached = false;
 
 /* BOOT TIMERS */
@@ -72,6 +73,26 @@ static bool timer_just_ended(uint16_t *timer) {
     }
     return false;
 }
+
+#ifdef SWITCHER_SWALLOW_ENDING_KEYCODE
+    static bool is_layer_switch(uint16_t keycode) {
+        switch (keycode) {
+        case QK_MOMENTARY ... QK_MOMENTARY_MAX:
+        case QK_LAYER_TAP_TOGGLE ... QK_LAYER_TAP_TOGGLE_MAX:
+        case QK_TO ... QK_TO_MAX:
+        case QK_TOGGLE_LAYER ... QK_TOGGLE_LAYER_MAX:
+      #ifndef NO_ACTION_ONESHOT
+        case QK_ONE_SHOT_LAYER ... QK_ONE_SHOT_LAYER_MAX:
+      #endif //NO_ACTION_ONESHOT
+      #ifdef LAYER_LOCK_ENABLE
+        case QK_LLCK:
+      #endif //LAYER_LOCK_ENABLE
+            return true;
+        default:
+            return false;
+        }
+    }
+#endif
 
 #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
     static void cache_secondary_keycode(uint16_t keycode) {
@@ -137,15 +158,18 @@ static void select_highlighted_item(void) {
     }
 #endif
 
-static void process_ending_key(keyrecord_t *record) {
+static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
     if (loading()) { // if loading, cache the record for later processing
         ending_record = *record;
+        ending_keycode = keycode;
         ending_record_cached = true;
     }
     else {
         select_highlighted_item();
         #ifndef SWITCHER_SWALLOW_ENDING_KEYCODE
             process_record(record); // Send the ending key for regular processing
+        #else
+            if (is_layer_switch(keycode)) {process_record(record);} // Swallow ending key (unless it's a layer switch)
         #endif
     }
 }
@@ -163,7 +187,7 @@ void process_cached_keys(void) {
     #endif
     // Process any cached ending key
     if (ending_record_cached) {
-        process_ending_key(&ending_record);
+        process_ending_key(ending_keycode, &ending_record);
     }
 }
 
@@ -201,7 +225,7 @@ bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
             }
         #endif
         // it's not a secondary trigger: end the switching sequence
-        process_ending_key(record);
+        process_ending_key(current_keycode, record);
         return false; // swallow the ending key; process_ending_key will explicitly send it on for additional processing if needed
     }
     return true;
