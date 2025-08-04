@@ -82,6 +82,10 @@ typedef struct {
  * */
 extern const switcher_key_t switcher_secondary_keys[];
 
+bool is_switcher_keycode_user(uint16_t keycode);
+void switcher_send_initial_keycodes_user(uint16_t keycode);
+void switcher_send_keycode(uint16_t virtual_keycode);
+
 #ifdef __cplusplus
 }
 #endif

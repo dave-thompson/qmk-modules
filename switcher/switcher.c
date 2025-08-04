@@ -5,6 +5,7 @@ ASSERT_COMMUNITY_MODULES_MIN_API_VERSION(1, 0, 0);
 /* BASIC STATUS */
 static bool switcher_key_held = false;
 static bool switcher_active = false; // Is the switcher in use?
+static uint16_t latest_switcher_keycode;
 #ifdef SWITCHER_MACOS_APP_SWITCHER
     static bool window_mode = false; // Are we in window switcher mode or app switcher mode?
 #endif
@@ -28,8 +29,10 @@ static bool switcher_active = false; // Is the switcher in use?
 /* BOOT CACHE */
 // (MacOS only caches Cmd-tab for basic app switching; secondary keycodes need to be cached at the keyboard level.)
 #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
-    #define SECONDARY_KEY_CACHE_SIZE 8
-    static uint16_t secondary_key_cache[SECONDARY_KEY_CACHE_SIZE];
+    #ifndef SWITCHER_SECONDARY_KEY_CACHE_SIZE
+        #define SWITCHER_SECONDARY_KEY_CACHE_SIZE 8
+    #endif
+    static uint16_t secondary_key_cache[SWITCHER_SECONDARY_KEY_CACHE_SIZE];
     static uint8_t secondary_key_cache_count = 0;
 #endif
 
@@ -42,20 +45,30 @@ static bool ending_record_cached = false;
     #define SWITCHER_BOOT_DURATION 180
 #endif
 
-#if defined(SWITCHER_MACOS_APP_SWITCHER) && !defined(SWITCHER_WINDOWS_BOOT_DURATION) // Maximum time in ms for the stock MacOS App Switcher to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
-    #define SWITCHER_WINDOWS_BOOT_DURATION 400
+#if defined(SWITCHER_MACOS_APP_SWITCHER) && !defined(SWITCHER_EXPOSE_BOOT_DURATION) // Maximum time in ms for the stock MacOS App Switcher to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
+    #define SWITCHER_EXPOSE_BOOT_DURATION 400
+#endif
+
+// Constrain boot durations:
+//   - They must be at least 1 millisecond, so that boot timers always run and post-boot processing is always carried out.
+//   - They must not exceed 30 seconds, so as not to overflow the 16-bit timer (32,768ms).
+#if SWITCHER_BOOT_DURATION < 1 || SWITCHER_BOOT_DURATION > 30000
+    #error "switcher: SWITCHER_BOOT_DURATION must be between 1 and 30000 ms"
+#endif
+#if defined(SWITCHER_EXPOSE_BOOT_DURATION) && (SWITCHER_EXPOSE_BOOT_DURATION < 1 || SWITCHER_EXPOSE_BOOT_DURATION > 30000)
+    #error "switcher: SWITCHER_EXPOSE_BOOT_DURATION must be between 1 and 30000 ms"
 #endif
 
 static uint16_t initial_boot_timer = 0; // Estimated switcher _software_ boot completion time; 0 if and only if app switcher not currently booting
 #ifdef SWITCHER_MACOS_APP_SWITCHER
-    static uint16_t window_boot_timer = 0; // Estimated MacOS App Switcher window mode boot completion time; 0 if and only if window mode not currently booting
-    static inline bool loading(void) { return initial_boot_timer || window_boot_timer; }
+    static uint16_t expose_boot_timer = 0; // Estimated MacOS Expose boot completion time; 0 if and only if window mode not currently booting
+    static inline bool loading(void) { return initial_boot_timer || expose_boot_timer; }
 #else
     static inline bool loading(void) { return initial_boot_timer; }
 #endif
 
 static void begin_timer(uint16_t *timer, uint16_t duration) {
-    if (duration != 0) // 0 disables timed feature (either caching or idle timeout)
+    if (duration != 0) // 0 disables timed feature (only for idle timeout; caching never has a duration of < 1)
     {
         // The bitwise OR here, "| 1", increments any even number by 1 to make it odd. This addresses the 
         // corner case where the computed value is 0 (which otherwise would happen roughly 1 in 65k times:
@@ -94,14 +107,12 @@ static bool timer_just_ended(uint16_t *timer) {
     }
 #endif
 
-#ifdef SWITCHER_ENABLE_SECONDARY_KEYS
-    static void cache_secondary_keycode(uint16_t keycode) {
-        if (secondary_key_cache_count < SECONDARY_KEY_CACHE_SIZE) {
-            secondary_key_cache[secondary_key_cache_count] = keycode;
-            secondary_key_cache_count++;
-        }
+static void cache_secondary_keycode(uint16_t keycode) {
+    if (secondary_key_cache_count < SWITCHER_SECONDARY_KEY_CACHE_SIZE) {
+        secondary_key_cache[secondary_key_cache_count] = keycode;
+        secondary_key_cache_count++;
     }
-#endif
+}
 
 static void exit_switcher(void) {
     unregister_code(SWITCHER_VIRTUAL_HOLD_KEY);
@@ -130,33 +141,83 @@ static void select_highlighted_item(void) {
     #endif
 }
 
-#ifdef SWITCHER_ENABLE_SECONDARY_KEYS
-    static void process_secondary_key(uint16_t virtual_keycode) {
-        reset_idle_timer();
-        if (loading()) {
-            cache_secondary_keycode(virtual_keycode);
-        }
-        else {
-            tap_code(virtual_keycode);
-            #ifdef SWITCHER_MACOS_APP_SWITCHER
-                // if entering window browsing (expose):
-                if (!window_mode &&
-                    ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
-                    begin_timer(&window_boot_timer, SWITCHER_WINDOWS_BOOT_DURATION);
-                    window_mode = true;
-                }
-                // if the user selected a window themselves: clean up
-                if (window_mode && (virtual_keycode == KC_ENTER)) {
-                    exit_switcher();
-                }
-                // if app switcher cancelled: clean up
-                if ((virtual_keycode == KC_ESC) || (!window_mode && (virtual_keycode == KC_DOT))) {
-                    exit_switcher();
-                }
-            #endif
-        }
+static void process_secondary_key(uint16_t virtual_keycode) {
+    reset_idle_timer();
+    if (loading()) {
+        cache_secondary_keycode(virtual_keycode);
     }
-#endif
+    else {
+        tap_code16(virtual_keycode);
+        // if app switcher cancelled: clean up (presumes all switching software uses Escape to quit)
+        if (virtual_keycode == KC_ESC) {
+            exit_switcher();
+        }
+        if (virtual_keycode == SWITCHER_SELECT_ITEM) {
+            select_highlighted_item();
+        }
+        #ifdef SWITCHER_MACOS_APP_SWITCHER
+            // if entering window browsing (exposé):
+            if (!window_mode &&
+                ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
+                begin_timer(&expose_boot_timer, SWITCHER_EXPOSE_BOOT_DURATION);
+                window_mode = true;
+            }
+            // if the user selected a window themselves: clean up
+            if (window_mode && (virtual_keycode == KC_ENTER)) {
+                exit_switcher();
+            }
+            // if app switcher cancelled: clean up
+            if (!window_mode && (virtual_keycode == KC_DOT)) {
+                exit_switcher();
+            }
+        #endif
+    }
+}
+
+void switcher_send_keycode(uint16_t virtual_keycode) {
+    process_secondary_key(virtual_keycode);
+}
+
+static bool is_switcher_keycode(uint16_t keycode) {
+    if (keycode == SWITCHER ||
+        keycode == SWITCHER_EXPOSE ||
+        is_switcher_keycode_user(keycode)) {
+        latest_switcher_keycode = keycode;
+        return true;
+    }
+    else
+        return false;
+}
+
+__attribute__((weak)) bool is_switcher_keycode_user(uint16_t keycode) {
+    return false;
+}
+
+static void switcher_send_initial_keycodes(uint16_t switcher_keycode) {
+
+    #ifdef SWITCHER_MACOS_APP_SWITCHER
+        if (switcher_keycode == SWITCHER_EXPOSE) {
+            process_secondary_key(KC_LEFT);
+            process_secondary_key(KC_UP);
+        }
+    #endif
+
+    #ifdef SWITCHER_SELECT_CURRENT_APP_NOT_PREVIOUS
+        if (switcher_keycode == SWITCHER) {
+            process_secondary_key(S(SWITCHER_VIRTUAL_TAP_KEY)); // Highlight the current app rather than the previous app
+        }
+    #endif
+
+    switcher_send_initial_keycodes_user(switcher_keycode);
+}
+
+__attribute__((weak)) void switcher_send_initial_keycodes_user(uint16_t keycode) {}
+
+#ifdef SWITCHER_MACOS_APP_SWITCHER
+void switcher_send_initial_expose_keycodes(uint16_t switcher_keycode) {
+    process_secondary_key(KC_RIGHT); // Select the first window automatically
+}
+#endif //SWITCHER_MACOS_APP_SWITCHER
 
 static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
     if (loading()) { // if loading, cache the record for later processing
@@ -174,7 +235,7 @@ static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
     }
 }
 
-void process_cached_keys(void) {
+static void process_cached_keys(void) {
     reset_idle_timer(); // in case idle timer expired during the preceding boot delay
     #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
         // Prepare to re-cache keys if necessary (in case the processing of a cached key leads to an additional boot delay)
@@ -192,7 +253,7 @@ void process_cached_keys(void) {
 }
 
 bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
-    if (current_keycode == SWITCHER) {
+    if (is_switcher_keycode(current_keycode)) {
         if (record->event.pressed) {
             // primary trigger pressed
             if (!switcher_active) { // start of the switching sequence
@@ -234,16 +295,14 @@ bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
 void housekeeping_task_switcher(void){
     // After App Switcher Boot Up:
     if (timer_just_ended(&initial_boot_timer)) {
-        #ifdef SWITCHER_SELECT_CURRENT_APP_NOT_PREVIOUS
-            tap_code16(S(KC_TAB)); // Highlight the current app rather than the previous app
-        #endif
+        switcher_send_initial_keycodes(latest_switcher_keycode);
         process_cached_keys();
     }
 
-    // After Window Switcher Boot Up:
+    // After Window Switcher (Exposé) Boot Up:
     #ifdef SWITCHER_MACOS_APP_SWITCHER
-        if (timer_just_ended(&window_boot_timer)) {
-            tap_code(KC_RIGHT); // Select the first window automatically
+        if (timer_just_ended(&expose_boot_timer)) {
+            switcher_send_initial_expose_keycodes(latest_switcher_keycode);
             process_cached_keys();
         }
     #endif
