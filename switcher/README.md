@@ -2,34 +2,48 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-07-31</td></tr>
+<tr><td><b>Version</b></td><td>2025-08-04</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
 
-This is community module [Switcher](https://github.com/dave-thompson/qmk-modules/switcher).  Switcher is a fuller-featured re-imagining of @callum-oakley's [Swapper](https://github.com/callum-oakley/qmk_firmware/tree/master/users/callum).
+This is community module [Switcher](https://github.com/dave-thompson/qmk-modules/switcher), which makes any app switcher - even the stock MacOS App Switcher - work well on a QMK keyboard.
 
-It allows full use of MacOS's app switcher on a QMK mechanical keyboard, no matter how your keyboard is configured, and including all the things you never even knew the app switcher could do.
+# Features
 
-Indebted to @getreuer's [superbly documented examples](https://getreuer.info/posts/keyboards/index.html).
+## Single Key App Switching
 
-# Usage
+## Secondary Key Presses
+
+## Caching
+
+## Three Ways to Select an App
+
+## Mac OS Niceties
+
+## Advanced Use: Multiple Switcher Keys
+
+# Setup
 
 ##1. keymap.json
 
-In `keymap.json`, add the following:
+In `keymap.json`, add the below.  If you don't have a keymap.json yet, just create one (with the below content) in the same directory as your keymap.c file.
 
 ```json
 {
     "modules": ["dave-thompson/switcher"]
 }
 ```
-If you don't already have a keymap.json file, simply create one with the above content in the same directory as your keymap.c file.
 
-If you are also using other modules, you will usually want Switcher to be the first in the list.  As a minimum, it should go before any modules which process the same keycodes when Switcher is not active.  This ensures correct behaviour as follows:
-- When Switcher is *not* active, it will simply allow keystrokes to cascade through to other modules.
-- When Switcher *is* active (i.e. when the app switcher modal is open), it will intercept all keystrokes before they get to any other modules, thus correctly interpreting them in the app switcher context, rather than in the context of whatever applications you have underneath.
+If you are already using other modules, then in most cases you should add Switcher to **the front of** the list, to prevent your app switcher keystrokes interfering with modules such as Sentence Case.
+```json
+{
+  "modules": ["dave-thompson/switcher", "getreuer/sentence_case"]
+}
+```
 
 ## 2. keymap.c
 
 #TODO : Add setup instructions & example use cases
+
+
