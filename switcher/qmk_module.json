@@ -6,6 +6,7 @@
     "keycodes": [
         {"key": "SWITCHER"},
         {"key": "SWITCHER_EXPOSE"},
+        {"key": "SWITCHER_CUSTOM"},
         {"key": "SWITCHER_SELECT_ITEM"}
     ]
 }
