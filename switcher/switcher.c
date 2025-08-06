@@ -197,6 +197,7 @@ void switcher_send_keycode(uint16_t virtual_keycode) {
 static bool is_switcher_keycode(uint16_t keycode) {
     if (keycode == SWITCHER ||
         keycode == SWITCHER_EXPOSE ||
+        keycode == SWITCHER_CUSTOM ||
         is_switcher_keycode_user(keycode)) {
         latest_switcher_keycode = keycode;
         return true;
@@ -224,16 +225,26 @@ static void switcher_send_initial_keycodes(uint16_t switcher_keycode) {
         }
     #endif
 
+    #ifdef SWITCHER_CUSTOM_INITIAL_KEYCODES
+        if (switcher_keycode == SWITCHER_CUSTOM) {
+            // Send each of the custom initial keycodes in sequence
+            static const uint16_t custom_initial_keycodes[] = SWITCHER_CUSTOM_INITIAL_KEYCODES;
+            for (uint8_t i = 0; i < ARRAY_SIZE(custom_initial_keycodes); i++) {
+                process_secondary_key(custom_initial_keycodes[i]);
+            }
+        }
+    #endif
+
     switcher_send_initial_keycodes_user(switcher_keycode);
 }
 
 __attribute__((weak)) void switcher_send_initial_keycodes_user(uint16_t keycode) {}
 
 #ifdef SWITCHER_MACOS_APP_SWITCHER
-void switcher_send_initial_expose_keycodes(uint16_t switcher_keycode) {
-    process_secondary_key(KC_RIGHT); // Select the first window automatically
-}
-#endif //SWITCHER_MACOS_APP_SWITCHER
+    void switcher_send_initial_expose_keycodes(uint16_t switcher_keycode) {
+        process_secondary_key(KC_RIGHT); // Select the first window automatically
+    }
+#endif
 
 static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
     if (loading()) { // if loading, cache the record for later processing
