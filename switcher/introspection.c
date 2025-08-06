@@ -1,19 +1,13 @@
 #ifdef COMMUNITY_MODULE_SWITCHER_ENABLE
 
-    #ifdef SWITCHER_MACOS_APP_SWITCHER
-        uint16_t SWITCHER_VIRTUAL_HOLD_KEY = KC_LGUI;
-        uint16_t SWITCHER_VIRTUAL_TAP_KEY = KC_TAB;
-    #endif //SWITCHER_MACOS_APP_SWITCHER
-
     #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
 
         /**
          * switcher_seconday_keys_count(void): Returns the number of secondary keys specified in keymap.c
          * 
-         * If you don't want to define your secondary keys in an array, as outlined
-         * in switcher.h, then simply define them in the way you wish and override
-         * BOTH switcher_secondary_keys_count() and switcher_secondary_keys_get()
-         * in your keymap.c file.
+         * If you don't want to define your secondary keys using the SWITCHER_SECONDARY_KEYS macro,
+         * as outlined in switcher.h, then simply define them in the way you wish and override
+         * switcher_secondary_keys_count() and switcher_secondary_keys_get().
          * 
          * You may refer to the raw implementations below in your overriding methods
          * if useful.
