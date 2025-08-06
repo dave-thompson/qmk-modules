@@ -2,6 +2,22 @@
 
 ASSERT_COMMUNITY_MODULES_MIN_API_VERSION(1, 0, 0);
 
+#ifdef SWITCHER_MACOS_APP_SWITCHER
+    #ifndef SWITCHER_VIRTUAL_HOLD_KEY
+        #define SWITCHER_VIRTUAL_HOLD_KEY KC_LGUI
+    #endif
+    #ifndef SWITCHER_VIRTUAL_TAP_KEY
+        #define SWITCHER_VIRTUAL_TAP_KEY KC_TAB
+    #endif
+#else //SWITCHER_MACOS_APP_SWITCHER not defined
+    #ifndef SWITCHER_VIRTUAL_HOLD_KEY
+        #error "Must define SWITCHER_VIRTUAL_HOLD_KEY (or enable SWITCHER_MACOS_APP_SWITCHER)"
+    #endif
+    #ifndef SWITCHER_VIRTUAL_TAP_KEY
+        #error "Must define SWITCHER_VIRTUAL_TAP_KEY (or enable SWITCHER_MACOS_APP_SWITCHER)"
+    #endif
+#endif //SWITCHER_MACOS_APP_SWITCHER
+
 /* BASIC STATUS */
 static bool switcher_key_held = false;
 static bool switcher_active = false; // Is the switcher in use?
@@ -23,7 +39,7 @@ static uint16_t latest_switcher_keycode;
 #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
     // Defined in introspection.c
     uint16_t switcher_secondary_keys_count(void);
-    switcher_key_t* switcher_secondary_keys_get(uint16_t index);
+    const switcher_key_t* switcher_secondary_keys_get(uint16_t index);
 #endif
 
 /* BOOT CACHE */

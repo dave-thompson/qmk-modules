@@ -27,28 +27,6 @@ extern "C" {
 #endif
 
 /**
- * @brief Switcher Virtual Hold Key
- *
- * Define `SWITCHER_VIRTUAL_HOLD_KEY` and assign it to the keycode you would like held
- * down whenever Switcher is open.  For example, to use with the MacOS app switcher,
- * set it to the Command key as follows:
- *
- *     uint16_t SWITCHER_VIRTUAL_HOLD_KEY = KC_LGUI;
- */
-extern uint16_t SWITCHER_VIRTUAL_HOLD_KEY;
-
-/**
- * @brief Switcher Virtual Tap Key
- *
- * Define `SWITCHER_VIRTUAL_TAP_KEY` and assign it to the keycode you would like sent
- * every time the SWITCHER key is tapped.  For example, to use with the MacOS app switcher,
- * set it to the Tab key as follows:
- *
- *     uint16_t SWITCHER_VIRTUAL_TAP_KEY = KC_TAB;
- */
-extern uint16_t SWITCHER_VIRTUAL_TAP_KEY;
-
-/**
  * Custom switcher secondary keys. The `keycode` field is the keycode as it appears in
  * your layout and determines what is typed normally. The `virtual_keycode` is the
  * keycode that will be sent while in Switcher Mode.
@@ -65,22 +43,21 @@ typedef struct {
  *  Define any secondary keys to be used while in Switcher mode in your keymap.c,
  *  as follows:
  *  
- *  const switcher_key_t switcher_secondary_keys[] = {
- *    // When switcher is active:
- *    {KC_LEFT, KC_LEFT}, // 'left' functions as usual
- *    {KC_RIGHT, KC_RIGHT}, // 'right' functions as usual
- *    {KC_UP, KC_UP}, // 'up' functions as usual
- *    {KC_DOWN, KC_DOWN}, // 'down' functions as usual
- *    {KC_A, KC_Q}, // left pinky ('A' on qwerty) sends 'Q' to quit app
- *    {KC_F, KC_H}, // left index ('F' on qwerty) sends 'H' to hide app
- *    {KC_D, KC_DOT}, // left middle ('D' on qwerty) sends '.' to silently exit switcher
- *  };
+ *  SWITCHER_SECONDARY_KEYS(
+ *    {KC_LEFT, KC_LEFT},     // 'left' functions as usual
+ *    {KC_RIGHT, KC_RIGHT},   // 'right' functions as usual  
+ *    {KC_UP, KC_UP},         // 'up' functions as usual
+ *    {KC_DOWN, KC_DOWN},     // 'down' functions as usual
+ *    {KC_A, KC_Q},           // left pinky ('A' on QWERTY) sends 'Q' to quit app
+ *    {KC_F, KC_H},           // left index ('F' on QWERTY) sends 'H' to hide app
+ *  );
  * 
  *  Any keycodes not specified here will exit the switcher and then be sent for
  *  processing.
  * 
  * */
-extern const switcher_key_t switcher_secondary_keys[];
+#define SWITCHER_SECONDARY_KEYS(...) \
+    const switcher_key_t switcher_secondary_keys[] = { __VA_ARGS__ }
 
 bool is_switcher_keycode_user(uint16_t keycode);
 void switcher_send_initial_keycodes_user(uint16_t keycode);
