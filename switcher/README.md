@@ -21,7 +21,9 @@ This is community module [Switcher](https://github.com/dave-thompson/qmk-modules
 
 ## Mac OS Niceties
 
-## Advanced Use: Multiple Switcher Keys
+## Automated Initial Sequences
+
+## Advanced Use: Multiple Custom Switcher Keys
 
 # Setup
 
