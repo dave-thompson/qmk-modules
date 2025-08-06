@@ -4,9 +4,26 @@
     "license": "AGPL-3.0-or-later",
     "url": "https://github.com/dave-thompson/qmk-modules/switcher",
     "keycodes": [
-        {"key": "SWITCHER"},
-        {"key": "SWITCHER_EXPOSE"},
-        {"key": "SWITCHER_CUSTOM"},
-        {"key": "SWITCHER_SELECT_ITEM"}
+        {
+            "key": "SWITCHER",
+            "aliases": [
+              "SWTCH"
+            ]
+        },
+        {
+            "key": "SWITCHER_EXPOSE",
+            "aliases": [
+              "SWTCH_E"
+            ]
+        },
+        {
+            "key": "SWITCHER_CUSTOM",
+            "aliases": [
+              "SWTCH_C"
+            ]
+        },
+        {
+            "key": "SWITCHER_SELECT_ITEM"
+        }
     ]
 }
