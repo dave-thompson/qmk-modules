@@ -3,7 +3,7 @@
     #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
 
         /**
-         * switcher_seconday_keys_count(void): Returns the number of secondary keys specified in keymap.c
+         * switcher_secondary_keys_count(void): Returns the number of secondary keys specified in keymap.c
          * 
          * If you don't want to define your secondary keys using the SWITCHER_SECONDARY_KEYS macro,
          * as outlined in switcher.h, then simply define them in the way you wish and override
