@@ -23,7 +23,7 @@ static bool switcher_key_held = false;
 static bool switcher_active = false; // Is the switcher in use?
 static uint16_t latest_switcher_keycode;
 #ifdef SWITCHER_MACOS_APP_SWITCHER
-    static bool window_mode = false; // Are we in window switcher mode or app switcher mode?
+    static bool expose_mode = false; // Are we in exposé mode or app switcher mode?
 #endif
 
 /* IDLE TIMER */
@@ -58,11 +58,11 @@ static bool ending_record_cached = false;
 
 /* BOOT TIMERS */
 #ifndef SWITCHER_BOOT_DURATION // Maximum time in ms for the switcher _software_ to boot up after the SWITCHER keystroke is sent; during this time window, any keystrokes will be cached and then sent once boot is expected to have completed
-    #define SWITCHER_BOOT_DURATION 180
+    #define SWITCHER_BOOT_DURATION 180 // 180ms typical for built-in MacOS app switcher on Intel chip
 #endif
 
-#if defined(SWITCHER_MACOS_APP_SWITCHER) && !defined(SWITCHER_EXPOSE_BOOT_DURATION) // Maximum time in ms for the stock MacOS App Switcher to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
-    #define SWITCHER_EXPOSE_BOOT_DURATION 400
+#if defined(SWITCHER_MACOS_APP_SWITCHER) && !defined(SWITCHER_EXPOSE_BOOT_DURATION) // Maximum time in ms for the stock MacOS app switcher to load the window manager; during this time window, any keystrokes will be cached and then sent once loading is expected to have completed
+    #define SWITCHER_EXPOSE_BOOT_DURATION 400 // Exposé takes longer to boot
 #endif
 
 // Constrain boot durations:
@@ -71,7 +71,8 @@ static bool ending_record_cached = false;
 #if SWITCHER_BOOT_DURATION < 1 || SWITCHER_BOOT_DURATION > 30000
     #error "switcher: SWITCHER_BOOT_DURATION must be between 1 and 30000 ms"
 #endif
-#if defined(SWITCHER_EXPOSE_BOOT_DURATION) && (SWITCHER_EXPOSE_BOOT_DURATION < 1 || SWITCHER_EXPOSE_BOOT_DURATION > 30000)
+#if defined(SWITCHER_EXPOSE_BOOT_DURATION) && \
+        (SWITCHER_EXPOSE_BOOT_DURATION < 1 || SWITCHER_EXPOSE_BOOT_DURATION > 30000)
     #error "switcher: SWITCHER_EXPOSE_BOOT_DURATION must be between 1 and 30000 ms"
 #endif
 
@@ -103,7 +104,7 @@ static bool timer_just_ended(uint16_t *timer) {
     return false;
 }
 
-#ifdef SWITCHER_SWALLOW_ENDING_KEYCODE
+#ifdef SWITCHER_FORWARD_ENDING_KEYCODE
     static bool is_layer_switch(uint16_t keycode) {
         switch (keycode) {
         case QK_MOMENTARY ... QK_MOMENTARY_MAX:
@@ -134,7 +135,7 @@ static void exit_switcher(void) {
     unregister_code(SWITCHER_VIRTUAL_HOLD_KEY);
     switcher_active = ending_record_cached = false;
     #ifdef SWITCHER_MACOS_APP_SWITCHER
-        window_mode = false;
+        expose_mode = false;
     #endif
     #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
         secondary_key_cache_count = 0;
@@ -143,7 +144,7 @@ static void exit_switcher(void) {
 
 static void select_highlighted_item(void) {
     #ifdef SWITCHER_MACOS_APP_SWITCHER
-        if (window_mode) { // if window switcher in use: select the highlighted window
+        if (expose_mode) { // if in exposé: select the highlighted window
             tap_code(KC_ENTER);
             exit_switcher();
         }
@@ -173,17 +174,17 @@ static void process_secondary_key(uint16_t virtual_keycode) {
         }
         #ifdef SWITCHER_MACOS_APP_SWITCHER
             // if entering window browsing (exposé):
-            if (!window_mode &&
+            if (!expose_mode &&
                 ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
                 begin_timer(&expose_boot_timer, SWITCHER_EXPOSE_BOOT_DURATION);
-                window_mode = true;
+                expose_mode = true;
             }
             // if the user selected a window themselves: clean up
-            if (window_mode && (virtual_keycode == KC_ENTER)) {
+            if ((expose_mode && (virtual_keycode == KC_ENTER))||(!expose_mode && (virtual_keycode == KC_SPACE))) {
                 exit_switcher();
             }
             // if app switcher cancelled: clean up
-            if (!window_mode && (virtual_keycode == KC_DOT)) {
+            if (!expose_mode && (virtual_keycode == KC_DOT)) {
                 exit_switcher();
             }
         #endif
@@ -219,7 +220,7 @@ static void switcher_send_initial_keycodes(uint16_t switcher_keycode) {
         }
     #endif
 
-    #ifdef SWITCHER_SELECT_CURRENT_APP_NOT_PREVIOUS
+    #ifdef SWITCHER_PRESELECT_CURRENT_APP
         if (switcher_keycode == SWITCHER) {
             process_secondary_key(S(SWITCHER_VIRTUAL_TAP_KEY)); // Highlight the current app rather than the previous app
         }
@@ -254,7 +255,7 @@ static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
     }
     else {
         select_highlighted_item();
-        #ifndef SWITCHER_SWALLOW_ENDING_KEYCODE
+        #ifdef SWITCHER_FORWARD_ENDING_KEYCODE
             process_record(record); // Send the ending key for regular processing
         #else
             if (is_layer_switch(keycode)) {process_record(record);} // Swallow ending key (unless it's a layer switch)

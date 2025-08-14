@@ -1,12 +1,23 @@
 /**
- * Allows for Mac app switching (holding down cmd, then tab-ing multiple times)
- * from a single physical key.
+ * QMK Switcher Module - Single-key app switching with advanced features
+ * 
+ * This module enables single-key app switching by simulating hold+tap sequences
+ * (like Cmd+Tab on Mac or Alt+Tab on Windows). Features include:
+ * - Single key cycling through applications
+ * - Secondary key support for advanced actions (quit, hide, etc.)
+ * - Keystroke caching during app switcher boot time
+ * - Automatic selection via idle timeout
+ * - MacOS-specific optimizations (including Exposé support)
+ * 
+ * See README.md in this folder for a detailed setup guide.
  *
- * More generally, can be used anytime a modifier needs to be held while a key is
- * repeatedly tapped. In lieu of a physical key trigger, it's also possible to use
- * combos, tap dances, or any other means to generate the trigger_keycode.
+ * **********
+ * 
+ * A single 'Switcher' key  can be used anytime a modifier needs to be held while a
+ * key is repeatedly tapped. In lieu of a physical key trigger, it's also possible to
+ * use combos, tap dances, or any other means to generate the trigger_keycode.
  *
- * Optionally allows for a secondary trigger, facilitating an alternative action
+ * Optionally allows for secondary keys, allowing additional actions to be taken
  * without releasing the virtual_hold_key. In the Mac app switcher, this is useful
  * to send a 'Q' while cmd remains held, quitting the highlighted app. This does
  * not require a physical press of the 'Q' key but rather can be triggered by any
