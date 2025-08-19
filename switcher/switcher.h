@@ -1,21 +1,25 @@
 /**
- * QMK Switcher Module - Single-key app switching with advanced features
+ * Switcher - QMK Community Module - Single-key app switching with fancy features
+ * ******************************************************************************
+ * 
+ * ****
+ * See README.md in this folder for a detailed setup guide.
+ * ****
  * 
  * This module enables single-key app switching by simulating hold+tap sequences
  * (like Cmd+Tab on Mac or Alt+Tab on Windows). Features include:
- * - Single key cycling through applications
+ * - Single key cycling through windows / applications
  * - Secondary key support for advanced actions (quit, hide, etc.)
  * - Keystroke caching during app switcher boot time
  * - Automatic selection via idle timeout
  * - MacOS-specific optimizations (including Exposé support)
  * 
- * See README.md in this folder for a detailed setup guide.
- *
+ * 
  * **********
  * 
- * A single 'Switcher' key  can be used anytime a modifier needs to be held while a
- * key is repeatedly tapped. In lieu of a physical key trigger, it's also possible to
- * use combos, tap dances, or any other means to generate the trigger_keycode.
+ * A single 'Switcher' key can be used anytime a modifier needs to be held while a
+ * key is repeatedly tapped. In place of a physical key trigger, it's also possible to
+ * use combos, tap dances, or any other means to generate the Switcher keycode.
  *
  * Optionally allows for secondary keys, allowing additional actions to be taken
  * without releasing the virtual_hold_key. In the Mac app switcher, this is useful
@@ -23,33 +27,59 @@
  * not require a physical press of the 'Q' key but rather can be triggered by any
  * specified keycode.
  *
- * The virtual_hold_key (cmd in the Mac app switcher case) is released on the press
+ * The virtual_hold_key (Cmd in the Mac app switcher case) is released on the press
  * or release of any key other than the specified triggers. This means that if the
  * trigger is on a higher layer and you're holding a layer switch key to access it,
  * the virtual_hold_key will be released as soon as the layer switch key is released.
+ * 
+ * 
+ * **********
+ * 
+ * Switcher Keys
+ * -------------
+ * 
+ * Switcher divides keys into four types:
+ * 
+ *     - Primary Keys:      Any key(code) which activites Switcher, such as SWITCHER,
+ *                          SWITCHER_CUSTOM or SWITCHER_EXPOSE.
+ * 
+ *     - Secondary Keys:    Any key(code) used while Switcher is active to
+ *                          request a secondary action, e.g. 'Q' to quit the
+ *                          selected app.  Secondary keys are always specified as a
+ *                          pair: (1) the key pressed by the user -> (2) the keycode
+ *                          sent by Switcher to the switching software.
+ * 
+ *     - Ending Keys:       Any key received while Switcher is active that is not 
+ *                          either a Primary key or a Secondary key.  When an
+ *                          ending key press is detected, Switcher will open the
+ *                          highlighted item and exit.
+ * 
+ *     - Out of Scope Keys: Any key received while Switcher is _not_ active
+ *                          that is not a Primary key.  Switcher ignores these
+ *                          key presses.
+ *                          
  */
 
 #pragma once
 
 #include "quantum.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 /**
- * Custom switcher secondary keys. The `keycode` field is the keycode as it appears in
- * your layout and determines what is typed normally. The `virtual_keycode` is the
- * keycode that will be sent while in Switcher Mode.
+ * @brief Secondary key mapping structure
  * 
+ * Maps a physical keycode to a virtual keycode that should be sent while
+ * in switcher mode. This allows remapping keys for more convenient access
+ * to switcher functions.
+ * 
+ * Example: {KC_H, KC_LEFT} maps the 'H' key to send 'Left Arrow' while switching
  */
 typedef struct {
-    uint16_t keycode;
-    uint16_t virtual_keycode;
+    uint16_t keycode;          ///< physical key pressed on keyboard
+    uint16_t virtual_keycode;  ///< virtual keycode sent to switcher software
 } switcher_key_t;
 
 /** 
- *  @brief Table of Switcher Secondary Keys
+ *  @brief Table of secondary keys
  * 
  *  Define any secondary keys to be used while in Switcher mode in your keymap.c,
  *  as follows:
@@ -70,10 +100,63 @@ typedef struct {
 #define SWITCHER_SECONDARY_KEYS(...) \
     const switcher_key_t switcher_secondary_keys[] = { __VA_ARGS__ }
 
+ /**
+ * @brief User callback to define additional primary switcher keycodes
+ * 
+ * Implement this function in your keymap.c to add custom primary keycodes
+ * beyond the built-in SWITCHER, SWITCHER_EXPOSE, and SWITCHER_CUSTOM keycodes.
+ * 
+ * @param keycode Switcher needs to know if this keycode is for a primary key.
+ * @return true if supplied keycode is a _primary_ switcher keycode
+ * 
+ * Example implementation:
+ * @code
+ * bool is_switcher_keycode_user(uint16_t keycode) {
+ *     return keycode == MY_CUSTOM_SWITCHER_KEY;
+ * }
+ * @endcode
+ */
 bool is_switcher_keycode_user(uint16_t keycode);
-void switcher_send_initial_keycodes_user(uint16_t keycode);
-void switcher_send_keycode(uint16_t virtual_keycode);
 
-#ifdef __cplusplus
-}
-#endif
+/**
+ * @brief User callback to define macro key sequences for custom switcher keys
+ * 
+ * Called when a switcher key is first pressed, allowing you to send an initial
+ * sequence of keys automatically. This enables complex switcher behaviors with
+ * a single key press.  Macro key sequences are sent after booting but before
+ * user key presses.
+ * 
+ * @param keycode The primary keycode that activated Switcher
+ * 
+ * @note Use switcher_send_keycode() to send keys from within this function
+ * 
+ * Example implementation:
+ * @code
+ * void switcher_send_macros_user(uint16_t keycode) {
+ *     if (keycode == OLDEST_WINDOW) {
+ *         switcher_send_keycode(KC_LEFT);             // Select current window
+ *         switcher_send_keycode(KC_LEFT);             // Select oldest window (by wraparound)
+ *         switcher_send_keycode(SWITCHER_OPEN_ITEM);  // Open selected window and exit
+ *     }
+ * }
+ * @endcode
+ */
+void switcher_send_macros_user(uint16_t keycode);
+
+/**
+ * @brief Send a virtual keycode to the switcher software
+ * 
+ * Sends a keycode to the active switcher software, with automatic caching
+ * if the switcher is still loading. Use this function within custom initial
+ * sequences for programmatic switcher control.
+ * 
+ * @param virtual_keycode The keycode to send
+ * 
+ * @note To open a highlighted item, send special keycode SWITCHER_OPEN_ITEM
+ * 
+ * Example usage:
+ * @code
+ * switcher_send_keycode(KC_RIGHT);  // Navigate right
+ * @endcode
+ */
+void switcher_send_keycode(uint16_t virtual_keycode);

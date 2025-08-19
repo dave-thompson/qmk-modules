@@ -2,10 +2,12 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-08-14</td></tr>
+<tr><td><b>Version</b></td><td>2025-08-19</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
+
+
 
 ## Supercharge your App Switcher & Get More Done
 
@@ -13,49 +15,77 @@ App switchers tend to use awkward combinations like Cmd+Tab or Alt+Tab.  Then th
 
 With [Switcher](https://github.com/dave-thompson/qmk-modules/switcher) you can cycle through apps with a single key press, remap favourite features to your home row, and a whole lot more.
 
+## Table of Contents
+
+- [Features](#features)
+
+- [Quick Start](#quick-start)
+
+- [Optional Additional Setup](#optional-additional-setup)
+  - [1. Secondary Keys](#1-secondary-keys)
+  - [2. Switcher Macros](#2-switcher-macros)
+  - [3. Other Options](#3-other-options)
+
+- [Troubleshooting](#troubleshooting)
+  - [Boot Durations](#boot-durations)
+  - [Cache Size](#cache-size)
+
+- [Full Examples](#full-examples)
+  - [1. Switcher Key on Nav Layer](#1-switcher-key-on-nav-layer)
+  - [2. Exposé Key with Vim Bindings](#2-exposé-key-with-vim-bindings)
+  - [3. Same Three Files](#3-same-three-files)
+
+- [Appendix A: Full List of Keycodes, Parameters and Options](#appendix-a-full-list-of-keycodes-parameters-and-options)
+
+- [Appendix B: Resource Requirements](#appendix-b-resource-requirements)
+
 ## Features
-
-### Single Key App Switching
-
+### Single Key Switching
 ![](doc/mac_app_switcher.png)
 ***The MacOS App Switcher:***  *Usually you have to hold* ***Command*** *and repeatedly tap* ***Tab*** *to cycle through apps.  Switcher lets you do this with a single* ***'Switcher'*** *key.*
 
-Tap the **Switcher** key once to open the app switcher, then tap it again to cycle through apps.  Switcher is platform agnostic and can simulate any **Hold Key** and **Tap Key** you like.
 
-### Three Ways to Select an App
+Tap the **Switcher** key once to open your switcher, then tap it again to cycle through windows or apps.  Switcher supports Windows, Mac or Linux and can simulate any **Hold Key** and **Tap Key** you like.
 
-By default, Switcher selects an app and exits as soon as you press or release any non-Switcher key. This is ideal if your Switcher key is accessed via a momentary layer switch, as Switcher will automatically exit as soon as you release the layer switch key.
+### Easy App Selection
 
-If your Switcher key is on the base layer instead, then just tap any non-Switcher key to exit.  Switcher also sends this **'ending key'** onward to the selected app, so there are no wasted keystrokes.
+Switcher opens the highlighted item when you press or release any other key. So if your Switcher key is on a alternative layer and you hold a layer key to access it, the highlighted item will open automatically when you release the layer key.
 
-Alternatively, you can specify an idle timeout.  In this case, Switcher will automatically select the highlighted app a short while after your last keypress.
+If instead your Switcher key is on the base layer, then tap any non-Switcher key to open the item.  Switcher can also send this **'ending key'** on to the selected app if you'd like, so there are no wasted keystrokes.
 
-### Secondary Keys: Remap Secondary Features to the Most Convenient Keys on your Board
-![](doc/expose.png)
-***MacOS Exposé:***  *One of several hidden features of the MacOS App Switcher, accessed via a secondary key press. From here you can select individual app windows using your keyboard.*
+Your other option is to specify an idle timeout, in which case Switcher will open the highlighted item a short while after your last keypress.
 
-Many app switchers offer additional functionality accessed by **'secondary keys'**.  MacOS, for example, allows hiding an app (with 'H'), quitting an app (with 'Q'), or entering Exposé and viewing all open windows of an app (with '⬆'). You can give Switcher a list of keys you want to be treated as secondary keys rather than ending keys.
+### Secondary Keys: Remapped to the Home Row
 
-Often, these secondary keys are not conveniently placed on your keyboard, so Switcher also allows you to remap them to any other keys you like.  How about the home row?
+Many app switchers offer additional features accessed by **'secondary keys'**.  MacOS, for example, allows hiding an app (with 'H'), quitting an app (with 'Q'), or entering App Exposé to view all open windows of an app (with '⬆'). You can give Switcher a list of keys you want to be treated as secondary keys rather than ending keys.
 
-### Caching: Switch Even Faster
-App switching software typically takes a few hundred milliseconds to appear.  The software caches tap key (e.g. Tab) presses during this time, but usually does **not** cache other key presses.  As a result, if you want to use the arrow keys or any other secondary keys, you have to wait for the app switcher to load before you do so.
+Often, these secondary keys are not conveniently placed on your keyboard, so Switcher lets you remap them to any other keys you like, just while Switcher is active.  How about the home row?
 
-Switcher caches **all** your key presses while the switching software is loading, so if you already know which keys to press, no more waiting for the UI to appear.
+### Secondary Key Caching: Switch Even Faster
+Most switching software takes a few hundred milliseconds to appear, and only caches Tab – not other key – presses during this time.  So if you plan to use the arrows or other secondary keys, you have to wait for the switcher to load before doing so.  If you use secondary keys a lot, you inevitably get faster and start losing key presses.
 
-### Automated Sequences: A Single Key for Complex Tasks
-Sometimes you want a single physical key that will not only open your app switcher but do something more — perhaps open MacOS Exposé for the current app, which would normally take five actions with a wait in the middle: Cmd Down > Tab > Wait > Left > Up > Cmd Up.  With Switcher you can have a key that will perform all this (or any other action) instantly and all by itself.
+Switcher caches **all** key presses while the software is loading, so you need never lose a key press again.
+
+### Switcher Macros: Do More with a Single Key
+Want a single key that sends a whole sequence of switching keystrokes for you? Opening MacOS Exposé normally takes five actions with a wait in the middle: Cmd Down > Tab > _Wait_ > Left > Up > Cmd Up.  With Switcher Macros, your Switcher key can do all this (or anything else) instantly.
 
 
-### MacOS Niceties: Love Your Mac More
-Switcher resolves some of the other shortcomings of MacOS's built-in app switcher too. With Switcher:
+### MacOS-Specific Niceties
+If you're on a Mac, Switcher resolves many of the shortcomings of the built-in app switcher. With Switcher:
 
 - The app switcher and Exposé use the same navigation keys.
 - Opening Exposé automatically highlights the first window.
 - Windows open even when minimised.
 
+
+![](doc/expose.png)
+***MacOS Exposé:***  *One of several hidden features of the MacOS App Switcher, accessed via a secondary key press. From here you can select individual app windows using your keyboard.*
+***
+
 ## Quick Start
-Follow the steps below to set up Switcher.  (For a real-life example, see my [personal keymap](https://github.com/dave-thompson/qmk-userspace/tree/main/keyboards/zsa/ergodox_ez/m32u4/glow/keymaps/dave-thompson).)
+Follow the steps below to set up Switcher.
+
+For a real-life example, see my [personal keymap](https://github.com/dave-thompson/qmk-userspace/tree/main/keyboards/zsa/ergodox_ez/m32u4/glow/keymaps/dave-thompson).  For fully coded examples of different use cases, see [Full Examples](#full-examples) below.
 
 ### a. keymap.json
 
@@ -121,7 +151,7 @@ If you would like Switcher to automatically select the highlighted app a short w
 
 ## Optional Additional Setup
 
-### 1. Secondary Key Presses
+### 1. Secondary Keys
 #### a. *config.h*
 If you wish to use secondary keys, you need to first define `SWITCHER_ENABLE_SECONDARY_KEYS` in your `config.h`, as follows:
 
@@ -163,15 +193,14 @@ You can also use compound keycodes.  On my own Navigation layer, left index fing
 
 SWITCHER_SECONDARY_KEYS(
     {G(KC_V), KC_H},           // 'Cmd-V' sends H to hide app
-                               // (In QMK, 'G' means GUI, another name for 'Cmd'.)
+                               // (In QMK, G() stands for GUI, another name for 'Cmd'.)
 );
 
 ```
 
+### 2. Switcher Macros
 
-### 2. Automated Sequences
-
-To define a custom automated sequence, use the `SWITCHER_CUSTOM` keycode (or its alias, `SWTCH_C`) as a key in your keymap. Then in `config.h` specify the sequence of keycodes you want to send when the key is pressed.
+To send a custom macro immediately after you press the Switcher key, use the `SWITCHER_CUSTOM` keycode (or its alias, `SWTCH_C`) as a key in your keymap. Then in `config.h` specify the sequence of keycodes you want to send when the key is pressed.
 
 We could create a key on MacOS that hides all windows of the last used app (rather than of the currently used app):
 
@@ -180,7 +209,7 @@ We could create a key on MacOS that hides all windows of the last used app (rath
 * KC_H hides the last used app (which is initially highlighted by default)
 * KC_DOT exits the switcher with no further changes.
 **/
-#define SWITCHER_CUSTOM_INITIAL_KEYCODES {KC_H, KC_DOT}
+#define SWITCHER_CUSTOM_MACRO {KC_H, KC_DOT}
 ```
 
 Alternatively, you could have a Mac key that quickly switches to the 2025_main.xls file (or really, to any window of the current app whose name starts with the number '2').
@@ -190,13 +219,17 @@ Alternatively, you could have a Mac key that quickly switches to the 2025_main.x
 * KC_LEFT points to the current app
 * KC_UP goes into Exposé
 * KC_2 highlights the most recent window whose name begins with the number two
-* SWITCHER_SELECT_ITEM is a special keycode that selects the highlighted item and closes the switcher
+* SWITCHER_OPEN_ITEM is a special keycode that opens the highlighted app / window and closes the switcher
 **/
-#define SWITCHER_CUSTOM_INITIAL_KEYCODES {KC_LEFT, KC_UP, KC_2, SWITCHER_SELECT_ITEM}
+#define SWITCHER_CUSTOM_MACRO {KC_LEFT, KC_UP, KC_2, SWITCHER_OPEN_ITEM}
 ```
 
-#### 2.1 MacOS Exposé
-If you're on MacOS and you'd like a Switcher key that immediately opens Exposé, you can add the pre-configured`SWITCHER_EXPOSE` keycode (or its alias `SWTCH_E`) to your keymap in `keymap.c`.
+#### 2.1 Preconfigured Exposé Key
+
+> [!NOTE]
+> Exposé, aka Application Windows, is not the same as Mission Control.  Mission Control shows you all open windows simultaneously and can only be navigated with the trackpad / mouse.  Exposé shows you the windows of one app at a time and can be navigated with the keyboard.
+
+If you're on MacOS and you'd like a key that opens Exposé but with all the Switcher trimmings, you can add the `SWITCHER_EXPOSE` keycode (or its alias `SWTCH_E`) to your keymap in `keymap.c`.  This opens the app switcher and then sends a pre-configured macro to immediately dive into Exposé.
 
 If you do this, you'll likely also want to set up backtick (`) as a secondary key so that you can cycle through the windows of different apps:
 
@@ -211,11 +244,11 @@ SWITCHER_SECONDARY_KEYS(
 
 ```
 
-#### 2.2 Multiple Switcher Keys
+#### 2.2 Using Multiple Switcher Keys
 
-If you wish to, you can use all three of the Switcher keycodes (`SWITCHER`, `SWITCHER_EXPOSE`, `SWITCHER_CUSTOM`) simultaneously, each on its own key.  All three must use the same piece of switcher software; you can not specify more than one `SWITCHER_VIRTUAL_HOLD_KEY` or `SWITCHER_VIRTUAL_TAP_KEY`.
+If you like, you can use all three Primary keycodes (`SWITCHER`, `SWITCHER_EXPOSE`, `SWITCHER_CUSTOM`) simultaneously on three separate keys.  All three must use the same piece of switcher software as you can only specify one `SWITCHER_VIRTUAL_HOLD_KEY` and `SWITCHER_VIRTUAL_TAP_KEY`, but macros allow each to have its own use.
 
-#### 2.3 Advanced Use: Additional Custom Switcher Keys
+#### 2.3 Even More Custom Switcher Keys
 You can go crazy with even more custom Switcher keys with a little custom code in your `keymap.c`:
 
 **Step 1:** Add a custom keycode `MY_SWITCHER_KEYCODE` (or any other keycode):
@@ -233,17 +266,17 @@ enum custom_keycodes {
 
 ```
 bool is_switcher_keycode_user(uint16_t keycode) {
-	return (keycode == MY_SWITCHER_KEYCODE);
+	return keycode == MY_SWITCHER_KEYCODE;
 }
 ```
 
 **Step 4:** Add another callback to set up the initial sequence for that specific keycode:
 
 ```
-void switcher_send_initial_keycodes_user(uint16_t keycode) {
+void switcher_send_macros_user(uint16_t keycode) {
     if (keycode == MY_SWITCHER_KEYCODE) {
         switcher_send_keycode(KC_RIGHT);
-        switcher_send_keycode(SWITCHER_SELECT_ITEM);
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);
     }
 }
 ```
@@ -289,72 +322,15 @@ If you're using the MacOS app switcher, there's a separate boot duration for Exp
 If your boot duration is too short, keystrokes will be lost, leading to unexpected behaviour.  If your boot duration is too long, keystrokes will always be sent and correctly sequenced, but you may see the app switcher briefly appear in its default state before the keystrokes are applied.  In the event of issues, you should err on the side of a longer boot duration.
 
 ### Cache Size
-Switcher's key cache is limited to 8 keystrokes.  This is for any initial sequence **plus** any keystrokes you enter manually before the boot duration is complete.  Any keys received while the cache is full are silently discarded.  The cache size can be increased in your `config.h` as in the example below, but be mindful of memory usage, especially if you have an older keyboard.  Before 2024, even expensive keyboards often came with AVR chips and only 2.5KB of RAM!
+Switcher's key cache is limited to 8 keystrokes.  This is for any initial sequence **plus** any keystrokes you enter manually before the boot duration is complete.  Keys received while the cache is full are silently discarded.  The cache size can be increased in your `config.h` as shown below, but be mindful of memory usage, especially if you have an older keyboard.  Before 2024, even expensive keyboards often came with AVR chips and only 2.5KB of RAM!
 
 ```
 #define SWITCHER_SECONDARY_KEY_CACHE_SIZE 12 // default is 8
 ```
 
-## Appendix A: Full List of Keycodes, Parameters and Options
+## Full Examples
 
-### Keycodes
-<table>
-<tr><td><b>Keycode</b></td><td><b>Alias</td></b></tr>
-<tr><td><tt>SWITCHER</tt></td><td><tt>SWTCH</tt></td></tr>
-<tr><td><tt>SWITCHER_CUSTOM</tt></td><td><tt>SWTCH_C</tt></td></tr>
-<tr><td><tt>SWITCHER_EXPOSE</tt></td><td><tt>SWTCH_E</tt></td></tr>
-</table>
-
-In addition to the main keycodes above, there is also special keycode `SWITCHER_SELECT_ITEM`. This should never be applied to a key and is only used when specifying custom automated sequences.
-
-### Config Parameters
-#### In config.h
-
-See the Setup and Troubleshooting sections above for example usage of each of the following parameters.
-
-
-<table>
-<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
-<tr><td><tt>SWITCHER_VIRTUAL_HOLD_KEY</tt></td><td>Defines the Hold key, usually Cmd or Alt, simulated by Switcher.</td></tr>
-<tr><td><tt>SWITCHER_VIRTUAL_TAP_KEY</tt></td><td>Defines the Tap key, usually Tab, simulated by Switcher.</td></tr>
-<tr><td><tt>SWITCHER_MACOS_APP_SWITCHER</tt></td><td>Turns on all features specific to the built-in MacOS app switcher.  Defaults the virtual Hold and Tap keys to Cmd and Tab; these defaults may be overwritten using the parameters above.</td></tr>
-<tr><td><tt>SWITCHER_IDLE_TIMEOUT</tt></td><td>Applies an idle timeout from the time of the user's last keypress.  When the timeout expires, Switcher will automatically select the highlighted item and exit.</td></tr>
-<tr><td><tt>SWITCHER_ENABLE_SECONDARY_KEYS</tt></td><td>Enables secondary key functionality.  Must be accompanied by a mapping of secondary keys in keymap.c.</td></tr>
-<tr><td><tt> SWITCHER_PRESELECT_CURRENT_APP </tt></td><td>Automatically sends Shift(Tap key) when opening the switching software to highlight the current app rather than the previous one.</td></tr>
-<tr><td><tt> SWITCHER_FORWARD_ENDING_KEYCODE </tt></td><td>Forwards any ending keycode to the newly selected app.  (By default, ending keycodes are discarded when Switcher exits.)</td></tr>
-<tr><td><tt>SWITCHER_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for your switching software to appear before sending any keycodes (default: 180).</td></tr>
-<tr><td><tt>SWITCHER_EXPOSE_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for MacOS Exposé to appear before sending any keycodes (default: 400).</td></tr>
-<tr><td><tt>SWITCHER_SECONDARY_KEY_CACHE_SIZE</tt></td><td>Redefines the size of the secondary key cache (default: 8).</td></tr>
-<tr><td><tt>SWITCHER_CUSTOM_INITIAL_KEYCODES</tt></td><td>Defines a list of initial keycodes to be sent automatically when pressing a SWITCHER_CUSTOM key.</td></tr>
-</table>
-
-#### In keymap.c
-
-<table>
-<tr><td><b>Macro</b></td><td><b>Effect</b></td></tr>
-<tr><td><tt>SWITCHER_SECONDARY_KEYS</tt></td><td>Defines any secondary keys, as well as any remappings between keys pressed on the keyboard and virtual secondary keys sent by it.  Must be accompanied by the definition of SWITCHER_ENABLE_SECONDARY_KEYS in config.h.</td></tr>
-</table>
-
-### MacOS App Switcher: Known Features for use via Secondary Keys
-
-The MacOS app switcher has several undocumented features available for use via secondary keys:
-
-<table>
-<tr><td><b>Key</b></td><td><b>Keycode</b></td><td><b>Effect</b></td></tr>
-<tr><td><tt>⬅</tt></td><td><tt>KC_LEFT</tt></td><td>Navigate left</td></tr>
-<tr><td><tt>⮕</tt></td><td><tt>KC_RIGHT</tt></td><td>Navigate right</td></tr>
-<tr><td><tt>⬆</tt></td><td><tt>KC_UP</tt></td><td>Enter Exposé / Exposé: Navigate up</td></tr>
-<tr><td><tt>⬇</tt></td><td><tt>KC_DOWN</tt></td><td>Enter Exposé / Exposé: Navigate down</td></tr>
-<tr><td><tt>Q</tt></td><td><tt>KC_Q</tt></td><td>Quit highlighted app</td></tr>
-<tr><td><tt>H</tt></td><td><tt>KC_H</tt></td><td>Hide highlighted app</td></tr>
-<tr><td><tt>`</tt></td><td><tt>KC_GRAVE</tt></td><td>Exposé: View windows of next app</td></tr>
-<tr><td><tt>A-Z, 0-9</tt></td><td><tt>KC_A, KC_0, etc.</tt></td><td>Exposé: Highlight window with matching name</td></tr>
-<tr><td><tt>. / ESC</tt></td><td><tt>KC_DOT / KC_ESC</tt></td><td>Close app switcher without switching app</td></tr>
-</table>
-
-## Appendix B: Full Examples
-
-### 1. Switcher Key on Nav layer
+### 1. Switcher Key on Nav Layer
 Anatoly uses Windows.  His Switcher key is on a navigation layer that's accessed with a momentary layer switch.
 
 #### a. keymap.json
@@ -377,7 +353,7 @@ Anatoly's navigation layer looks like this:
                                 _______, _______,  _______, _______,
   ),
 ```
-Since his arrow keys are on the same layer as his Switcher key, he'll use those to navigate to the desired window.  The window will open automatically when he releases the momentary layer key.
+To open Switcher, Anatoly holds down his navigation layer key and taps 'SWTCH'.  Since his arrow keys are on the same layer, he'll use those to navigate to the desired window.  As soon as he releases the layer key, the highlighted window will open automatically.
 
 ```
 SWITCHER_SECONDARY_KEYS(
@@ -397,10 +373,10 @@ SWITCHER_SECONDARY_KEYS(
 
 ```
 
-### 2. Exposé Only, with Vim Bindings
+### 2. Exposé Key with Vim Bindings
 Jenny has a Mac and uses Exposé rather than the app switcher. Her Exposé key immediately shows her open windows of the current app, and she cycles through the windows of other apps by tapping 'F' with her left index finger.
 
-She uses Vim key bindings to navigate between windows and hits the Enter key to open the selected window.
+She uses Vim key bindings to navigate between windows and hits the Enter key to switch to the selected window.
 
 #### a. keymap.json
 
@@ -443,7 +419,7 @@ SWITCHER_SECONDARY_KEYS(
 ```
 
 ### 3. Same Three Files
-Sumit prepares executive summaries of the latest analytics data.  His fingers are lightning fast and he always works on the same three files: 'Summary', 'Data' and 'Analysis'.  He has three Switcher keys, each of which switches *directly* to a specific file.
+Sumit prepares executive summaries of the latest analytics data.  His fingers are lightning fast and he always works on the same three files: 'Summary', 'Data' and 'Analysis'.  He has three Switcher keys, each of which switches directly to a specific file.
 
 #### a. keymap.json
 
@@ -481,31 +457,30 @@ He adds the following two callbacks, so Switcher knows how to process the three 
 
 ```
 bool is_switcher_keycode_user(uint16_t keycode) {
-    return (keycode == S_SUMM)
-           || (keycode == S_DATA)
-           || (keycode == S_ANLY);
+    return keycode == S_SUMM
+        || keycode == S_DATA
+        || keycode == S_ANLY;
 }
 
-void switcher_send_initial_keycodes_user(uint16_t keycode) {
+void switcher_send_macros_user(uint16_t keycode) {
     if (keycode == S_SUMM) {
         switcher_send_keycode(KC_LEFT);                // Select current app
         switcher_send_keycode(KC_UP);                  // Enter Exposé
         switcher_send_keycode(KC_S);                   // Select first window whose name begins with 'S'
-        switcher_send_keycode(SWITCHER_SELECT_ITEM);   // Open that window 
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);     // Open that window 
     }
     if (keycode == S_DATA) {
         switcher_send_keycode(KC_LEFT);                // Select current app
         switcher_send_keycode(KC_UP);                  // Enter Exposé
         switcher_send_keycode(KC_D);                   // Select first window whose name begins with 'D'
-        switcher_send_keycode(SWITCHER_SELECT_ITEM);   // Open that window 
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);     // Open that window 
     }
     if (keycode == S_ANLY) {
         switcher_send_keycode(KC_LEFT);                // Select current app
         switcher_send_keycode(KC_UP);                  // Enter Exposé
         switcher_send_keycode(KC_A);                   // Select first window whose name begins with 'A'
-        switcher_send_keycode(SWITCHER_SELECT_ITEM);   // Open that window 
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);     // Open that window 
     }
-
 }
 ```
 
@@ -513,7 +488,73 @@ void switcher_send_initial_keycodes_user(uint16_t keycode) {
 
 ```
 #define SWITCHER_MACOS_APP_SWITCHER
-#define SWITCHER_ENABLE_SECONDARY_KEYS
 
 ```
+
+## Appendix A: Full List of Keycodes, Parameters and Options
+
+### Keycodes
+<table>
+<tr><td><b>Primary Keycode</b></td><td><b>Alias</td></b></tr>
+<tr><td><tt>SWITCHER</tt></td><td><tt>SWTCH</tt></td></tr>
+<tr><td><tt>SWITCHER_CUSTOM</tt></td><td><tt>SWTCH_C</tt></td></tr>
+<tr><td><tt>SWITCHER_EXPOSE</tt></td><td><tt>SWTCH_E</tt></td></tr>
+</table>
+
+In addition to the primary keycodes above, there is also special secondary keycode `SWITCHER_OPEN_ITEM`. This should never be applied to a key and is only used when specifying custom automated sequences.
+
+### Config Parameters
+#### In config.h
+
+See the Setup and Troubleshooting sections above for example usage of each of the following parameters.
+
+
+<table>
+<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
+<tr><td><tt>SWITCHER_VIRTUAL_HOLD_KEY</tt></td><td>Defines the Hold key, usually Cmd or Alt, simulated by Switcher.</td></tr>
+<tr><td><tt>SWITCHER_VIRTUAL_TAP_KEY</tt></td><td>Defines the Tap key, usually Tab, simulated by Switcher.</td></tr>
+<tr><td><tt>SWITCHER_MACOS_APP_SWITCHER</tt></td><td>Turns on all features specific to the built-in MacOS app switcher.  Defaults the virtual Hold and Tap keys to Cmd and Tab; these defaults may be overwritten using the parameters above.</td></tr>
+<tr><td><tt>SWITCHER_IDLE_TIMEOUT</tt></td><td>Applies an idle timeout from the time of the user's last keypress.  When the timeout expires, Switcher will automatically select the highlighted item and exit.</td></tr>
+<tr><td><tt>SWITCHER_ENABLE_SECONDARY_KEYS</tt></td><td>Enables secondary key functionality.  Must be accompanied by a mapping of secondary keys in keymap.c.</td></tr>
+<tr><td><tt> SWITCHER_PRESELECT_CURRENT_APP </tt></td><td>Automatically sends Shift-TapKey when opening the switching software, to highlight the current app rather than the previous one.</td></tr>
+<tr><td><tt> SWITCHER_FORWARD_ENDING_KEYCODE </tt></td><td>Forwards any ending keycode to the newly selected app.  (By default, ending keycodes are discarded when Switcher exits.)</td></tr>
+<tr><td><tt>SWITCHER_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for your switching software to appear before sending any keycodes (default: 180).</td></tr>
+<tr><td><tt>SWITCHER_EXPOSE_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for MacOS Exposé to appear before sending any keycodes (default: 400).</td></tr>
+<tr><td><tt>SWITCHER_SECONDARY_KEY_CACHE_SIZE</tt></td><td>Redefines the size of the secondary key cache (default: 8).</td></tr>
+<tr><td><tt>SWITCHER_CUSTOM_MACRO</tt></td><td>Defines a list of initial keycodes to be sent automatically when pressing a SWITCHER_CUSTOM key.</td></tr>
+</table>
+
+#### In keymap.c
+
+<table>
+<tr><td><b>Macro</b></td><td><b>Effect</b></td></tr>
+<tr><td><tt>SWITCHER_SECONDARY_KEYS</tt></td><td>Defines any secondary keys, as well as any remappings between keys pressed on the keyboard and virtual secondary keys sent by it.  Must be accompanied by the definition of SWITCHER_ENABLE_SECONDARY_KEYS in config.h.</td></tr>
+</table>
+
+### MacOS App Switcher: Known Features for use via Secondary Keys
+
+The MacOS app switcher has several undocumented features available for use via secondary keys:
+
+<table>
+<tr><td><b>Key</b></td><td><b>Keycode</b></td><td><b>Effect</b></td></tr>
+<tr><td><tt>⬅</tt></td><td><tt>KC_LEFT</tt></td><td>Navigate left</td></tr>
+<tr><td><tt>⮕</tt></td><td><tt>KC_RIGHT</tt></td><td>Navigate right</td></tr>
+<tr><td><tt>⬆</tt></td><td><tt>KC_UP</tt></td><td>Enter Exposé / Exposé: Navigate up</td></tr>
+<tr><td><tt>⬇</tt></td><td><tt>KC_DOWN</tt></td><td>Enter Exposé / Exposé: Navigate down</td></tr>
+<tr><td><tt>Q</tt></td><td><tt>KC_Q</tt></td><td>Quit highlighted app</td></tr>
+<tr><td><tt>H</tt></td><td><tt>KC_H</tt></td><td>Hide highlighted app</td></tr>
+<tr><td><tt>`</tt></td><td><tt>KC_GRAVE</tt></td><td>Exposé: View windows of next app</td></tr>
+<tr><td><tt>A-Z, 0-9</tt></td><td><tt>KC_A, KC_0, etc.</tt></td><td>Exposé: Highlight window with matching name</td></tr>
+<tr><td><tt>. / ESC</tt></td><td><tt>KC_DOT / KC_ESC</tt></td><td>Close app switcher without switching app</td></tr>
+</table>
+
+## Appendix B: Resource Requirements
+
+### Firmware Size
+
+Switcher adds 300 to 900 bytes to your firmware size, dependent on its configuration.
+
+### RAM Usage
+
+Switcher uses ~20 bytes of RAM when minimally configured, plus an additional ~25 bytes for a typical secondary key setup.
 
