@@ -1,41 +1,47 @@
-#ifdef COMMUNITY_MODULE_SWITCHER_ENABLE
+#if defined(COMMUNITY_MODULE_SWITCHER_ENABLE) && defined(SWITCHER_ENABLE_SECONDARY_KEYS)
 
-    #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
 
-        /**
-         * switcher_secondary_keys_count(void): Returns the number of secondary keys specified in keymap.c
-         * 
-         * If you don't want to define your secondary keys using the SWITCHER_SECONDARY_KEYS macro,
-         * as outlined in switcher.h, then simply define them in the way you wish and override
-         * switcher_secondary_keys_count() and switcher_secondary_keys_get().
-         * 
-         * You may refer to the raw implementations below in your overriding methods
-         * if useful.
-         * 
-         */
-        uint16_t switcher_secondary_keys_count_raw(void) {
-            return ARRAY_SIZE(switcher_secondary_keys);
-        }
+uint16_t switcher_secondary_keys_count_raw(void) {
+    return ARRAY_SIZE(switcher_secondary_keys);
+}
 
-        __attribute__((weak)) uint16_t switcher_secondary_keys_count(void) {
-            return switcher_secondary_keys_count_raw();
-        }
+/**
+ * @brief Returns the number of secondary keys specified in keymap.c using
+ *        the SWITCHER_SECONDARY_KEYS macro
+ * 
+ * If your secondary keys are defined in a different way, then override
+ * switcher_secondary_keys_count() and switcher_secondary_keys_get().
+ * 
+ * @return number of secondary keys in the user's keymap
+ */
+__attribute__((weak)) uint16_t switcher_secondary_keys_count(void) {
+    return switcher_secondary_keys_count_raw();
+}
 
-        /**
-         * switcher_secondary_keys_get(uint16_t index): returns the key at index
-         * 
-         */
-        const switcher_key_t* switcher_secondary_keys_get_raw(uint16_t index) {
-            if (index >= switcher_secondary_keys_count_raw()) {
-                return NULL;
-            }
-            return &switcher_secondary_keys[index];
-        }
 
-        __attribute__((weak)) const switcher_key_t* switcher_secondary_keys_get(uint16_t index) {
-            return switcher_secondary_keys_get_raw(index);
-        }
+const switcher_key_t* switcher_secondary_keys_get_raw(uint16_t index) {
+    if (index >= switcher_secondary_keys_count_raw()) {
+        return NULL;
+    }
+    return &switcher_secondary_keys[index];
+}
 
-    #endif //SWITCHER_ENABLE_SECONDARY_KEYS
+/**
+ * @brief Returns the requested secondary key as specified using the
+ *        SWITCHER_SECONDARY_KEYS macro in the user's keymap
+ * 
+ * If your secondary keys are defined in a different way, then override
+ * switcher_secondary_keys_count() and switcher_secondary_keys_get().
+ * 
+ * @param index The index of the requested secondary key
+ * 
+ * @return A secondary key pair, including both (1) the key to be pressed
+ *         by the user and (2) the keycode to be sent by Switcher to the
+ *         switching software.
+ */
+__attribute__((weak)) const switcher_key_t* switcher_secondary_keys_get(uint16_t index) {
+    return switcher_secondary_keys_get_raw(index);
+}
 
-#endif //COMMUNITY_MODULE_SWITCHER_ENABLE
+
+#endif //COMMUNITY_MODULE_SWITCHER_ENABLE && SWITCHER_ENABLE_SECONDARY_KEYS
