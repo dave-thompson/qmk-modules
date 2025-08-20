@@ -1,0 +1,6 @@
+{
+    "module_name": "Key Logger",
+    "maintainer": "dave-thompson",
+    "license": "AGPL-3.0-or-later",
+    "url": "https://github.com/dave-thompson/qmk-modules/key_logger",
+}
