@@ -1,6 +1,7 @@
 {
-    "module_name": "Key Logger",
+    "module_name": "Lumberjack",
     "maintainer": "dave-thompson",
-    "license": "AGPL-3.0-or-later",
-    "url": "https://github.com/dave-thompson/qmk-modules/key_logger",
+    "license": "GPL-3.0-or-later",
+    "url": "https://github.com/dave-thompson/qmk-modules/lumberjack",
+    "description": "Pretty key logger for QMK debugging with key press times and hold durations"
 }
