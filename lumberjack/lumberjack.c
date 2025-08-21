@@ -39,11 +39,23 @@ static lumberjack_state_t state = {0};
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Reurns duration of keypress, only if this was a key release
-// Returns 0 if this is a press (rather than release)
-// Returns 0 if this is a release but the press wasn't recorded (presumably as MAC_TRACKED_KEYS exceeded)
-// @note For accurate durations, all key presses must be passed to this function as well as all key releases
-uint16_t get_duration(uint16_t keycode, keyrecord_t *record) {
+/**
+ * @brief Calculate hold duration for key press/release events
+ * 
+ * @details Tracks up to LUMBERJACK_MAX_TRACKED_KEYS simultaneous key presses
+ *          and calculates hold duration when keys are released. Uses O(n) 
+ *          linear search for key matching.
+ * 
+ * @param keycode The QMK keycode that was pressed / released
+ * @param record The corresponding key event record
+ * 
+ * @return Hold duration in milliseconds, iff this is a key release.
+ *         0 if this is a press (rather than a release)
+ *         0 if the corresponding press wasn't recorded (i.e. MAX_TRACKED_KEYS exceeded)
+ * 
+ * @note Must be called for both _presses_ and _releases_ for duration calculation
+ */
+static uint16_t track_duration(uint16_t keycode, keyrecord_t *record) {
 
     // Times of previous Key Presses
     static struct {
@@ -91,17 +103,17 @@ uint16_t get_duration(uint16_t keycode, keyrecord_t *record) {
 // Handles all key presses/releases
 bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record) {
 
-    uint16_t current_time = record->event.time;    
-    uint16_t hold_duration = get_duration(current_keycode, record);
-
+    // calculate hold duration
+    uint16_t hold_duration = track_duration(current_keycode, record);
+  
     // create pretty keycode string
     char keycode_string[LUMBERJACK_KEYCODE_LENGTH+1];
     #ifdef KEYCODE_STRING_ENABLE
-        right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(current_keycode));
+        lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(current_keycode));
     #else
         char hex_string[6+1];
-        keycode_to_hex_string(hex_string, current_keycode);
-        right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, hex_string);
+        lumberjack_keycode_to_hex_string(hex_string, current_keycode);
+        lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, hex_string);
     #endif
 
     // log the key event
@@ -110,22 +122,22 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         state.active = true;
     } else {
         // calculate delta
-        uint16_t delta = current_time - state.last_event_time;
+        uint16_t delta = record->event.time - state.last_event_time;
 
         // convert delta to a string
         char delta_string[6+1]; // 5 digits, 1 minus sign, 1 terminating NULL
         if (delta > 61000) { // if well over 60s, must be negative
             // note: negative deltas only arise in process_record, not in pre_process_record
             delta = -(int)delta;
-            uint_to_string(delta_string, (int)delta);
-            prepend_char(delta_string, '-');
+            lumberjack_uint_to_string(delta_string, (int)delta);
+            lumberjack_prepend_char(delta_string, '-');
         }
         else
-            uint_to_string(delta_string, delta);
+            lumberjack_uint_to_string(delta_string, delta);
         
         // pad delta string for prettier printing
         char padded_delta_string[6+1];
-        right_align_string(padded_delta_string, 6+1, delta_string);
+        lumberjack_right_align_string(padded_delta_string, 6+1, delta_string);
 
         // write to log
         if (record->event.pressed) {
@@ -135,9 +147,9 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         }
     }
 
-    state.last_event_time = current_time;
+    state.last_event_time = record->event.time;
 
-return true;
+    return true;
 }
 
 // Stop clock if idle (over 60 seconds from last key event)
