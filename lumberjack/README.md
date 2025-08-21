@@ -112,7 +112,7 @@ The timers measure up to a maximum of 60 seconds between keystrokes.  Deltas gre
 ### Firmware Size
 The Console is ~1,200 bytes, Lumberjack is ~950 bytes and Keycode String is ~1,850bytes, for a total of ~4,000 bytes.
 
-Lumberjack has a built-in lightweight utilities library (`lumberjack_utils.c`) which provides string and keycode manipulation at a fraction of the size of standard C libraries.  The library may also be useful for other QMK logging applications.
+Lumberjack has a built-in lightweight utilities library (`lumberjack_utils.h/.c`) which provides string and keycode manipulation at a fraction of the size of standard C libraries.  The library may also be useful for other QMK logging applications.
 
 
 ### RAM Usage
@@ -123,6 +123,11 @@ So if you're short on RAM and confident you'll never have more than, say, five k
 ```
 #define LUMBERJACK_MAX_TRACKED_KEYS 5 // default is 10
 ```
+
+## Appendix B: Running Tests
+
+The `lumberjack_utils` library comes with unit tests.  To run them, navigate to the `tests` directory in your terminal and enter `make test`.
+
 
 <p align="right">
 <i>Lumberjack: he's good with logs</i>
