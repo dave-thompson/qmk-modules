@@ -1,2 +1,7 @@
 *.bin
 *.hex
+
+# Test artifacts
+lumberjack/tests/test_runner
+lumberjack/tests/test_runner.dSYM/
+lumberjack/tests/*.dSYM/
