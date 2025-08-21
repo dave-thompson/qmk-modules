@@ -13,12 +13,12 @@ Sometimes, your keyboard doesn't do what you expect, and figuring out **why on e
 
 [Lumberjack](https://github.com/dave-thompson/qmk-modules/lumberjack) logs every key press to the console, with deltas and hold times, so you can see what's going on.
 
-## Features
+## Overview
 
 ![](doc/lumberjack.png)
 ***The QMK Console:***  *Lumberjack records every key press to the console so you can see exactly which keys you pressed and when*
 
-Every key press is shown with four pieces of information:
+Every event is shown with four pieces of information:
 
 - **Keycode:** The code for the pressed key.
 - **Down / Up:** Whether the key was pressed DOWN or released UP.
@@ -90,19 +90,19 @@ Then, in `config.h`, comment out with //:
 
 ## Troubleshooting
 ### My Keycodes are Scrambled!
-If your keycodes look something like `0x320B` then, well... that's just what a keycode looks like!  In fact, your keyboard likes them that way.
+If your keycodes look something like `0x320B` then, well... that's just what keycodes looks like!  In fact, your keyboard likes them that way.
 
-If you add `KEYCODE_STRING_ENABLE = yes` to your `rules.mk` then they will become more human readable and look like this: `RSFT_T(KC_H)`.  (In case `RSFT_T(KC_H)` still seems somewhat cryptic, it's a Mod-Tap key that resolves to either "Right Shift" or "H".)
+If you add `KEYCODE_STRING_ENABLE = yes` to your `rules.mk`, then they will become more human readable and look like this: `RSFT_T(KC_H)`.  (In case `RSFT_T(KC_H)` still seems somewhat cryptic, it's a Mod-Tap key that resolves to either "Right Shift" or "H".)
+
+### My Keycodes are Truncated
+By default, Lumberjack truncates keycodes over 15 characters long to fit them in the first column of logged output.  You can increase the size of the first column by adding, e.g. `#define LUMBERJACK_KEYCODE_LENGTH 20` to your `config.h`.
 
 ### My Firmware is Too Big to Compile
 Unfortunately, older keyboards have very little memory, and pretty logging takes up a surprising amount of it.  You have several options to free up space:
 
-1. Follow the instructions on QMK's [Squeezing AVR](https://docs.qmk.fm/squeezing_avr) page, which will free up a lot.  (However, do NOT follow their suggestion to enable `AVR_USE_MINIMAL_PRINTF`, as it is not compatible with Lumberjack.)
-1. Remove `KEYCODE_STRING_ENABLE = yes` from your rules.mk file.  This will make your keycodes much harder to read, but will free up quite a bit of space too.
+1. Follow the instructions on QMK's [Squeezing AVR](https://docs.qmk.fm/squeezing_avr) page, which will free up a lot.
+1. Remove `KEYCODE_STRING_ENABLE = yes` from your rules.mk file.  This will make your keycodes much harder to read, but will free quite a bit of space.
 1. Temporarily comment out parts of your keymap, like LED functionality, that you can live without until you're done debugging.
-
-### Some Deltas are Negative
-Yes, this happens!  Due to the way that matrix scanning works, QMK's key event sequence can be slightly non-chronological.
 
 ### Some Deltas are Missing
 The timers measure up to a maximum of 60 seconds between keystrokes.  Deltas greater than this are not reported.
@@ -110,16 +110,20 @@ The timers measure up to a maximum of 60 seconds between keystrokes.  Deltas gre
 ## Appendix A: Resource Requirements
 
 ### Firmware Size
-The Console is ~1,200 bytes, Lumberjack is ~1,900 bytes and Keycode String is ~1,950bytes, for a total of ~5,050 bytes.
+The Console is ~1,200 bytes, Lumberjack is ~950 bytes and Keycode String is ~1,850bytes, for a total of ~4,000 bytes.
+
+Lumberjack has a built-in lightweight utilities library (`lumberjack_utils.c`) which provides string and keycode manipulation at a fraction of the size of standard C libraries.  The library may also be useful for other QMK logging applications.
 
 
 ### RAM Usage
-Lumberjack uses ~70 bytes of RAM.  You may reduce this by lowering the number of keys which Lumberjack tracks simultaneously.  If you're confident you'll never have more than five keys pressed at the same time, you could add the below line to `config.h`.  Each simultaneously tracked key costs four bytes of RAM.
+Lumberjack uses ~70 bytes of RAM.  You may reduce this by lowering the number of keys which Lumberjack tracks simultaneously.  Each simultaneously tracked key costs four bytes of RAM and Lumberjack tracks up to 10 simultaneous keys by default.
+
+So if you're short on RAM and confident you'll never have more than, say, five keys pressed at the same time, add the following to `config.h`:
 
 ```
 #define LUMBERJACK_MAX_TRACKED_KEYS 5 // default is 10
 ```
 
 <p align="right">
-<i>Lumberjack: He's good with logs</i>
+<i>Lumberjack: he's good with logs</i>
 </p>
