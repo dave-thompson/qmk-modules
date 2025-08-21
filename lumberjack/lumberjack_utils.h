@@ -1,9 +1,12 @@
 /**
  * @file lumberjack_utils.h
+ * 
  * @brief Lightweight QMK string formatting utilities
  * 
  * This library provides concise alternatives to heavyweight C library
- * functions like snprintf, allowing for reduced firmware size
+ * functions like snprintf, allowing for reduced firmware size.
+ * 
+ * Input validation is deliberately minimal; please take care.
  */
 
 #pragma once
@@ -16,9 +19,10 @@
  * C standard library.
  * 
  * @param str Pointer to null-terminated string
+ * 
  * @return Length of the string in characters (excluding null terminator)
  */
-uint8_t str_len(const char* str);
+uint8_t lumberjack_str_len(const char* str);
 
 /**
  * @brief Copy string to fixed-size destination buffer with right alignment
@@ -33,7 +37,7 @@ uint8_t str_len(const char* str);
  * 
  * @warning dest and src must be different
  */
-void right_align_string(char* dest, uint8_t dest_size, const char* src);
+void lumberjack_right_align_string(char* dest, uint8_t dest_size, const char* src);
 
 /**
  * @brief Prepend a character to the beginning of a string
@@ -47,9 +51,8 @@ void right_align_string(char* dest, uint8_t dest_size, const char* src);
  * @warning The string buffer must have at least one extra byte of space
  *          available beyond the current string length to accommodate the
  *          new character
- * 
  */
-void prepend_char(char* str, char ch);
+void lumberjack_prepend_char(char* str, char ch);
 
 /**
  * @brief Convert QMK keycode to hexadecimal string with 0x prefix
@@ -59,9 +62,8 @@ void prepend_char(char* str, char ch);
  * 
  * @param dest Destination buffer (must be at least 7 bytes: "0x1234\0")
  * @param value 16-bit unsigned integer to convert (such as a QMK keycode)
- * 
  */
-void keycode_to_hex_string(char* dest, uint16_t value);
+void lumberjack_keycode_to_hex_string(char* dest, uint16_t value);
 
 /**
  * @brief Convert unsigned 16-bit integer to decimal string
@@ -70,6 +72,5 @@ void keycode_to_hex_string(char* dest, uint16_t value);
  * 
  * @param dest Destination buffer (must be at least 6 bytes for max value 65535)
  * @param value Unsigned 16-bit integer to convert (0-65535)
- * 
  */
-void uint_to_string(char* dest, uint16_t value);
+void lumberjack_uint_to_string(char* dest, uint16_t value);

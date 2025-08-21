@@ -7,7 +7,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Get string length
-uint8_t str_len(const char* str) {
+uint8_t lumberjack_str_len(const char* str) {
     uint8_t len = 0;
     while (str[len] != '\0') len++;
     return len;
@@ -21,8 +21,8 @@ uint8_t str_len(const char* str) {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Copy src to dest & align to right
-void right_align_string(char* dest, uint8_t dest_size, const char* src) {
-    uint8_t src_len = str_len(src);
+void lumberjack_right_align_string(char* dest, uint8_t dest_size, const char* src) {
+    uint8_t src_len = lumberjack_str_len(src);
     uint8_t i;
     
     // If source is longer than destination, truncate from left
@@ -46,8 +46,9 @@ void right_align_string(char* dest, uint8_t dest_size, const char* src) {
 // Prepend a character to a string
 // @note Uses a lightweight memmove implementation to safely handle
 //       overlapping memory regions
-void prepend_char(char* str, char ch) {
-    uint8_t len = str_len(str);
+// @warning Caller must ensure buffer has sufficient space
+void lumberjack_prepend_char(char* str, char ch) {
+    uint8_t len = lumberjack_str_len(str);
     
     // Shift everything right by 1, starting from the end (including null terminator)
     for (uint8_t i = len + 1; i > 0; i--) {
@@ -66,7 +67,7 @@ void prepend_char(char* str, char ch) {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Convert keycode to hex string, e.g. 0x320B
-void keycode_to_hex_string(char* dest, uint16_t value) {
+void lumberjack_keycode_to_hex_string(char* dest, uint16_t value) {
     const char hex_chars[] = "0123456789ABCDEF";
     uint8_t i;
         
@@ -82,7 +83,7 @@ void keycode_to_hex_string(char* dest, uint16_t value) {
 }
 
 // Convert unsigned int to string
-void uint_to_string(char* dest, uint16_t value) {
+void lumberjack_uint_to_string(char* dest, uint16_t value) {
     uint8_t len = 0;
     uint8_t i;
     
