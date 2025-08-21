@@ -244,11 +244,11 @@ SWITCHER_SECONDARY_KEYS(
 
 ```
 
-#### 2.2 Using Multiple Switcher Keys
+#### 2.2 Multiple Switcher Keys with Different Macros
 
 If you like, you can use all three Primary keycodes (`SWITCHER`, `SWITCHER_EXPOSE`, `SWITCHER_CUSTOM`) simultaneously on three separate keys.  All three must use the same piece of switcher software as you can only specify one `SWITCHER_VIRTUAL_HOLD_KEY` and `SWITCHER_VIRTUAL_TAP_KEY`, but macros allow each to have its own use.
 
-#### 2.3 Even More Custom Switcher Keys
+#### 2.3 Extra Custom Switcher Keys
 You can go crazy with even more custom Switcher keys with a little custom code in your `keymap.c`:
 
 **Step 1:** Add a custom keycode `MY_SWITCHER_KEYCODE` (or any other keycode):
@@ -280,9 +280,6 @@ void switcher_send_macros_user(uint16_t keycode) {
     }
 }
 ```
-
-
-
 
 ### 3. Other Options
 #### 3.1. `SWITCHER_PRESELECT_CURRENT_APP`
