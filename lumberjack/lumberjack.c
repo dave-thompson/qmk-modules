@@ -2,6 +2,8 @@
 
 #include "quantum.h"
 #include "lumberjack_utils.h"
+#include "lumberjack_colors.h"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -20,14 +22,88 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+// Colour Initialisation
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#define RESET_COLOR "\033[0m"
+
+
+void keyboard_post_init_lumberjack(void) {
+
+    // LUMBERJACK_COLOR_CODES(
+    //     "A",  // Bright Red
+    //     "B",  // Bright Green  
+    //     "C",  // Bright Blue
+    //     "D",  // Bright Yellow
+    //     "E",  // Bright Magenta
+    //     "F",  // Bright Cyan
+    //     "G",  // Red
+    //     "H",  // Magenta
+    //     "I",  // Yellow
+    //     "J"   // White
+    // );
+
+
+    // lumberjack_release_color("\033[91m");  // Bright Red
+    // lumberjack_release_color("\033[92m");  // Bright Green 
+    // lumberjack_release_color("\033[94m");  // Bright Blue
+    // lumberjack_release_color("\033[93m");  // Bright Yellow
+    // lumberjack_release_color("\033[95m");  // Bright Magenta
+    // lumberjack_release_color("\033[96m");  // Bright Cyan
+    // lumberjack_release_color("\033[31m");  // Red
+    // lumberjack_release_color("\033[35m");  // Magenta
+    // lumberjack_release_color("\033[33m");  // Yellow
+    // lumberjack_release_color("\033[37m");  // White
+
+    // lumberjack_release_color("0: ");  // Bright Red
+    // lumberjack_release_color("1: ");  // Bright Green 
+    // lumberjack_release_color("2: ");  // Bright Blue
+    // lumberjack_release_color("3: ");  // Bright Yellow
+    // lumberjack_release_color("4: ");  // Bright Magenta
+    // lumberjack_release_color("5: ");  // Bright Cyan
+    // lumberjack_release_color("6: ");  // Red
+    // lumberjack_release_color("7: ");  // Magenta
+    // lumberjack_release_color("8: ");  // Yellow
+    // lumberjack_release_color("9: ");  // White
+
+
+    lumberjack_release_color("0: \033[91m");  // Bright Red
+    lumberjack_release_color("1: \033[92m");  // Bright Green 
+    lumberjack_release_color("2: \033[94m");  // Bright Blue
+    lumberjack_release_color("3: \033[93m");  // Bright Yellow
+    lumberjack_release_color("4: \033[95m");  // Bright Magenta
+    lumberjack_release_color("5: \033[96m");  // Bright Cyan
+    lumberjack_release_color("6: \033[37m");  // White
+    lumberjack_release_color("7: \033[90m");  // Grey
+
+
+    //lumberjack_print_queue();
+
+    // LUMBERJACK_COLOR_CODES(
+    //     "\033[91m",  // Bright Red
+    //     "\033[92m",  // Bright Green  
+    //     "\033[94m",  // Bright Blue
+    //     "\033[93m",  // Bright Yellow
+    //     "\033[95m",  // Bright Magenta
+    //     "\033[96m",  // Bright Cyan
+    //     "\033[31m",  // Red
+    //     "\033[35m",  // Magenta
+    //     "\033[33m",  // Yellow
+    //     "\033[37m"   // White
+    // );
+
+}
+
+///////////////////////////////////////////////////////////////////////////////
+//
 // State
 //
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-    bool active;                // Has there been a keypress in the last 60 secs?
-    uint16_t last_event_time;   // Time of last key event
-
+    bool active;                // has there been a keypress in the last 60 secs?
+    uint16_t last_event_time;   // time of last key event
 } lumberjack_state_t;
 
 static lumberjack_state_t state = {0};
@@ -35,62 +111,107 @@ static lumberjack_state_t state = {0};
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Calculating Hold Durations
+// Key Press Lifecycle
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+typedef struct {
+    uint16_t keycode;    // key that was pressed
+    uint16_t down_time;  // time it was pressed DOWN
+    uint16_t up_time;    // time is was released UP
+    const char* color;   // log colour allocated to the key press
+} keypress_t;
+
+// log of all currently depressed keys
+static keypress_t depressed_keys[LUMBERJACK_MAX_TRACKED_KEYS];
+static uint8_t num_depressed_keys = 0;
+
+
 /**
- * @brief Calculate hold duration for key press/release events
- * 
- * @details Tracks up to LUMBERJACK_MAX_TRACKED_KEYS simultaneous key presses
- *          and calculates hold duration when keys are released. Uses O(n) 
- *          linear search for key matching.
+ * @brief Tracks an individual key press: call on key DOWN event
  * 
  * @param keycode The QMK keycode that was pressed / released
  * @param record The corresponding key event record
  * 
- * @return Hold duration in milliseconds, iff this is a key release.
- *         0 if this is a press (rather than a release)
- *         0 if the corresponding press wasn't recorded (i.e. MAX_TRACKED_KEYS exceeded)
+ * @return keypress_t with keycode, down_time and color for this keypress, or
+ *         an empty keypress_t if the corresponding press wasn't recorded
+ *         (i.e. MAX_TRACKED_KEYS exceeded)
  * 
- * @note Must be called for both _presses_ and _releases_ for duration calculation
+ * @note Tracks up to LUMBERJACK_MAX_TRACKED_KEYS simultaneous key presses
  */
-static uint16_t track_duration(uint16_t keycode, keyrecord_t *record) {
+static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
+    
+    // if not a key press DOWN, return empty keypress
+    if (!record->event.pressed) {
+        keypress_t empty_keypress = {0};
+        return empty_keypress;    
+    }
 
-    // Times of previous Key Presses
-    static struct {
-        uint16_t keycode;
-        uint16_t down_time;
-    } key_times[LUMBERJACK_MAX_TRACKED_KEYS];
+    // if no tracking space left, return empty keypress
+    if (num_depressed_keys >= LUMBERJACK_MAX_TRACKED_KEYS) {
+        keypress_t empty_keypress = {0};
+        return empty_keypress;
+    }
 
-    // Numer of keys currently pressed
-    static uint8_t num_tracked = 0;
+    // record the key DOWN time
+    depressed_keys[num_depressed_keys].keycode = keycode;
+    depressed_keys[num_depressed_keys].down_time = record->event.time;
 
-    // Calculate duration
-    uint16_t hold_duration = 0;
-    if (record->event.pressed) { // Key DOWN
-        // record down event
-        if (num_tracked < LUMBERJACK_MAX_TRACKED_KEYS) {
-            key_times[num_tracked].keycode = keycode;
-            key_times[num_tracked].down_time = record->event.time;
-            num_tracked++;
-        }
-    } else { // Key UP
-        // how long has the current key been pressed?
-        for (uint8_t i = 0; i < num_tracked; i++) {
-            if (key_times[i].keycode == keycode) {
+    // assign a (not recently used) colour to the key press
+    depressed_keys[num_depressed_keys].color = lumberjack_get_next_color();
+    num_depressed_keys++;
+    return depressed_keys[num_depressed_keys-1];
+}
 
-                hold_duration = record->event.time - key_times[i].down_time;
-                // delete the down event now we've used it
-                for (uint8_t j = i; j < num_tracked - 1; j++) {
-                    key_times[j] = key_times[j + 1];
-                }
-                num_tracked--;
-                break;
+
+/**
+ * @brief Provides data on an individual key press: call on key UP event
+ * 
+ * @details Key press data is supplied a maximum of one time, after which
+ *          it is deleted from the tracking system.
+ * 
+ * @param keycode The QMK keycode that was released
+ * @param record The corresponding key event record
+ * 
+ * @return keypress_t with keycode, down_time, up_time and color for this
+ *         keypress, or an empty keypress_t if the corresponding press
+ *         wasn't recorded
+ * 
+ * @note Tracks up to LUMBERJACK_MAX_TRACKED_KEYS simultaneous key presses.
+ */
+static keypress_t data_for_released_key(uint16_t keycode, keyrecord_t *record) {
+    
+    // if not a key release UP, return empty keypress
+    if (record->event.pressed) {
+        keypress_t empty_keypress = {0};
+        return empty_keypress;
+    }
+
+    // search for the key DOWN data
+    for (uint8_t i = 0; i < num_depressed_keys; i++) {
+        if (depressed_keys[i].keycode == keycode) {
+            
+            // record the key UP time
+            depressed_keys[i].up_time = record->event.time;
+
+            // copy data to return struct
+            keypress_t keypress = depressed_keys[i];
+
+            // remove key from depressed_keys list
+            for (uint8_t j = i; j < num_depressed_keys - 1; j++) {
+                depressed_keys[j] = depressed_keys[j + 1];
             }
+            num_depressed_keys--;
+
+            // release key press's colour for future re-use
+            lumberjack_release_color(depressed_keys[i].color);
+            return keypress;
         }
     }
-    return hold_duration;
+
+    // if key DOWN data not found, return empty keypress
+    keypress_t empty_keypress = {0};
+    return empty_keypress;
 }
 
 
@@ -103,10 +224,21 @@ static uint16_t track_duration(uint16_t keycode, keyrecord_t *record) {
 // Handles all key presses/releases
 bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record) {
 
-    // calculate hold duration
-    uint16_t hold_duration = track_duration(current_keycode, record);
-  
-    // create pretty keycode string
+    // calculate delta
+    uint16_t delta = record->event.time - state.last_event_time;
+    state.last_event_time = record->event.time;
+
+    // track keypress & get data for it
+    keypress_t keypress_data;
+    if (record->event.pressed) { // key DOWN
+        // starting key press: start tracking & assign a color
+        keypress_data = track_pressed_key(current_keycode, record);
+    } else { // key UP
+        // ending key press: calculate hold duration
+        keypress_data = data_for_released_key(current_keycode, record);
+    }
+
+    // prettify keycode string (convert to human-readable keycode or hex string, then pad for alignment)
     char keycode_string[LUMBERJACK_KEYCODE_LENGTH+1];
     #ifdef KEYCODE_STRING_ENABLE
         lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(current_keycode));
@@ -116,41 +248,46 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, hex_string);
     #endif
 
-    // log the key event
-    if (!state.active) {
-        uprintf(" %s  |  DOWN  |                    |\n", keycode_string);
-        state.active = true;
-    } else {
-        // calculate delta
-        uint16_t delta = record->event.time - state.last_event_time;
-
-        // convert delta to a string
-        char delta_string[6+1]; // 5 digits, 1 minus sign, 1 terminating NULL
-        if (delta > 61000) { // if well over 60s, must be negative
-            // note: negative deltas only arise in process_record, not in pre_process_record
-            delta = -(int)delta;
-            lumberjack_uint_to_string(delta_string, (int)delta);
-            lumberjack_prepend_char(delta_string, '-');
-        }
-        else
-            lumberjack_uint_to_string(delta_string, delta);
-        
-        // pad delta string for prettier printing
-        char padded_delta_string[6+1];
-        lumberjack_right_align_string(padded_delta_string, 6+1, delta_string);
-
-        // write to log
-        if (record->event.pressed) {
-            uprintf(" %s  |  DOWN  |  Delta: %s ms  |\n", keycode_string, padded_delta_string);
-        } else {
-            uprintf(" %s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n", keycode_string, padded_delta_string, hold_duration);
-        }
+    // if key press failed to be tracked, log error
+    if (keypress_data.keycode == 0) {
+        uprintf("%s - NOT TRACKED\n", keycode_string);
+        return true;
     }
 
-    state.last_event_time = record->event.time;
+    // if first key press in over 60 seconds: log without delta
+    if (!state.active && record->event.pressed) { // 
+        // log without a delta
+        uprintf("%s %s  |  DOWN  |                    |%s\n", keypress_data.color, keycode_string, RESET_COLOR);
+        state.active = true;
+        return true;
+    }
+
+    // convert delta to string
+    char delta_string[6+1]; // 5 digits, 1 minus sign, 1 terminating NULL
+    if (delta > 61000) { // if well over 60s, must be negative
+        // note: negative deltas only arise in process_record, not in pre_process_record
+        delta = -(int)delta;
+        lumberjack_uint_to_string(delta_string, (int)delta);
+        lumberjack_prepend_char(delta_string, '-');
+    }
+    else
+        lumberjack_uint_to_string(delta_string, delta);
+    
+    // prettify delta string (i.e. pad it for alignment)
+    char padded_delta_string[6+1];
+    lumberjack_right_align_string(padded_delta_string, 6+1, delta_string);
+
+    // log normally
+    if (record->event.pressed) {
+        uprintf("%s %s  |  DOWN  |  Delta: %s ms  |%s\n", keypress_data.color, keycode_string, padded_delta_string, RESET_COLOR);
+    } else {
+        uint16_t hold_duration = keypress_data.up_time - keypress_data.down_time;
+        uprintf("%s %s  |  UP    |  Delta: %s ms  |  Hold: %u ms%s\n", keypress_data.color, keycode_string, padded_delta_string, hold_duration, RESET_COLOR);
+    }
 
     return true;
 }
+
 
 // Stop clock if idle (over 60 seconds from last key event)
 void housekeeping_task_lumberjack(void) {
@@ -159,5 +296,6 @@ void housekeeping_task_lumberjack(void) {
         if (delta > 60000 && delta < 62000) state.active = false;
     }
 }
+
 
 #endif // CONSOLE_ENABLE && LUMBERJACK_LOG_KEYS
