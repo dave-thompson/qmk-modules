@@ -7,10 +7,17 @@
  * functions like snprintf, allowing for reduced firmware size.
  * 
  * Input validation is deliberately minimal; please take care.
+ * 
+ * @author dave-thompson
  */
 
 #pragma once
 #include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 
 /**
  * @brief Calculate the length of a null-terminated string
@@ -23,6 +30,7 @@
  * @return Length of the string in characters (excluding null terminator)
  */
 uint8_t lumberjack_str_len(const char* str);
+
 
 /**
  * @brief Copy string to fixed-size destination buffer with right alignment
@@ -39,6 +47,7 @@ uint8_t lumberjack_str_len(const char* str);
  */
 void lumberjack_right_align_string(char* dest, uint8_t dest_size, const char* src);
 
+
 /**
  * @brief Prepend a character to the beginning of a string
  * 
@@ -54,6 +63,7 @@ void lumberjack_right_align_string(char* dest, uint8_t dest_size, const char* sr
  */
 void lumberjack_prepend_char(char* str, char ch);
 
+
 /**
  * @brief Convert QMK keycode to hexadecimal string with 0x prefix
  * 
@@ -65,6 +75,7 @@ void lumberjack_prepend_char(char* str, char ch);
  */
 void lumberjack_keycode_to_hex_string(char* dest, uint16_t value);
 
+
 /**
  * @brief Convert unsigned 16-bit integer to decimal string
  * 
@@ -74,3 +85,8 @@ void lumberjack_keycode_to_hex_string(char* dest, uint16_t value);
  * @param value Unsigned 16-bit integer to convert (0-65535)
  */
 void lumberjack_uint_to_string(char* dest, uint16_t value);
+
+
+#ifdef __cplusplus
+}
+#endif
