@@ -63,7 +63,9 @@ static lumberjack_state_t state = {0};
 ///////////////////////////////////////////////////////////////////////////////
 
 typedef struct {
-    uint16_t keycode;    // key that was pressed
+    uint8_t row;         // key pressed: row
+    uint8_t col;         // key pressed: column
+    uint16_t keycode;    // keycode reported by QMK (sometimes differs on DOWN and UP)
     uint16_t down_time;  // time it was pressed DOWN
     uint16_t up_time;    // time is was released UP
     const char* color;   // log colour allocated to the key press
@@ -100,7 +102,9 @@ static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
         return empty_keypress;
     }
 
-    // record the key DOWN time
+    // record the keycode and key DOWN time
+    depressed_keys[num_depressed_keys].row = record->event.key.row;
+    depressed_keys[num_depressed_keys].col = record->event.key.col;
     depressed_keys[num_depressed_keys].keycode = keycode;
     depressed_keys[num_depressed_keys].down_time = record->event.time;
 
@@ -136,9 +140,14 @@ static keypress_t data_for_released_key(uint16_t keycode, keyrecord_t *record) {
 
     // search for the key DOWN data
     for (uint8_t i = 0; i < num_depressed_keys; i++) {
-        if (depressed_keys[i].keycode == keycode) {
+        if (depressed_keys[i].row == record->event.key.row
+            && depressed_keys[i].col == record->event.key.col) {
             
             // record the key UP time
+            // do NOT update keycode, even if QMK has changed it since DOWN event
+            // (non-matching DOWN / UP pairs are confusing to the user; Lumberjack's
+            // purpose is to show the user which _physical_keys they pressed and when,
+            // not which keycodes were sent to their application)
             depressed_keys[i].up_time = record->event.time;
 
             // copy data to return struct
@@ -189,10 +198,10 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
     // prettify keycode string (convert to human-readable keycode or hex string, then pad for alignment)
     char keycode_string[LUMBERJACK_KEYCODE_LENGTH+1];
     #ifdef KEYCODE_STRING_ENABLE
-        lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(current_keycode));
+        lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(keypress_data.keycode));
     #else
         char hex_string[6+1];
-        lumberjack_keycode_to_hex_string(hex_string, current_keycode);
+        lumberjack_keycode_to_hex_string(hex_string, keypress_data.keycode);
         lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, hex_string);
     #endif
 

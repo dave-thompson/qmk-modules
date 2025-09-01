@@ -112,8 +112,10 @@ If your keycodes look something like `0x320B` then, well... that's just what key
 
 If you add `KEYCODE_STRING_ENABLE = yes` to your `rules.mk`, then they will become more human readable and look like this: `RSFT_T(KC_H)`.  (`RSFT_T(KC_H)` is a Mod-Tap key that resolves to either "Right Shift" or "H".)
 
-### My Keycodes are Truncated
-By default, Lumberjack truncates keycodes over 15 characters long to fit them in the first column of logged output.  You can increase the size of the first column by adding, e.g. `#define LUMBERJACK_KEYCODE_LENGTH 20` to your `config.h`.
+### My Logged Keycodes Don't Match What Was Typed
+Lumberjack hooks into QMK early in its key processing architecture (in `pre_process_record`), with the aim to show you which physical keys you pressed and when.  But QMK does lots of processing after this to determine what keycodes to actually send to your computer.  Layer switches, mod-tap keys, combos, community modules like Sentence Case, and lots more will adjust the typed keycodes before they're sent on.
+
+The hope is that, armed with the data Lumberjack gives you, you can identify which key sequences are causing problems.  Then it's up to you to work out why!  Or, if you're utterly stumped, at least you'll have some data to give to the good people of Reddit or Discord for them to help you out.
 
 ### My Firmware is Too Big to Compile
 Unfortunately, older keyboards have very little memory, and pretty logging takes up a surprising amount of it.  You have several options to free up space:
@@ -122,11 +124,14 @@ Unfortunately, older keyboards have very little memory, and pretty logging takes
 1. Remove `KEYCODE_STRING_ENABLE = yes` from your rules.mk file.  This will make your keycodes much harder to read, but will free ~1,850 bytes.
 1. Temporarily comment out parts of your keymap, like LED functionality, that you can live without until you're done debugging.
 
+### My Keycodes are Truncated
+By default, Lumberjack truncates keycodes over 15 characters long to fit them in the first column of logged output.  You can increase the size of the first column by adding, e.g. `#define LUMBERJACK_KEYCODE_LENGTH 20` to your `config.h`.
+
 ### Some Deltas are Missing
 The timers measure up to a maximum of 60 seconds between keystrokes.  Deltas greater than this are not reported.
 
 ### Some Keypresses are Reported as  "Not Tracked"
-Lumberjack tracks up to 10 simultaneous keypresses.  If you press 11 keys simultaneously, the 11th keypress will be written to the console but instead of timing data you will see "Not Tracked" instead.
+Lumberjack tracks up to 10 simultaneous keypresses.  If you press 11 keys simultaneously, the 11th keypress will still be written to the console but instead of timing data you will see "Not Tracked" instead.
 
 ### Some Keypresses are not Coloured
 To avoid being too busy, Lumberjack limits its palette to five colours.  The same colour will never be allocated to more than one simultaneous keypress, meaning Lumberjack will only ever colour five keypresses at the same time.  Any additional simultaneous keypresses will not be coloured.
