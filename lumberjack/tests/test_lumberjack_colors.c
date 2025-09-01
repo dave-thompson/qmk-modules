@@ -1,5 +1,3 @@
-#define LUMBERJACK_MAX_COLORS 12
-
 #include "unity.h"
 #include "../lumberjack_colors.h"
 #include <string.h>
@@ -69,17 +67,17 @@ void test_queue_wraparound(void) {
 
     // Create test colors
     const char* test_colors[LUMBERJACK_MAX_COLORS];
+    char color_buffers[LUMBERJACK_MAX_COLORS][10];
     for (int i = 0; i < LUMBERJACK_MAX_COLORS; i++) {
-        static char color_buffers[LUMBERJACK_MAX_COLORS][10];
         sprintf(color_buffers[i], "\033[%dm", 30 + i);
         test_colors[i] = color_buffers[i];
     }
 
     const char* extra_test_colors[2];
+    char extra_color_buffers[2][10];
     for (int i = 0; i < 2; i++) {
-        static char color_buffers[2][10];
-        sprintf(color_buffers[i], "\033[%dm", 10 + i);
-        extra_test_colors[i] = color_buffers[i];
+        sprintf(extra_color_buffers[i], "\033[%dm", 10 + i);
+        extra_test_colors[i] = extra_color_buffers[i];
     }
     
     // Fill queue to capacity
@@ -112,8 +110,8 @@ void test_queue_full_ignores_additional_items(void) {
     const char* test_colors[LUMBERJACK_MAX_COLORS + 2];
     
     // Create test color strings
+    char color_buffers[LUMBERJACK_MAX_COLORS + 2][10];
     for (int i = 0; i < LUMBERJACK_MAX_COLORS + 2; i++) {
-        static char color_buffers[LUMBERJACK_MAX_COLORS + 2][10];
         sprintf(color_buffers[i], "\033[%dm", 30 + i);
         test_colors[i] = color_buffers[i];
     }
@@ -152,11 +150,6 @@ void test_LUMBERJACK_COLOR_CODES_macro_large_set(void) {
         "\033[94m",  // Bright Blue
         "\033[93m",  // Bright Yellow
         "\033[95m",  // Bright Magenta
-        "\033[96m",  // Bright Cyan
-        "\033[31m",  // Red
-        "\033[35m",  // Magenta
-        "\033[33m",  // Yellow
-        "\033[37m"   // White
     );
     
     // Verify all colors are retrieved in order
@@ -165,11 +158,6 @@ void test_LUMBERJACK_COLOR_CODES_macro_large_set(void) {
     TEST_ASSERT_EQUAL_STRING("\033[94m", lumberjack_get_next_color());
     TEST_ASSERT_EQUAL_STRING("\033[93m", lumberjack_get_next_color());
     TEST_ASSERT_EQUAL_STRING("\033[95m", lumberjack_get_next_color());
-    TEST_ASSERT_EQUAL_STRING("\033[96m", lumberjack_get_next_color());
-    TEST_ASSERT_EQUAL_STRING("\033[31m", lumberjack_get_next_color());
-    TEST_ASSERT_EQUAL_STRING("\033[35m", lumberjack_get_next_color());
-    TEST_ASSERT_EQUAL_STRING("\033[33m", lumberjack_get_next_color());
-    TEST_ASSERT_EQUAL_STRING("\033[37m", lumberjack_get_next_color());
     
     // Should be empty now
     TEST_ASSERT_EQUAL_STRING("", lumberjack_get_next_color());

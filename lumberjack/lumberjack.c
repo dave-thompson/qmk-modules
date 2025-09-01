@@ -16,7 +16,7 @@
 #endif
 
 #ifndef LUMBERJACK_KEYCODE_LENGTH
-    #define LUMBERJACK_KEYCODE_LENGTH 15 // 6-char modifier, 7-char basic keycode, & 2 parens
+    #define LUMBERJACK_KEYCODE_LENGTH 15 // 6-char modifier, 7-char basic keycode, 2 parens
 #endif
 
 
@@ -28,72 +28,19 @@
 
 #define RESET_COLOR "\033[0m"
 
-
+// Only declare five colours to be used in log output.  This is enough for most
+// use cases, while avoiding distracting colours like red and ensuring all
+// colours are easily distinguished.  If more than five keys are depressed
+// simultaneously, the extra keys will be printed in the default colour
+// (typically white / black).
 void keyboard_post_init_lumberjack(void) {
-
-    // LUMBERJACK_COLOR_CODES(
-    //     "A",  // Bright Red
-    //     "B",  // Bright Green  
-    //     "C",  // Bright Blue
-    //     "D",  // Bright Yellow
-    //     "E",  // Bright Magenta
-    //     "F",  // Bright Cyan
-    //     "G",  // Red
-    //     "H",  // Magenta
-    //     "I",  // Yellow
-    //     "J"   // White
-    // );
-
-
-    // lumberjack_release_color("\033[91m");  // Bright Red
-    // lumberjack_release_color("\033[92m");  // Bright Green 
-    // lumberjack_release_color("\033[94m");  // Bright Blue
-    // lumberjack_release_color("\033[93m");  // Bright Yellow
-    // lumberjack_release_color("\033[95m");  // Bright Magenta
-    // lumberjack_release_color("\033[96m");  // Bright Cyan
-    // lumberjack_release_color("\033[31m");  // Red
-    // lumberjack_release_color("\033[35m");  // Magenta
-    // lumberjack_release_color("\033[33m");  // Yellow
-    // lumberjack_release_color("\033[37m");  // White
-
-    // lumberjack_release_color("0: ");  // Bright Red
-    // lumberjack_release_color("1: ");  // Bright Green 
-    // lumberjack_release_color("2: ");  // Bright Blue
-    // lumberjack_release_color("3: ");  // Bright Yellow
-    // lumberjack_release_color("4: ");  // Bright Magenta
-    // lumberjack_release_color("5: ");  // Bright Cyan
-    // lumberjack_release_color("6: ");  // Red
-    // lumberjack_release_color("7: ");  // Magenta
-    // lumberjack_release_color("8: ");  // Yellow
-    // lumberjack_release_color("9: ");  // White
-
-
-    lumberjack_release_color("0: \033[91m");  // Bright Red
-    lumberjack_release_color("1: \033[92m");  // Bright Green 
-    lumberjack_release_color("2: \033[94m");  // Bright Blue
-    lumberjack_release_color("3: \033[93m");  // Bright Yellow
-    lumberjack_release_color("4: \033[95m");  // Bright Magenta
-    lumberjack_release_color("5: \033[96m");  // Bright Cyan
-    lumberjack_release_color("6: \033[37m");  // White
-    lumberjack_release_color("7: \033[90m");  // Grey
-
-
-    //lumberjack_print_queue();
-
-    // LUMBERJACK_COLOR_CODES(
-    //     "\033[91m",  // Bright Red
-    //     "\033[92m",  // Bright Green  
-    //     "\033[94m",  // Bright Blue
-    //     "\033[93m",  // Bright Yellow
-    //     "\033[95m",  // Bright Magenta
-    //     "\033[96m",  // Bright Cyan
-    //     "\033[31m",  // Red
-    //     "\033[35m",  // Magenta
-    //     "\033[33m",  // Yellow
-    //     "\033[37m"   // White
-    // );
-
+    lumberjack_add_color_to_queue("\033[32m");  // Green 
+    lumberjack_add_color_to_queue("\033[33m");  // Yellow
+    lumberjack_add_color_to_queue("\033[34m");  // Blue
+    lumberjack_add_color_to_queue("\033[35m");  // Magenta
+    lumberjack_add_color_to_queue("\033[36m");  // Cyan
 }
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -158,7 +105,7 @@ static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
     depressed_keys[num_depressed_keys].down_time = record->event.time;
 
     // assign a (not recently used) colour to the key press
-    depressed_keys[num_depressed_keys].color = lumberjack_get_next_color();
+    depressed_keys[num_depressed_keys].color = lumberjack_next_color();
     num_depressed_keys++;
     return depressed_keys[num_depressed_keys-1];
 }
@@ -197,14 +144,15 @@ static keypress_t data_for_released_key(uint16_t keycode, keyrecord_t *record) {
             // copy data to return struct
             keypress_t keypress = depressed_keys[i];
 
+            // release key press's colour for future re-use
+            lumberjack_add_color_to_queue(depressed_keys[i].color);
+
             // remove key from depressed_keys list
             for (uint8_t j = i; j < num_depressed_keys - 1; j++) {
                 depressed_keys[j] = depressed_keys[j + 1];
             }
             num_depressed_keys--;
 
-            // release key press's colour for future re-use
-            lumberjack_release_color(depressed_keys[i].color);
             return keypress;
         }
     }
@@ -254,10 +202,21 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         return true;
     }
 
+    // make non-colored pipe
+    #ifdef LUMBERJACK_COLOR
+        char pipe[17+1];
+        strcpy(pipe, RESET_COLOR);
+        strcat(pipe, "|");
+        strcat(pipe, keypress_data.color);
+    #endif
+
     // if first key press in over 60 seconds: log without delta
     if (!state.active && record->event.pressed) { // 
         // log without a delta
-        uprintf("%s %s  |  DOWN  |                    |%s\n", keypress_data.color, keycode_string, RESET_COLOR);
+        if (!lumberjack_color())
+            {uprintf("%s  |  DOWN  |                    |\n", keycode_string);}
+        else
+            {uprintf("%s%s  %s--DOWN--%s                    %s%s\n", keypress_data.color, keycode_string, pipe, pipe, pipe, RESET_COLOR);}
         state.active = true;
         return true;
     }
@@ -279,10 +238,16 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
 
     // log normally
     if (record->event.pressed) {
-        uprintf("%s %s  |  DOWN  |  Delta: %s ms  |%s\n", keypress_data.color, keycode_string, padded_delta_string, RESET_COLOR);
+        if (!lumberjack_color())
+            {uprintf("%s  |  DOWN  |  Delta: %s ms  |\n", keycode_string, padded_delta_string);}
+        else
+            {uprintf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n", keypress_data.color, keycode_string, pipe, pipe, padded_delta_string, pipe, RESET_COLOR);}
     } else {
         uint16_t hold_duration = keypress_data.up_time - keypress_data.down_time;
-        uprintf("%s %s  |  UP    |  Delta: %s ms  |  Hold: %u ms%s\n", keypress_data.color, keycode_string, padded_delta_string, hold_duration, RESET_COLOR);
+        if (!lumberjack_color())
+            {uprintf("%s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n", keycode_string, padded_delta_string, hold_duration);}
+        else
+            {uprintf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n", keypress_data.color, keycode_string, padded_delta_string, pipe, hold_duration, RESET_COLOR);}
     }
 
     return true;
