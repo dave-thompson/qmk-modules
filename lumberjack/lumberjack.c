@@ -34,11 +34,13 @@
 // simultaneously, the extra keys will be printed in the default colour
 // (typically white / black).
 void keyboard_post_init_lumberjack(void) {
-    lumberjack_add_color_to_queue("\033[32m");  // Green 
-    lumberjack_add_color_to_queue("\033[33m");  // Yellow
-    lumberjack_add_color_to_queue("\033[34m");  // Blue
-    lumberjack_add_color_to_queue("\033[35m");  // Magenta
-    lumberjack_add_color_to_queue("\033[36m");  // Cyan
+    if (lumberjack_color()) {
+        lumberjack_add_color_to_queue("\033[32m");  // Green 
+        lumberjack_add_color_to_queue("\033[33m");  // Yellow
+        lumberjack_add_color_to_queue("\033[34m");  // Blue
+        lumberjack_add_color_to_queue("\033[35m");  // Magenta
+        lumberjack_add_color_to_queue("\033[36m");  // Cyan
+    }
 }
 
 
@@ -108,8 +110,10 @@ static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
     depressed_keys[num_depressed_keys].keycode = keycode;
     depressed_keys[num_depressed_keys].down_time = record->event.time;
 
-    // assign a (not recently used) colour to the key press
-    depressed_keys[num_depressed_keys].color = lumberjack_next_color();
+    // assign (the least recently used) colour to the key press
+    if (lumberjack_color()) {depressed_keys[num_depressed_keys].color = lumberjack_next_color();}
+
+    // return the key press
     num_depressed_keys++;
     return depressed_keys[num_depressed_keys-1];
 }
@@ -154,7 +158,7 @@ static keypress_t data_for_released_key(uint16_t keycode, keyrecord_t *record) {
             keypress_t keypress = depressed_keys[i];
 
             // release key press's colour for future re-use
-            lumberjack_add_color_to_queue(depressed_keys[i].color);
+            if (lumberjack_color()) {lumberjack_add_color_to_queue(depressed_keys[i].color);}
 
             // remove key from depressed_keys list
             for (uint8_t j = i; j < num_depressed_keys - 1; j++) {
@@ -188,7 +192,7 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
     // track keypress & get data for it
     keypress_t keypress_data;
     if (record->event.pressed) { // key DOWN
-        // starting key press: start tracking & assign a color
+        // starting key press: start tracking & assign a colour
         keypress_data = track_pressed_key(current_keycode, record);
     } else { // key UP
         // ending key press: calculate hold duration
@@ -221,9 +225,9 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         return true;
     }
 
-    // make non-colored pipe
+    // make non-coloured pipe
+    char pipe[17+1];
     #ifdef LUMBERJACK_COLOR
-        char pipe[17+1];
         strcpy(pipe, RESET_COLOR);
         strcat(pipe, "|");
         strcat(pipe, keypress_data.color);
@@ -248,8 +252,9 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         lumberjack_uint_to_string(delta_string, (int)delta);
         lumberjack_prepend_char(delta_string, '-');
     }
-    else
+    else {
         lumberjack_uint_to_string(delta_string, delta);
+    }
     
     // prettify delta string (i.e. pad it for alignment)
     char padded_delta_string[6+1];
