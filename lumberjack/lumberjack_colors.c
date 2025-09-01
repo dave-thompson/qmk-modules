@@ -49,13 +49,3 @@ void lumberjack_reset_colors(void) {
     queue_rear = 0;
     queue_count = 0;
 }
-
-
-/**
- * Prints the current queue to the console, for debugging
- */
-void lumberjack_print_queue(void) {
-    for (int i = 0; i < LUMBERJACK_MAX_COLORS; i++) {
-        uprintf("%u: %s\n", i, color_queue[i]);
-    }    
-}

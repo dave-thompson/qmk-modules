@@ -22,10 +22,8 @@
  */
 
 #pragma once
-#include "quantum.h"
 #include <stdint.h>
-
-
+#include <stdbool.h>
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -88,12 +86,6 @@ const char* lumberjack_next_color(void);
  * Removes all colours from the queue
  */
 void lumberjack_reset_colors(void);
-
-
-/**
- * Prints the current queue to the console, for debugging
- */
-void lumberjack_print_queue(void);
 
 
 /**
