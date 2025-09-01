@@ -195,13 +195,23 @@ bool pre_process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record
         keypress_data = data_for_released_key(current_keycode, record);
     }
 
+    // choose the keycode to be logged
+    uint16_t log_keycode;
+    // If tracking was successful, use the tracked keycode
+    if (keypress_data.keycode != 0) {
+        log_keycode = keypress_data.keycode;
+    }
+    else { // otherwise fallback to the current_keycode
+        log_keycode = current_keycode;
+    }
+
     // prettify keycode string (convert to human-readable keycode or hex string, then pad for alignment)
     char keycode_string[LUMBERJACK_KEYCODE_LENGTH+1];
     #ifdef KEYCODE_STRING_ENABLE
-        lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(keypress_data.keycode));
+        lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, get_keycode_string(log_keycode));
     #else
         char hex_string[6+1];
-        lumberjack_keycode_to_hex_string(hex_string, keypress_data.keycode);
+        lumberjack_keycode_to_hex_string(hex_string, log_keycode);
         lumberjack_right_align_string(keycode_string, LUMBERJACK_KEYCODE_LENGTH+1, hex_string);
     #endif
 
