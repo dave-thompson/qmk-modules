@@ -42,7 +42,7 @@ const char* lumberjack_next_color(void) {
 
 
 /**
- * Resets the color queue, for use in unit tests
+ * Resets the colour queue, for use in unit tests
  */
 void lumberjack_reset_colors(void) {
     queue_front = 0;

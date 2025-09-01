@@ -9,9 +9,9 @@
 
 ## Pretty Key Log for Easier Debugging
 
-Sometimes, your keyboard doesn't do what you expect, and figuring out **why on earth not** can be tricky.
+Your keyboard doesn't always do what you expect.  Working out **why not** can be tricky.
 
-[Lumberjack](https://github.com/dave-thompson/qmk-modules/lumberjack) logs every key press to the console, with deltas and hold times, so you can see what's going on.
+[Lumberjack](https://github.com/dave-thompson/qmk-modules/lumberjack) logs every key press to the console, with deltas and hold times, letting you see **exactly** which keys you pressed and when, so you can figure out what's going on.
 
 ## Overview
 
@@ -30,7 +30,7 @@ Follow the steps below to set up Lumberjack.
 
 ### a. keymap.json
 
-Add Lumberjack to your `keymap.json` file.  If you are already using other modules, then in most cases you should add Lumberjack to the **front** of the list, so it can log your key presses before other modules intercept (and potentially swallow) them.  Lumberjack will never interfere with modules that come after it.
+Add Lumberjack to your `keymap.json` file.  If you are already using other modules, then in most cases you should add Lumberjack to the **front** of the list, so it can log your key presses before other modules intercept (and potentially change) them.  Lumberjack will never interfere with modules that come after it.
 
 ```json
 {
@@ -93,14 +93,14 @@ Then, in `config.h`, comment out with //:
 // #define LUMBERJACK_LOG_KEYS
 ```
 
-##Optional Setup
+## Optional Setup
 ### Coloured Output
 ![](doc/colored.png)
 ***Coloured Console:***  *If it's not too distracting, you might prefer a colourised output, which can be enabled in config.h.*
 
 Lumberjack's optional coloured output assigns a unique colour to each keypress, making for easier identification of the UP and DOWN parts of each press, and faster spotting of keypresses that unexpectedly overlap.  It comes at the cost of extra firmware size and is only compatible with the command-line QMK console, not with QMK Toolbox.
 
-Enable coloured output by adding the following to your `config.h`:
+Enable colours by adding the following to your `config.h`:
 
 ```
 #define LUMBERJACK_COLOR
@@ -130,22 +130,45 @@ By default, Lumberjack truncates keycodes over 15 characters long to fit them in
 ### Some Deltas are Missing
 The timers measure up to a maximum of 60 seconds between keystrokes.  Deltas greater than this are not reported.
 
-### Some Keypresses are Reported as  "Not Tracked"
-Lumberjack tracks up to 10 simultaneous keypresses.  If you press 11 keys simultaneously, the 11th keypress will still be written to the console but instead of timing data you will see "Not Tracked" instead.
+### Some Key Presses "Not Tracked"
+Lumberjack tracks up to 10 simultaneous key presses.  If you press 11 keys simultaneously, the 11th press will still be written to the console but instead of timing data you will see "Not Tracked" instead.
 
-### Some Keypresses are not Coloured
-To avoid being too busy, Lumberjack limits its palette to five colours.  The same colour will never be allocated to more than one simultaneous keypress, meaning Lumberjack will only ever colour five keypresses at the same time.  Any additional simultaneous keypresses will not be coloured.
+### Colours Missing from Some Key Presses
+To avoid being too busy, Lumberjack limits its palette to five colours.  The same colour will never be allocated to more than one simultaneous key press, meaning Lumberjack will only ever colour five keys at the same time.  Any additional simultaneous key presses will not be in colour.
 
-## Appendix A: Resource Requirements
+## Appendix A: Full list of Parameters and Options
 
-### Firmware Size
-The Console is ~1,200 bytes, Lumberjack is ~950 bytes and Keycode String is ~1,850bytes, for a total of ~4,000 bytes.
+#### In rules.mk
+
+<table>
+<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
+<tr><td><tt>CONSOLE_ENABLE = yes</tt></td><td>Mandatory. Enables use of the console.</td></tr>
+<tr><td><tt>KEYCODE_STRING_ENABLE = yes</tt></td><td>Enables human-readable keycodes at the cost of larger firmware size.</td></tr>
+</table>
+
+#### In config.h
+
+<table>
+<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
+<tr><td><tt>LUMBERJACK_LOG_KEYS</tt></td><td>Mandatory. Enables Lumberjack.</td></tr>
+<tr><td><tt>LUMBERJACK_COLOR</tt></td><td>Enables coloured logging at the cost of larger firmware size.  Requires use of command-line console.</td></tr>
+<tr><td><tt>LUMBERJACK_KEYCODE_LENGTH</tt></td><td>Adjusts the width of the first log column.  Keycodes longer than this length will be truncated.</td></tr>
+<tr><td><tt>LUMBERJACK_MAX_TRACKED_KEYS</tt></td><td>Adjusts the maximum number of simultaneously tracked keypresses.  Additional simultaneous keypresses beyond the maximum are logged without hold times and with the message "Not Tracked".</td></tr>
+
+
+
+</table>
+
+## Appendix B: Resource Requirements
+
+### Firmware Sizes
+The Console is ~1,200 bytes, Lumberjack (Core) is ~1,100 bytes, Keycode String is ~1,850bytes and Lumberjack Colour is ~450bytes, for a total of ~4,600 bytes.
 
 Lumberjack has a built-in lightweight utilities library (`lumberjack_utils.h/.c`) which provides string and keycode manipulation at a fraction of the size of standard C libraries.  The library may also be useful for other QMK logging applications.
 
 
 ### RAM Usage
-Lumberjack uses ~70 bytes of RAM.  You may reduce this by lowering the number of keys which Lumberjack tracks simultaneously.  Each simultaneously tracked key costs four bytes of RAM and Lumberjack tracks up to 10 simultaneous keys by default.
+Lumberjack uses ~115 bytes of static RAM (or ~160 with colours), plus ~60 bytes of stack.  You may reduce RAM usage by lowering the number of keys which Lumberjack tracks simultaneously.  Each simultaneously tracked key costs 11 bytes of RAM and Lumberjack tracks up to 10 simultaneous keys by default.
 
 So if you're short on RAM and confident you'll never have more than, say, five keys pressed at the same time, add the following to `config.h`:
 
@@ -153,7 +176,7 @@ So if you're short on RAM and confident you'll never have more than, say, five k
 #define LUMBERJACK_MAX_TRACKED_KEYS 5 // default is 10
 ```
 
-## Appendix B: Running Tests
+## Appendix C: Running Tests
 
 The `lumberjack_utils` and `lumberjack_colors` libraries comes with unit tests.  To run them, navigate to the `tests` directory in your terminal and enter `make test`.
 
