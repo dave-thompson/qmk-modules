@@ -11,7 +11,7 @@
 
 Your keyboard doesn't always do what you expect.  Working out **why not** can be tricky.
 
-[Lumberjack](https://github.com/dave-thompson/qmk-modules/lumberjack) logs every key press to the console, with deltas and hold times, letting you see **exactly** which keys you pressed and when, so you can figure out what's going on.
+[Lumberjack](https://github.com/dave-thompson/qmk-modules/lumberjack) logs every key press to the console, with deltas and hold times, letting you see **which keys you pressed and when**, so you can figure out what's going on.
 
 ## Overview
 
@@ -53,10 +53,6 @@ Lumberjack logs your keystrokes to a QMK console.  You have two console options:
 - **Command Line QMK:** Firstly, if you don't already have QMK installed on your machine, then follow steps 2 & 3 from the [QMK Setup Guide](https://docs.qmk.fm/newbs_getting_started) to install it.  Once QMK is installed, open a terminal window and type `qmk console` to open a QMK console in that window.
 
 - **QMK Toolbox:**  If you don't want to install QMK or you'd rather avoid using the command line, you can instead install and use [QMK Toolbox](https://qmk.fm/toolbox). This is the easier option if you're unsure about things.
-
-
-
-
 
 ### c. rules.mk
 In your rules.mk, you need to enable the console:
@@ -131,7 +127,7 @@ By default, Lumberjack truncates keycodes over 15 characters long to fit them in
 The timers measure up to a maximum of 60 seconds between keystrokes.  Deltas greater than this are not reported.
 
 ### Some Key Presses "Not Tracked"
-Lumberjack tracks up to 10 simultaneous key presses.  If you press 11 keys simultaneously, the 11th press will still be written to the console but instead of timing data you will see "Not Tracked" instead.
+Lumberjack tracks up to 10 simultaneous key presses.  If you press 11 keys simultaneously, the 11th press will still be written to the console but instead of timing data you will see "Not Tracked" instead.  If you want to track more keys than you have fingers to press, you can do so by adding, e.g. `#define LUMBERJACK_MAX_TRACKED_KEYS 15` to your `config.h`.
 
 ### Colours Missing from Some Key Presses
 To avoid being too busy, Lumberjack limits its palette to five colours.  The same colour will never be allocated to more than one simultaneous key press, meaning Lumberjack will only ever colour five keys at the same time.  Any additional simultaneous key presses will not be in colour.
