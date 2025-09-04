@@ -28,9 +28,17 @@ Every event is shown with four pieces of information:
 ## Quick Start
 Follow the steps below to set up Lumberjack.
 
-### a. keymap.json
+### a. Install a QMK Console
 
-Add Lumberjack to your `keymap.json` file.  If you are already using other modules, then in most cases you should add Lumberjack to the **front** of the list, so it can log your key presses before other modules intercept (and potentially change) them.  Lumberjack will never interfere with modules that come after it.
+Lumberjack logs your keystrokes to a QMK console.  You have two console options:
+
+- **Command Line QMK:** If you don't already have QMK installed on your machine, then follow steps 2 & 3 from the [QMK Setup Guide](https://docs.qmk.fm/newbs_getting_started) to install it.  Once QMK is installed, open a terminal window and type `qmk console` to open a QMK console in that window.
+
+- **QMK Toolbox:**  If you don't want to install QMK or you'd rather avoid using the command line, you can instead install and use [QMK Toolbox](https://qmk.fm/toolbox). This is the easier option if you're unsure about things.
+
+### b. keymap.json
+
+Add Lumberjack to your `keymap.json` file.  If you're already using other modules, then add Lumberjack to the **front** of the list, so it can log your key presses before other modules intercept (and potentially change) them.  Lumberjack will never interfere with modules that come after it.
 
 ```json
 {
@@ -45,14 +53,6 @@ If you don't yet have a `keymap.json`, create one with the below content in the 
     "modules": ["dave-thompson/lumberjack"]
 }
 ```
-
-### b. Install a QMK Console
-
-Lumberjack logs your keystrokes to a QMK console.  You have two console options:
-
-- **Command Line QMK:** Firstly, if you don't already have QMK installed on your machine, then follow steps 2 & 3 from the [QMK Setup Guide](https://docs.qmk.fm/newbs_getting_started) to install it.  Once QMK is installed, open a terminal window and type `qmk console` to open a QMK console in that window.
-
-- **QMK Toolbox:**  If you don't want to install QMK or you'd rather avoid using the command line, you can instead install and use [QMK Toolbox](https://qmk.fm/toolbox). This is the easier option if you're unsure about things.
 
 ### c. rules.mk
 In your rules.mk, you need to enable the console:
