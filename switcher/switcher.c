@@ -137,11 +137,14 @@ static uint16_t virtual_keycode_for_secondary_key(uint16_t keycode) {
 // Sends a virtual secondary keycode
 static void send_virtual_secondary_keycode_immediately(uint16_t virtual_keycode) {
     tap_code16(virtual_keycode);
+    
     // if app switcher cancelled: clean up (presumes all switching software uses Escape to quit)
     if (virtual_keycode == KC_ESC) {
         exit_switcher();
     }
     if (virtual_keycode == SWITCHER_OPEN_ITEM) {
+        // exposé needs a brief delay before it's ready to exit
+        if (state.expose_mode) {wait_ms(SWITCHER_EXPOSE_EXIT_DELAY);}  // no need to cache, as this is the final keycode
         select_highlighted_item();
     }
     if (using_macos_switcher()) {
