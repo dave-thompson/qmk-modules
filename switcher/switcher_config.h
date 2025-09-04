@@ -31,6 +31,7 @@
     #define SWITCHER_EXPOSE_BOOT_DURATION 400 // Exposé takes longer to boot
 #endif
 
+#define SWITCHER_EXPOSE_EXIT_DELAY 250  // Custom Macros: Time to pause before opening a window from Expose
 
 ///////////////////////////////////////////////////////////////////////////////
 //
