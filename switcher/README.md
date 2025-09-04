@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-08-19</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-04</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -36,7 +36,7 @@ By default, app switching uses awkward combinations like **Cmd+Tab** or **Alt+Ta
 - [Full Examples](#full-examples)
   - [1. Switcher Key on Navigation Layer](#1-switcher-key-on-navigation-layer)
   - [2. Exposé Key with Vim Bindings](#2-exposé-key-with-vim-bindings)
-  - [3. Same Three Files](#3-same-three-files)
+  - [3. Three Keys for Three Files](#3-three-keys-for-three-files)
 
 - [Appendix A: Full List of Keycodes, Parameters and Options](#appendix-a-full-list-of-keycodes-parameters-and-options)
 
@@ -229,6 +229,8 @@ For a Mac key that switches straight to the 2025_main.xls file (or really, to an
 
 ```c
 /**
+* Warning: Exposé responds differently based on your screen and window setup.  The precise sequence required for your system may differ from that below.
+* 
 * KC_LEFT points to the current app
 * KC_UP goes into Exposé
 * KC_2 highlights the most recent window whose name begins with the number two
@@ -312,6 +314,7 @@ If your issues are on entering MacOS Exposé rather than the app manager, that t
 Overly short boot durations cause lost keystrokes and unexpected behaviour.  Overly long boot durations can cause the app manager to briefly appear in its default state before the keystrokes are applied – but keystrokes will always be sent eventually (and in the correct sequence).  When in doubt, err on the side of a longer duration.
 
 #### b) Cache Size
+
 The keystroke cache holds 8 keys by default, which is normally plenty.  The 8 keys include any macro **plus** all manual keystrokes before the boot period ends.  If you use long macros, increase the size in your `config.h`: 
 
 ```c
@@ -319,12 +322,24 @@ The keystroke cache holds 8 keys by default, which is normally plenty.  The 8 ke
 ```
 Be mindful of memory usage, especially if you have an older keyboard.  Before 2024, even expensive keyboards often came with AVR chips and only 2.5KB of RAM!
 
+### Strange Behaviour after App Manager Exits
+
+This is probably because Switcher is still holding Cmd/Alt.  Switcher releases Cmd/Alt when you select an app (or window) **with your keyboard**.  But if you select the app using your **mouse** instead, Switcher will not know and will keep Cmd/Alt held down.
+
+If you use Switcher to open the app manager, never use your mouse to close it.
+
 ### MacOS Won't Switch to Fullscreen Apps
-Unfortunately neither the MacOS app manager nor Exposé support fullscreen apps.  If switching to fullscreen apps is essential to you, you probably need a third-party app manager.
+
+Unfortunately neither the MacOS app manager nor Exposé support fullscreen apps.  If switching to fullscreen apps is essential to you, you probably need a third-party app manager (or take the Apple approach and use Ctrl-⮕ to swap 'spaces' instead).
+
+### Exposé Macros are Temperamental
+
+If your Exposé macros sometimes work and sometimes don't, even with long boot durations, then Exposé itself may be the cause.  Exposé behaves differently based on your screen and window setup at the time.  Try entering your macro keycodes to Exposé manually and see if they work that way.  If not, then adjust your macro as required.
 
 ## Full Examples
 
 ### 1. Switcher Key on Navigation Layer
+
 Anatoly uses Windows.  His Switcher key is on a navigation layer accessed via a momentary layer switch.  Since his arrow keys are on the same layer, he'll use those to navigate to the desired window.  As soon as he releases the layer key, the highlighted window will open automatically.
 
 **Usage:** Hold Navigation layer key -> Press Switcher key -> Use arrows to navigate -> Release layer key to open
@@ -409,7 +424,7 @@ SWITCHER_SECONDARY_KEYS(
 
 ```
 
-### 3. Same Three Files
+### 3. Three Keys for Three Files
 Sumit uses a Mac and works with three specific files.  He has dedicated keys to switch directly to each one.
 
 **Usage:** Press S\_SUMM, S\_DATA, or S\_ANLY to switch directly to the Summary, Data, or Analysis files.
@@ -502,9 +517,9 @@ See the Setup and Troubleshooting sections above for example usage of each of th
 <tr><td><tt>SWITCHER_MACOS_APP_SWITCHER</tt></td><td>Turns on all features specific to the built-in MacOS app manager (aka the MacOS app switcher).  Defaults the virtual Hold and Tap keys to Cmd and Tab; these defaults may be overwritten using the parameters above.</td></tr>
 <tr><td><tt>SWITCHER_IDLE_TIMEOUT</tt></td><td>Applies an idle timeout from the time of the user's last keypress.  When the timeout expires, Switcher will automatically select the highlighted item and exit.</td></tr>
 <tr><td><tt>SWITCHER_ENABLE_SECONDARY_KEYS</tt></td><td>Enables secondary key functionality.  Must be accompanied by a mapping of secondary keys in keymap.c.</td></tr>
-<tr><td><tt> SWITCHER_PRESELECT_CURRENT_APP </tt></td><td>Automatically sends Shift-TapKey when opening the switching software, to highlight the current app rather than the previous one.</td></tr>
+<tr><td><tt> SWITCHER_PRESELECT_CURRENT_APP </tt></td><td>Automatically sends Shift-TapKey when opening the app manager, to highlight the current app rather than the previous one.</td></tr>
 <tr><td><tt> SWITCHER_FORWARD_ENDING_KEYCODE </tt></td><td>Forwards any ending keycode to the newly selected app.  (By default, ending keycodes are discarded when Switcher exits.)</td></tr>
-<tr><td><tt>SWITCHER_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for your switching software to appear before sending any keycodes (default: 180).</td></tr>
+<tr><td><tt>SWITCHER_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for your app manager to appear before sending any keycodes (default: 180).</td></tr>
 <tr><td><tt>SWITCHER_EXPOSE_BOOT_DURATION</tt></td><td>Alters the number of milliseconds Switcher waits for MacOS Exposé to appear before sending any keycodes (default: 400).</td></tr>
 <tr><td><tt>SWITCHER_SECONDARY_KEY_CACHE_SIZE</tt></td><td>Redefines the size of the secondary key cache (default: 8).</td></tr>
 <tr><td><tt>SWITCHER_CUSTOM_MACRO</tt></td><td>Defines a list of initial keycodes to be sent automatically when pressing a SWITCHER_CUSTOM key.</td></tr>
@@ -539,8 +554,9 @@ Other useful Mac shortcuts outside of the app manager:
 <table>
 <tr><td><b>Key</b></td><td><b>Effect</b></td></tr>
 <tr><td><tt>Ctrl-Tab</tt></td><td>Next tab of current window</td></tr>
-<tr><td><tt>Cmd-backtick</tt></td><td>Next window of current app</td></tr>
-<tr><td><tt>Ctrl-⬇</tt></td><td>Exposé for current app<br><br><i>(Note: Opening Exposé this way is outside of Switcher's context.  If you want to use Exposé alongside Switcher's power features, use the SWITCHER_EXPOSE keycode instead.)</i></td></tr>
+<tr><td><tt>Cmd-backtick</tt></td><td>Next window of current app (within current space)</td></tr>
+<tr><td><tt>Ctrl-⮕</tt></td><td>Next space</td></tr>
+<tr><td><tt>Ctrl-⬇</tt></td><td>Exposé for current app (across all spaces)<br><br><i>(Note: Opening Exposé this way is outside of Switcher's context.  If you want to use Exposé alongside Switcher's power features, use the SWITCHER_EXPOSE keycode instead.)</i></td></tr>
 <tr><td><tt>Ctrl-⬆</tt></td><td>Mission Control<br><br><i>(Note: While Exposé shows you open windows for the current app, Mission Control shows you open windows across <b>all</b> apps.  However, Mission Control can <b>not</b> be controlled with the keyboard.)</i></td></tr>
 
 </table>
