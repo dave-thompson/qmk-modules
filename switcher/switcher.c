@@ -109,10 +109,13 @@ static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
 #endif
 
 #ifdef SWITCHER_MACOS_APP_SWITCHER
+    // Call when transitioning from the app switcher to exposé
     static void transition_to_expose(void) {
         switcher_start_expose_boot_timer();
         state.expose_mode = true;
     }
+    // Defined in Initial Keycodes section below
+    static void switcher_send_expose_macro(void);
 #else
     static void transition_to_expose(void) { }
 #endif
@@ -147,6 +150,11 @@ static void send_virtual_secondary_keycode_immediately(uint16_t virtual_keycode)
             ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
             transition_to_expose();
         }
+        // if cycing through apps in exposé:
+        if (state.expose_mode && virtual_keycode == KC_GRAVE) {
+            switcher_send_expose_macro();
+
+        }
         // if the user selected a window themselves: clean up
         if ((state.expose_mode && (virtual_keycode == KC_ENTER))||(!state.expose_mode && (virtual_keycode == KC_SPACE))) {
             exit_switcher();
@@ -161,6 +169,7 @@ static void send_virtual_secondary_keycode_immediately(uint16_t virtual_keycode)
 // Sends (or caches) a virtual secondary keycode
 static void process_virtual_secondary_key(uint16_t virtual_keycode) {
     switcher_restart_idle_timer();
+
     if (switcher_loading()) {
         switcher_cache_secondary_keycode(virtual_keycode);
     }
@@ -201,7 +210,19 @@ __attribute__((weak)) bool is_switcher_keycode_user(uint16_t keycode) {
 }
 
 // Handles Primary key presses/releases
-static void process_primary_keycode(keyrecord_t *record) {
+static void process_primary_keycode(uint16_t keycode, keyrecord_t *record) {
+    switcher_restart_idle_timer();
+
+    // If Exposé key pressed while already in Exposé
+    if (using_macos_switcher()) {
+        if (state.active && state.expose_mode && keycode == SWITCHER_EXPOSE) {
+            // cycle to next app
+            if (record->event.pressed) tap_code(KC_GRAVE);
+            return;
+        }
+    }
+
+    // Handle as normal Primary key
     if (record->event.pressed) {
         if (!state.active) { // start of the switching sequence
             // hold the hold key
@@ -215,7 +236,6 @@ static void process_primary_keycode(keyrecord_t *record) {
     } else {
         unregister_code(SWITCHER_VIRTUAL_TAP_KEY);
         state.primary_key_held = false;
-        switcher_restart_idle_timer();
     }
 }
 
@@ -254,7 +274,7 @@ static void process_secondary_or_ending_key (uint16_t keycode, keyrecord_t *reco
 // Handles all key presses/releases
 bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
     if (is_primary_keycode(current_keycode)) { // Primary key
-        process_primary_keycode(record);
+        process_primary_keycode(current_keycode, record);
         return false;
     } else if (state.active) { // Secondary or Ending Key
         process_secondary_or_ending_key(current_keycode, record);
@@ -270,6 +290,9 @@ bool process_record_switcher(uint16_t current_keycode, keyrecord_t *record) {
 //     - including Switcher Macros
 //
 ///////////////////////////////////////////////////////////////////////////////
+
+// User callback to define self-coded custom macros
+__attribute__((weak)) void switcher_send_macros_user(uint16_t keycode) {}
 
 // Sends any initial keycodes required to setup the switching software
 // before it appears
@@ -306,12 +329,10 @@ static void switcher_send_initial_keycodes(uint16_t switcher_keycode) {
     switcher_send_macros_user(switcher_keycode);
 }
 
-// User callback to define self-coded custom macros
-__attribute__((weak)) void switcher_send_macros_user(uint16_t keycode) {}
-
+// Initial keycodes to select the first exposé window automatically
 #ifdef SWITCHER_MACOS_APP_SWITCHER
-    // On entering Exposé: select the first window automatically
-    static void switcher_send_expose_macro(uint16_t switcher_keycode) {
+    static void switcher_send_expose_macro(void) {
+        // select the first window automatically
         process_virtual_secondary_key(KC_RIGHT);
     }
 #endif
@@ -357,7 +378,7 @@ static void handle_any_boot_completion(void) {
     // after Exposé Boots:
     #ifdef SWITCHER_MACOS_APP_SWITCHER
         if (switcher_expose_boot_timer_ended()) {
-            switcher_send_expose_macro(state.last_primary_keycode);
+            switcher_send_expose_macro();
             process_cached_keys();
         }
     #endif
