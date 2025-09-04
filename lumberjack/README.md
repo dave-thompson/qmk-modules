@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lumberjack</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-01</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-04</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -57,13 +57,13 @@ Lumberjack logs your keystrokes to a QMK console.  You have two console options:
 ### c. rules.mk
 In your rules.mk, you need to enable the console:
 
-```
+```makefile
 CONSOLE_ENABLE = yes
 
 ```
 Optionally, you can also turn on `KEYCODE_STRING_ENABLE`. This comes at the cost of significantly larger firmware, but is highly recommended if you have the space: it will make your logs much easier to read.
 
-```
+```makefile
 KEYCODE_STRING_ENABLE = yes
 ```
 
@@ -71,21 +71,21 @@ KEYCODE_STRING_ENABLE = yes
 
 Finally, in your config.h, you need to tell Lumberjack to log the keys:
 
-```
+```c
 #define LUMBERJACK_LOG_KEYS
 ```
 
 ### Disabling Lumberjack
 If you're done with logging for the time being, you can disable Lumberjack (and recoup its firmware space) by commenting out the enabling lines. First, in `rules.mk`, comment out with # symbols:
 
-```
+```makefile
 # CONSOLE_ENABLE = yes
 # KEYCODE_STRING_ENABLE = yes
 ```
 
 Then, in `config.h`, comment out with //:
 
-```
+```c
 // #define LUMBERJACK_LOG_KEYS
 ```
 
@@ -98,7 +98,7 @@ Lumberjack's optional coloured output assigns a unique colour to each keypress, 
 
 Enable colours by adding the following to your `config.h`:
 
-```
+```c
 #define LUMBERJACK_COLOR
 ```
 
@@ -168,7 +168,7 @@ Lumberjack uses ~115 bytes of static RAM (or ~160 with colours), plus ~60 bytes 
 
 So if you're short on RAM and confident you'll never have more than, say, five keys pressed at the same time, add the following to `config.h`:
 
-```
+```c
 #define LUMBERJACK_MAX_TRACKED_KEYS 5 // default is 10
 ```
 
