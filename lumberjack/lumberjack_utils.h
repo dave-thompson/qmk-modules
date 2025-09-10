@@ -45,7 +45,8 @@ uint8_t lumberjack_str_len(const char* str);
  * 
  * @warning dest and src must be different
  */
-void lumberjack_right_align_string(char* dest, uint8_t dest_size, const char* src);
+void lumberjack_right_align_string(char* dest, uint8_t dest_size,
+                                   const char* src);
 
 
 /**
@@ -81,7 +82,8 @@ void lumberjack_keycode_to_hex_string(char* dest, uint16_t value);
  * 
  * Converts an unsigned 16-bit integer to its decimal string representation.
  * 
- * @param dest Destination buffer (must be at least 6 bytes for max value 65535)
+ * @param dest Destination buffer (must be at least 6 bytes for max value
+ *             65535: 5 chars + 1 null terminator)
  * @param value Unsigned 16-bit integer to convert (0-65535)
  */
 void lumberjack_uint_to_string(char* dest, uint16_t value);

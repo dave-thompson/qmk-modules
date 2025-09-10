@@ -6,20 +6,20 @@
  * ANSI colour escape codes. Despite the colour-specific naming, it can store
  * any string pointers.
  * 
- * Call lumberjack_add_color_to_queue from an initialisation function as many times as 
- * necessary to declare your colour palette.
+ * Call lumberjack_add_color_to_queue from an initialisation function as many
+ * times as necessary to declare your colour palette.
  * 
  * Use lumberjack_next_color() to get an unused colour from the palette. Use
- * lumberjack_add_color_to_queue(color_code) to tell the library when you're no longer using a
- * specific colour.  lumberjack_next_color() will always return the _least_recently_used_
- * colour to reduce the chance of the user seeing the same colour used for different
- * purposes at the same time.
+ * lumberjack_add_color_to_queue(color_code) to tell the library when you're
+ * no longer using a specific colour.  lumberjack_next_color() will always
+ * return the _least_recently_used_ colour to reduce the chance of the user
+ * seeing the same colour used for different purposes at the same time.
  * 
  * @note This library stores pointers to strings, not copies. Ensure the
  *       strings remain valid for the lifetime of their use in the queue.
  * 
- * @note Despite the British English comments, all code uses American spellings for better
- *       portability.
+ * @note Despite the British English comments, all code uses American
+ *       spellings for better portability.
  * 
  * @author dave-thompson
  */
@@ -64,10 +64,11 @@ void lumberjack_add_color_to_queue(const char* color);
 /**
  * @brief Get the next colour code from the queue
  * 
- * Removes the first item from the front of the queue and returns it to the caller.
+ * Removes the first item from the front of the queue and returns it to the
+ * caller.
  * 
- * @return const char* Pointer to the colour code string, or empty string "" if
- *         queue is empty
+ * @return const char* Pointer to the colour code string, or empty string ""
+ *         if queue is empty
  * 
  * @note The returned pointer is valid as long as the original string
  *       (supplied in lumberjack_add_color_to_queue) remains valid

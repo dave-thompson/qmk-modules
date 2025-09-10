@@ -102,7 +102,8 @@ void test_queue_wraparound(void) {
     
     // Verify extras
     for (int i = 0; i < 2; i++) {
-        TEST_ASSERT_EQUAL_STRING(extra_test_colors[i], lumberjack_next_color());
+        TEST_ASSERT_EQUAL_STRING(extra_test_colors[i],
+                                 lumberjack_next_color());
     }
 }
 

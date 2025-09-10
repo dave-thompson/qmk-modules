@@ -26,7 +26,7 @@ void lumberjack_add_color_to_queue(const char* color) {
 
 
 /**
- * Returns the first item from the top of the queue (and removes that item from the queue)
+ * Returns the item at the top of the queue (and removes it from the queue)
  * Returns an empty string if the queue is empty
  */
 const char* lumberjack_next_color(void) {
