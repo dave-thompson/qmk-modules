@@ -1,62 +1,12 @@
 /**
- * Switcher - QMK Community Module - Single-key app switching with fancy features
- * ******************************************************************************
+ * Switcher - QMK Community Module - Single-Key App Switching
  * 
- * ****
  * See README.md in this folder for a detailed setup guide.
- * ****
  * 
- * This module enables single-key app switching by simulating hold+tap sequences
- * (like Cmd+Tab on Mac or Alt+Tab on Windows). Features include:
- * - Single key cycling through windows / applications
- * - Secondary key support for advanced actions (quit, hide, etc.)
- * - Keystroke caching during app switcher boot time
- * - Automatic selection via idle timeout
- * - MacOS-specific optimizations (including Exposé support)
- * 
- * 
- * **********
- * 
- * A single 'Switcher' key can be used anytime a modifier needs to be held while a
- * key is repeatedly tapped. In place of a physical key trigger, it's also possible to
- * use combos, tap dances, or any other means to generate the Switcher keycode.
- *
- * Optionally allows for secondary keys, allowing additional actions to be taken
- * without releasing the virtual_hold_key. In the Mac app switcher, this is useful
- * to send a 'Q' while cmd remains held, quitting the highlighted app. This does
- * not require a physical press of the 'Q' key but rather can be triggered by any
- * specified keycode.
- *
- * The virtual_hold_key (Cmd in the Mac app switcher case) is released on the press
- * or release of any key other than the specified triggers. This means that if the
- * trigger is on a higher layer and you're holding a layer switch key to access it,
- * the virtual_hold_key will be released as soon as the layer switch key is released.
- * 
- * 
- * **********
- * 
- * Switcher Keys
- * -------------
- * 
- * Switcher divides keys into four types:
- * 
- *     - Primary Keys:      Any key(code) which activites Switcher, such as SWITCHER,
- *                          SWITCHER_CUSTOM or SWITCHER_EXPOSE.
- * 
- *     - Secondary Keys:    Any key(code) used while Switcher is active to
- *                          request a secondary action, e.g. 'Q' to quit the
- *                          selected app.  Secondary keys are always specified as a
- *                          pair: (1) the key pressed by the user -> (2) the keycode
- *                          sent by Switcher to the switching software.
- * 
- *     - Ending Keys:       Any key received while Switcher is active that is not 
- *                          either a Primary key or a Secondary key.  When an
- *                          ending key press is detected, Switcher will open the
- *                          highlighted item and exit.
- * 
- *     - Out of Scope Keys: Any key received while Switcher is _not_ active
- *                          that is not a Primary key.  Switcher ignores these
- *                          key presses.
+ * A single 'Switcher' key can be used anytime a modifier needs to be held 
+ * while a key is repeatedly tapped. In place of a physical key trigger, 
+ * it's also possible to use combos, tap dances, or any other means to 
+ * generate the Switcher keycode.
  *                          
  */
 
@@ -71,7 +21,8 @@
  * in switcher mode. This allows remapping keys for more convenient access
  * to switcher functions.
  * 
- * Example: {KC_H, KC_LEFT} maps the 'H' key to send 'Left Arrow' while switching
+ * Example: {KC_H, KC_LEFT} maps the 'H' key to send 'Left Arrow' while 
+ * switching
  */
 typedef struct {
     uint16_t keycode;          ///< physical key pressed on keyboard
@@ -81,20 +32,20 @@ typedef struct {
 /** 
  *  @brief Table of secondary keys
  * 
- *  Define any secondary keys to be used while in Switcher mode in your keymap.c,
- *  as follows:
+ * Define any secondary keys to be used while in Switcher mode in your 
+ * keymap.c, as follows:
  *  
  *  SWITCHER_SECONDARY_KEYS(
- *    {KC_LEFT, KC_LEFT},     // 'left' functions as usual
- *    {KC_RIGHT, KC_RIGHT},   // 'right' functions as usual  
- *    {KC_UP, KC_UP},         // 'up' functions as usual
- *    {KC_DOWN, KC_DOWN},     // 'down' functions as usual
- *    {KC_A, KC_Q},           // left pinky ('A' on QWERTY) sends 'Q' to quit app
- *    {KC_F, KC_H},           // left index ('F' on QWERTY) sends 'H' to hide app
+ *    {KC_LEFT, KC_LEFT},   // 'left' functions as usual
+ *    {KC_RIGHT, KC_RIGHT}, // 'right' functions as usual  
+ *    {KC_UP, KC_UP},       // 'up' functions as usual
+ *    {KC_DOWN, KC_DOWN},   // 'down' functions as usual
+ *    {KC_A, KC_Q},         // left pinky ('A' on QWERTY) sends 'Q' to quit app
+ *    {KC_F, KC_H},         // left index ('F' on QWERTY) sends 'H' to hide app
  *  );
  * 
- *  Any keycodes not specified here will exit the switcher and then be sent for
- *  processing.
+ *  Any keycodes not specified here will exit the switcher and then be sent
+ *  for processing.
  * 
  * */
 #define SWITCHER_SECONDARY_KEYS(...) \
@@ -121,10 +72,10 @@ bool is_switcher_keycode_user(uint16_t keycode);
 /**
  * @brief User callback to define macro key sequences for custom switcher keys
  * 
- * Called when a switcher key is first pressed, allowing you to send an initial
- * sequence of keys automatically. This enables complex switcher behaviors with
- * a single key press.  Macro key sequences are sent after booting but before
- * user key presses.
+ * Called when a switcher key is first pressed, allowing you to send an 
+ * initial sequence of keys automatically. This enables complex switcher 
+ * behaviors with a single key press.  Macro key sequences are sent after 
+ * booting but before user key presses.
  * 
  * @param keycode The primary keycode that activated Switcher
  * 
@@ -135,8 +86,9 @@ bool is_switcher_keycode_user(uint16_t keycode);
  * void switcher_send_macros_user(uint16_t keycode) {
  *     if (keycode == OLDEST_WINDOW) {
  *         switcher_send_keycode(KC_LEFT);             // Select current window
- *         switcher_send_keycode(KC_LEFT);             // Select oldest window (by wraparound)
- *         switcher_send_keycode(SWITCHER_OPEN_ITEM);  // Open selected window and exit
+ *         switcher_send_keycode(KC_LEFT);             // Select oldest window
+ *                                                     //      (by wraparound)
+ *         switcher_send_keycode(SWITCHER_OPEN_ITEM);  // Open window and exit
  *     }
  * }
  * @endcode

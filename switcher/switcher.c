@@ -12,9 +12,9 @@
 
 typedef struct {
     bool active;                     // is the switcher in use?
-    bool expose_mode;                // are we in exposé mode or app switcher mode?
-    bool primary_key_held;           // is a Primary switcher key currently held down?
-    uint16_t last_primary_keycode;   // which was the last Primary switcher key to be held down?
+    bool expose_mode;                // are we in exposé or the app switcher?
+    bool primary_key_held;           // is a Primary switcher key held down?
+    uint16_t last_primary_keycode;   // last Primary switcher key used
 } switcher_state_t;
 
 static switcher_state_t state = {0};
@@ -82,7 +82,7 @@ static void select_highlighted_item(void) {
 
 // Handles Ending Keys
 static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
-    if (switcher_loading()) { // if loading, cache the record for later processing
+    if (switcher_loading()) { // if loading, cache the record to process later
         switcher_cache_ending_key(keycode, record);
     }
     else {
@@ -125,7 +125,8 @@ static void process_ending_key(uint16_t keycode, keyrecord_t *record) {
 static uint16_t virtual_keycode_for_secondary_key(uint16_t keycode) {
     #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
         for (int i = 0; i < switcher_secondary_keys_count(); ++i) {
-            const switcher_key_t* switcher_secondary_key = switcher_secondary_keys_get(i);
+            const switcher_key_t* switcher_secondary_key =
+                switcher_secondary_keys_get(i);
             if (keycode == switcher_secondary_key->keycode) {
                 return switcher_secondary_key->virtual_keycode;
             }
@@ -135,22 +136,28 @@ static uint16_t virtual_keycode_for_secondary_key(uint16_t keycode) {
 }
 
 // Sends a virtual secondary keycode
-static void send_virtual_secondary_keycode_immediately(uint16_t virtual_keycode) {
+static void send_virtual_secondary_keycode_immediately (
+                                                   uint16_t virtual_keycode) {
     tap_code16(virtual_keycode);
-    
-    // if app switcher cancelled: clean up (presumes all switching software uses Escape to quit)
+
+    // if app switcher cancelled: clean up
+    // (presumes all switching software uses Escape to quit)
     if (virtual_keycode == KC_ESC) {
         exit_switcher();
     }
     if (virtual_keycode == SWITCHER_OPEN_ITEM) {
         // exposé needs a brief delay before it's ready to exit
-        if (state.expose_mode) {wait_ms(SWITCHER_EXPOSE_EXIT_DELAY);}  // no need to cache, as this is the final keycode
+        if (state.expose_mode) {
+            // no need to cache, as this is the final keycode
+            wait_ms(SWITCHER_EXPOSE_EXIT_DELAY);
+        }  
         select_highlighted_item();
     }
     if (using_macos_switcher()) {
         // if entering window browsing (exposé):
         if (!state.expose_mode &&
-            ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) || (virtual_keycode == KC_1))) {
+            ((virtual_keycode == KC_UP) || (virtual_keycode == KC_DOWN) ||
+             (virtual_keycode == KC_1))) {
             transition_to_expose();
         }
         // if cycing through apps in exposé:
@@ -159,7 +166,8 @@ static void send_virtual_secondary_keycode_immediately(uint16_t virtual_keycode)
 
         }
         // if the user selected a window themselves: clean up
-        if ((state.expose_mode && (virtual_keycode == KC_ENTER))||(!state.expose_mode && (virtual_keycode == KC_SPACE))) {
+        if ((state.expose_mode && (virtual_keycode == KC_ENTER))||
+            (!state.expose_mode && (virtual_keycode == KC_SPACE))) {
             exit_switcher();
         }
         // if app switcher cancelled: clean up
@@ -247,7 +255,7 @@ static void process_primary_keycode(uint16_t keycode, keyrecord_t *record) {
 //
 // Triaging Key Presses
 //
-// - Triages keys into four categories:
+// - Keys are triaged into four categories:
 //
 //   A) While Switcher is inactive:
 //       0) Out of Scope Keys
@@ -257,12 +265,33 @@ static void process_primary_keycode(uint16_t keycode, keyrecord_t *record) {
 //       1) Primary Keys
 //       2) Secondary Keys
 //       3) Ending Keys
+//
+//
+// - Primary Keys:      Any key(code) which activites Switcher, such as 
+//                      SWITCHER, SWITCHER_CUSTOM or SWITCHER_EXPOSE.
+// 
+// - Secondary Keys:    Any key(code) used while Switcher is active to
+//                      request a secondary action, e.g. 'Q' to quit the
+//                      selected app.  Secondary keys are always 
+//                      specified as a pair: (1) the key pressed by the 
+//                      user -> (2) the keycode sent by Switcher to the 
+//                      switching software.
+// 
+// - Ending Keys:       Any key received while Switcher is active that 
+//                      is not either a Primary key or a Secondary key.  
+//                      When an ending key press is detected, Switcher 
+//                      will open the highlighted item and exit.
+// 
+// - Out of Scope Keys: Any key received while Switcher is _not_ active
+//                      that is not a Primary key.  Switcher ignores 
+//                      these key presses.
 // 
 ///////////////////////////////////////////////////////////////////////////////
 
 // Handles keys known to be either Secondary or Ending keys
 // (i.e. all keys received while Switcher is active, except for Primary keys)
-static void process_secondary_or_ending_key (uint16_t keycode, keyrecord_t *record) {
+static void process_secondary_or_ending_key (uint16_t keycode,
+                                             keyrecord_t *record) {
     uint16_t virtual_keycode = virtual_keycode_for_secondary_key(keycode);
     if (virtual_keycode != KC_NO) { // Secondary key
         if (record->event.pressed) {
@@ -321,7 +350,8 @@ static void switcher_send_initial_keycodes(uint16_t switcher_keycode) {
     #ifdef SWITCHER_CUSTOM_MACRO
         if (switcher_keycode == SWITCHER_CUSTOM) {
             // send custom macro
-            static const uint16_t custom_macro_sequence[] = SWITCHER_CUSTOM_MACRO;
+            static const uint16_t custom_macro_sequence[] =
+                SWITCHER_CUSTOM_MACRO;
             for (uint8_t i = 0; i < ARRAY_SIZE(custom_macro_sequence); i++) {
                 process_virtual_secondary_key(custom_macro_sequence[i]);
             }
@@ -349,21 +379,25 @@ static void switcher_send_initial_keycodes(uint16_t switcher_keycode) {
 
 // Processes all keys in the cache
 static void process_cached_keys(void) {
-    switcher_restart_idle_timer(); // in case idle timer expired during the preceding boot delay
+    switcher_restart_idle_timer(); // in case expired in preceding boot delay
 
     // process any cached secondary keys
     if (switcher_secondary_keys_enabled()) {
-        // prepare to re-cache keys if necessary (in case the processing of a cached key leads to an additional boot delay)
+        // prepare to re-cache keys if necessary (in case processing a cached
+        // key leads to an additional boot delay)
         uint8_t keys_to_process = switcher_secondary_cache_count();
-        switcher_reset_secondary_cache_index(); // so that any processed keys that are re-cached are added to the _start_ of the cache
+        switcher_reset_secondary_cache_index(); // so any processed keys that
+                                                // are re-cached go to start
         for (uint8_t i = 0; i < keys_to_process; i++) {
-            process_virtual_secondary_key(switcher_secondary_cache_get_item_at_index(i));
+            process_virtual_secondary_key(
+                switcher_secondary_cache_get_item_at_index(i));
         }
     }
 
     // process any cached ending key
     if (switcher_is_ending_key_cached()) {
-        process_ending_key(switcher_cached_ending_keycode(), switcher_cached_ending_record());
+        process_ending_key(switcher_cached_ending_keycode(),
+                         switcher_cached_ending_record());
     }
 
 }
@@ -397,8 +431,10 @@ static void handle_any_boot_completion(void) {
 
 static void handle_any_idle_timeout(void) {
     if (switcher_idle_timed_out()) {
-        // Ignore the timeout if a Primary key is held down, or if a new screen is booting (meaning there may be cached keys to deal with).
-        // The idle timer will restart either when the Primary key is released or when the boot timer expires.
+        // Ignore the timeout if a Primary key is held down, or if a new
+        // screen is booting (meaning there may be cached keys to deal with).
+        // The idle timer will restart either when the Primary key is released
+        // or when the boot timer expires.
         if (!state.primary_key_held && !switcher_loading()) {
             select_highlighted_item();
         }
@@ -413,6 +449,7 @@ static void handle_any_idle_timeout(void) {
 ///////////////////////////////////////////////////////////////////////////////
 
 void housekeeping_task_switcher(void) {
-    handle_any_boot_completion(); // boot completion (and cached keys) must be dealt with _before_ any idle timeout
+    handle_any_boot_completion(); // boot completion (and cached keys) must be
+                                  // dealt with _before_ any idle timeout
     handle_any_idle_timeout();
 }

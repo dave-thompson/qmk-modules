@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-04</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-10</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -198,8 +198,8 @@ You can remap any key, including modifier combinations.  To remap 'Paste' (Cmd-V
 
 ```c
 SWITCHER_SECONDARY_KEYS(
-    {G(KC_V), KC_H},           // 'Cmd-V' sends H to hide app
-                               // (In QMK, G() stands for GUI, another name for 'Cmd'.)
+    {G(KC_V), KC_H},        // 'Cmd-V' sends H to hide app
+                            // (In QMK, G() means GUI, another name for 'Cmd'.)
 );
 
 ```
@@ -229,12 +229,14 @@ For a Mac key that switches straight to the 2025_main.xls file (or really, to an
 
 ```c
 /**
-* Warning: Exposé responds differently based on your screen and window setup.  The precise sequence required for your system may differ from that below.
+* Warning: Exposé responds differently based on your screen and window setup.
+*          The required sequence for your system may differ from that below.
 * 
 * KC_LEFT points to the current app
 * KC_UP goes into Exposé
 * KC_2 highlights the most recent window whose name begins with the number two
-* SWITCHER_OPEN_ITEM is a special keycode that opens the highlighted app / window and closes the switcher
+* SWITCHER_OPEN_ITEM is a special keycode that opens the highlighted
+*                    app / window and closes the switcher
 **/
 #define SWITCHER_CUSTOM_MACRO {KC_LEFT, KC_UP, KC_2, SWITCHER_OPEN_ITEM}
 ```
@@ -412,7 +414,8 @@ SWITCHER_SECONDARY_KEYS(
     {KC_J, KC_DOWN},        // 'J' sends 'down'
     {KC_K, KC_UP},          // 'K' sends 'up'
     {KC_L, KC_RIGHT},       // 'L' sends 'right'
-    {KC_F, KC_GRAVE},       // 'F' sends 'backtick' to cycle Exposé through different apps
+    {KC_F, KC_GRAVE},       // 'F' sends 'backtick' to cycle Exposé through
+                            //            different apps
 );
 ```
 
@@ -464,22 +467,25 @@ bool is_switcher_keycode_user(uint16_t keycode) {
 
 void switcher_send_macros_user(uint16_t keycode) {
     if (keycode == S_SUMM) {
-        switcher_send_keycode(KC_LEFT);                // Select current app
-        switcher_send_keycode(KC_UP);                  // Enter Exposé
-        switcher_send_keycode(KC_S);                   // Select first window whose name begins with 'S'
-        switcher_send_keycode(SWITCHER_OPEN_ITEM);     // Open that window 
+        switcher_send_keycode(KC_LEFT);             // Select current app
+        switcher_send_keycode(KC_UP);               // Enter Exposé
+        switcher_send_keycode(KC_S);                // Select 1st window whose
+                                                    //    name begins with 'S'
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);  // Open that window 
     }
     if (keycode == S_DATA) {
-        switcher_send_keycode(KC_LEFT);                // Select current app
-        switcher_send_keycode(KC_UP);                  // Enter Exposé
-        switcher_send_keycode(KC_D);                   // Select first window whose name begins with 'D'
-        switcher_send_keycode(SWITCHER_OPEN_ITEM);     // Open that window 
+        switcher_send_keycode(KC_LEFT);             // Select current app
+        switcher_send_keycode(KC_UP);               // Enter Exposé
+        switcher_send_keycode(KC_D);                // Select 1st window whose
+                                                    //    name begins with 'D'
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);  // Open that window 
     }
     if (keycode == S_ANLY) {
-        switcher_send_keycode(KC_LEFT);                // Select current app
-        switcher_send_keycode(KC_UP);                  // Enter Exposé
-        switcher_send_keycode(KC_A);                   // Select first window whose name begins with 'A'
-        switcher_send_keycode(SWITCHER_OPEN_ITEM);     // Open that window 
+        switcher_send_keycode(KC_LEFT);             // Select current app
+        switcher_send_keycode(KC_UP);               // Enter Exposé
+        switcher_send_keycode(KC_A);                // Select 1st window whose
+                                                    //    name begins with 'A'
+        switcher_send_keycode(SWITCHER_OPEN_ITEM);  // Open that window 
     }
 }
 ```
