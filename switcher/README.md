@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-10</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-11</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -47,7 +47,7 @@ By default, app switching uses awkward combinations like **Cmd+Tab** or **Alt+Ta
 ## Features
 ### Single Key Switching
 ![](doc/mac_app_switcher.png)
-***The MacOS App Manager:***  *Normally you have to hold* ***Command*** *and repeatedly press* ***Tab****.  The Switcher module replaces this with a single key.*
+***The MacOS App Manager:***  *Normally you have to hold* ***Command*** *and repeatedly press* ***Tab***.  *The Switcher module replaces this with a single key.*
 
 Tap your Switcher key once to open the app manager, then again to cycle through windows or apps.  Switcher supports Windows Alt+Tab, Mac Cmd+Tab, or any other key combo you like.
 
@@ -61,18 +61,7 @@ Alternatively, tap any non-Switcher key to make the selection, or configure an i
 
 App managers offer advanced features through secondary keys.  Macs allow hiding an app ('H'), quitting an app ('Q'), viewing windows of an app in Exposé ('⬆') and more.
 
-Switcher can remap these keys to anywhere you like.  How about the home row?
-
-### Smart Key Caching
-App managers take several hundred milliseconds to appear, and only cache Tab during this time.  To use advanced features, you have to wait for the interface to appear.
-
-Switcher caches **all** keystrokes while the software loads.  Type full sequences immediately and never lose your input.
-
-### Custom Macro Sequences
-Create single keys that execute complex app switching sequences for you.
-
-Opening Exposé inside the MacOS app manager is normally six actions: Cmd Down > Tab > **Wait** > Left > Up > Cmd Up.  With Switcher Macros, a single keypress can do all this (or anything else) straight away.
-
+Switcher can remap these keys to anywhere you'd like them.  How about the home row?
 
 ### Mac-Specific Enhancements
 If you're on a Mac, Switcher resolves several limitations of the built-in app manager. With Switcher:
@@ -81,6 +70,17 @@ If you're on a Mac, Switcher resolves several limitations of the built-in app ma
 - The app manager and Exposé use the same navigation keys
 - Opening Exposé automatically highlights the first window
 - Special Exposé keycode both opens Exposé and cycles through apps within it
+
+### Full Key Caching
+App managers take several hundred milliseconds to appear, and only cache Tab during this time.  To use advanced features, you have to wait for the interface to appear.
+
+Switcher caches **all** keystrokes while the software loads, so you can type full sequences straight away.
+
+### Custom Macros
+Create single keys that execute complex app switching sequences for you.
+
+Opening Exposé inside the MacOS app manager is normally six actions: Cmd Down > Tab > **Wait** > Left > Up > Cmd Up.  With Switcher Macros, a single keypress can do all this (or anything else) instantly.
+
 
 <br/>
 
