@@ -236,7 +236,7 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
 
     // if key press failed to be tracked, log error
     if (keypress_data.keycode == 0) {
-        uprintf("%s - NOT TRACKED\n", keycode_string);
+        xprintf("%s - NOT TRACKED\n", keycode_string);
         return true;
     }
 
@@ -252,10 +252,10 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     if (!state.active && record->event.pressed) { // 
         // log without a delta
         if (!lumberjack_color()) {
-            uprintf("%s  |  DOWN  |                    |\n",
+            xprintf("%s  |  DOWN  |                    |\n",
                     keycode_string);
         } else {
-            uprintf("%s%s  %s--DOWN--%s                    %s%s\n",
+            xprintf("%s%s  %s--DOWN--%s                    %s%s\n",
                     keypress_data.color, keycode_string, pipe, pipe, pipe,
                     RESET_COLOR);
         }
@@ -283,10 +283,10 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     // log normally
     if (record->event.pressed) {
         if (!lumberjack_color()) {
-            uprintf("%s  |  DOWN  |  Delta: %s ms  |\n",
+            xprintf("%s  |  DOWN  |  Delta: %s ms  |\n",
                     keycode_string, padded_delta_string);
         } else {
-            uprintf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n",
+            xprintf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n",
                     keypress_data.color, keycode_string, pipe, pipe,
                     padded_delta_string, pipe, RESET_COLOR);
         }
@@ -294,10 +294,10 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
         uint16_t hold_duration = keypress_data.up_time -
                                  keypress_data.down_time;
         if (!lumberjack_color()) {
-            uprintf("%s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n",
+            xprintf("%s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n",
                     keycode_string, padded_delta_string, hold_duration);
         } else {
-            uprintf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n",
+            xprintf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n",
                     keypress_data.color, keycode_string, padded_delta_string,
                     pipe, hold_duration, RESET_COLOR);
         }
