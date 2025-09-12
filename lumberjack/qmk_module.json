@@ -3,5 +3,10 @@
     "maintainer": "dave-thompson",
     "license": "GPL-3.0-or-later",
     "url": "https://github.com/dave-thompson/qmk-modules/lumberjack",
-    "description": "Pretty key logger for QMK debugging with key press times and hold durations"
+    "description": "Pretty key logger for QMK debugging with key press times and hold durations",
+    "keycodes": [
+        {
+            "key": "LUMBERJ"
+        }
+    ]
 }

@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lumberjack</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-11</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-12</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -102,6 +102,16 @@ Enable colours by adding the following to your `config.h`:
 #define LUMBERJACK_COLOR
 ```
 
+### Toggling On / Off at Runtime
+
+You can add keycode `LUMBERJ` to any key in your keymap, then use that key to toggle lumberjack on / off anytime.  To toggle lumberjack programmatically, use the functions `enable_lumberjack()` and `disable_lumberjack()` in your code.
+
+Note that lumberjack is **enabled** by default when your keyboard boots.  If you would like it to be **disabled** by default, add the following line to your config.h:
+
+```c
+#define LUMBERJACK_DISABLE_ON_BOOT
+```
+
 ## Troubleshooting
 ### My Keycodes are Scrambled!
 If your keycodes look something like `0x320B` then, well... that's just what keycodes looks like!  In fact, your keyboard likes them that way.
@@ -150,8 +160,7 @@ To avoid being too busy, Lumberjack limits its palette to five colours.  The sam
 <tr><td><tt>LUMBERJACK_COLOR</tt></td><td>Enables coloured logging at the cost of larger firmware size.  Requires use of command-line console.</td></tr>
 <tr><td><tt>LUMBERJACK_KEYCODE_LENGTH</tt></td><td>Adjusts the width of the first log column.  Keycodes longer than this length will be truncated.</td></tr>
 <tr><td><tt>LUMBERJACK_MAX_TRACKED_KEYS</tt></td><td>Adjusts the maximum number of simultaneously tracked keypresses.  Additional simultaneous keypresses beyond the maximum are logged without hold times and with the message "Not Tracked".</td></tr>
-
-
+<tr><td><tt>LUMBERJACK_DISABLE_ON_BOOT</tt></td><td>Temporarily disables logging when the keyboard boots, until it is enabled by enable_lumberjack() or by pressing a LUMBERJ key.</td></tr>
 
 </table>
 
