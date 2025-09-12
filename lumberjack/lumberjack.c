@@ -23,6 +23,47 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+// Runtime Config
+//
+///////////////////////////////////////////////////////////////////////////////
+
+#ifndef LUMBERJACK_DISABLE_ON_BOOT
+    static bool lumberjack_enabled = true;
+#else
+    static bool lumberjack_enabled = false;
+#endif
+
+void disable_lumberjack(void) {
+    lumberjack_enabled = false;
+}
+
+void enable_lumberjack(void) {
+    lumberjack_enabled = true;
+}
+
+
+// xprintf wrapper; used for all lumberjack printing
+#define lj_printf(fmt, ...)                                       \
+        do {                                                      \
+            if (lumberjack_enabled) xprintf(fmt, ##__VA_ARGS__);  \
+        } while (0)
+
+
+// toggle logging when LUMBERJ key tapped
+bool process_record_lumberjack(uint16_t current_keycode,
+                               keyrecord_t *record) {
+    if (current_keycode == LUMBERJ) {
+        if (record->event.pressed) {
+            lumberjack_enabled = !lumberjack_enabled;
+        }
+        return false;
+    }
+    return true;
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
 // Colour Initialisation
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -236,7 +277,7 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
 
     // if key press failed to be tracked, log error
     if (keypress_data.keycode == 0) {
-        xprintf("%s - NOT TRACKED\n", keycode_string);
+        lj_printf("%s - NOT TRACKED\n", keycode_string);
         return true;
     }
 
@@ -252,12 +293,12 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     if (!state.active && record->event.pressed) { // 
         // log without a delta
         if (!lumberjack_color()) {
-            xprintf("%s  |  DOWN  |                    |\n",
-                    keycode_string);
+            lj_printf("%s  |  DOWN  |                    |\n",
+                      keycode_string);
         } else {
-            xprintf("%s%s  %s--DOWN--%s                    %s%s\n",
-                    keypress_data.color, keycode_string, pipe, pipe, pipe,
-                    RESET_COLOR);
+            lj_printf("%s%s  %s--DOWN--%s                    %s%s\n",
+                      keypress_data.color, keycode_string, pipe, pipe, pipe,
+                      RESET_COLOR);
         }
         state.active = true;
         return true;
@@ -283,23 +324,23 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     // log normally
     if (record->event.pressed) {
         if (!lumberjack_color()) {
-            xprintf("%s  |  DOWN  |  Delta: %s ms  |\n",
-                    keycode_string, padded_delta_string);
+            lj_printf("%s  |  DOWN  |  Delta: %s ms  |\n",
+                      keycode_string, padded_delta_string);
         } else {
-            xprintf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n",
-                    keypress_data.color, keycode_string, pipe, pipe,
-                    padded_delta_string, pipe, RESET_COLOR);
+            lj_printf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n",
+                      keypress_data.color, keycode_string, pipe, pipe,
+                      padded_delta_string, pipe, RESET_COLOR);
         }
     } else {
         uint16_t hold_duration = keypress_data.up_time -
                                  keypress_data.down_time;
         if (!lumberjack_color()) {
-            xprintf("%s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n",
-                    keycode_string, padded_delta_string, hold_duration);
+            lj_printf("%s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n",
+                      keycode_string, padded_delta_string, hold_duration);
         } else {
-            xprintf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n",
-                    keypress_data.color, keycode_string, padded_delta_string,
-                    pipe, hold_duration, RESET_COLOR);
+            lj_printf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n",
+                      keypress_data.color, keycode_string, padded_delta_string,
+                      pipe, hold_duration, RESET_COLOR);
         }
     }
 
