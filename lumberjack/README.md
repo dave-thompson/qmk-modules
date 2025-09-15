@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lumberjack</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-12</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-15</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -34,7 +34,7 @@ Lumberjack logs your keystrokes to a QMK console.  You have two console options:
 
 - **Command Line QMK:** If you don't already have QMK installed on your machine, then follow steps 2 & 3 from the [QMK Setup Guide](https://docs.qmk.fm/newbs_getting_started) to install it.  Once QMK is installed, open a terminal window and type `qmk console` to open a QMK console in that window.
 
-- **QMK Toolbox:**  If you don't want to install QMK or you'd rather avoid using the command line, you can instead install and use [QMK Toolbox](https://qmk.fm/toolbox). This is the easier option if you're unsure about things.
+- **QMK Toolbox:**  If you don't want to install QMK or you'd rather avoid using the command line, you can instead install and use [QMK Toolbox](https://qmk.fm/toolbox). This is a little easier if you're unsure about things, but doesn't support [coloured output](#coloured-output).
 
 ### b. keymap.json
 
@@ -54,39 +54,11 @@ If you don't yet have a `keymap.json`, create one with the below content in the 
 }
 ```
 
-### c. rules.mk
-In your rules.mk, you need to enable the console:
-
-```makefile
-CONSOLE_ENABLE = yes
-
-```
-Optionally, you can also turn on `KEYCODE_STRING_ENABLE`. This comes at the cost of significantly larger firmware, but is highly recommended if you have the space: it will make your logs much easier to read.
-
-```makefile
-KEYCODE_STRING_ENABLE = yes
-```
-
-### d. config.h
-
-Finally, in your config.h, you need to tell Lumberjack to log the keys:
-
-```c
-#define LUMBERJACK_LOG_KEYS
-```
-
 ### Disabling Lumberjack
-If you're done with logging for the time being, you can disable Lumberjack (and recoup its firmware space) by commenting out the enabling lines. First, in `rules.mk`, comment out with # symbols:
+If you're done with logging for the time being, but want to keep lumberjack installed, you can temporarily disable it (and recoup 98% of its firmware space) by adding the following to your `rules.mk`:
 
 ```makefile
-# CONSOLE_ENABLE = yes
-# KEYCODE_STRING_ENABLE = yes
-```
-
-Then, in `config.h`, comment out with //:
-
-```c
-// #define LUMBERJACK_LOG_KEYS
+LUMBERJACK_ENABLE = no
 ```
 
 ## Optional Setup
@@ -104,19 +76,19 @@ Enable colours by adding the following to your `config.h`:
 
 ### Toggling On / Off at Runtime
 
-You can add keycode `LUMBERJ` to any key in your keymap, then use that key to toggle lumberjack on / off anytime.  To toggle lumberjack programmatically, use the functions `enable_lumberjack()` and `disable_lumberjack()` in your code.
+You can add keycode `LUMBERJ` to any key in your keymap, then use that key to toggle lumberjack on / off anytime.  To toggle lumberjack programmatically, use the functions `lumberjack_on()` and `lumberjack_off()` in your code.
 
-Note that lumberjack is **enabled** by default when your keyboard boots.  If you would like it to be **disabled** by default, add the following line to your config.h:
+Note that lumberjack is **on** by default when your keyboard boots.  If you would like it to be **off** by default, add the following line to your config.h:
 
 ```c
-#define LUMBERJACK_DISABLE_ON_BOOT
+#define LUMBERJACK_OFF_AT_BOOT
 ```
 
 ## Troubleshooting
 ### My Keycodes are Scrambled!
-If your keycodes look something like `0x320B` then, well... that's just what keycodes looks like!  In fact, your keyboard likes them that way.
+If your keycodes look something like `0x320B` then, well... that's just what keycodes look like!  In fact, your keyboard likes them that way.  It's normal to have **some** keycodes like this, especially for unusual keys like 'Select Word'.
 
-If you add `KEYCODE_STRING_ENABLE = yes` to your `rules.mk`, then they will become more human readable and look like this: `RSFT_T(KC_H)`.  (`RSFT_T(KC_H)` is a Mod-Tap key that resolves to either "Right Shift" or "H".)
+If **all** your keycodes are like that, you may have `KEYCODE_STRING_ENABLE = no` in your rules.mk.  Removing that line will make your keycodes more human readable like this: `RSFT_T(KC_H)`.  (That's a Mod-Tap key that resolves to either "Right Shift" or "H".)
 
 ### My Logged Keycodes Don't Match What Was Typed
 Lumberjack hooks into QMK early in its key processing architecture (in `pre_process_record`), with the aim to show you which physical keys you pressed and when.  But QMK does lots of processing after this to determine what keycodes to actually send to your computer.  Layer switches, mod-tap keys, combos, community modules like Sentence Case, and lots more will adjust the typed keycodes before they're sent on.
@@ -127,7 +99,7 @@ The hope is that, armed with the data Lumberjack gives you, you can identify whi
 Unfortunately, older keyboards have very little memory, and pretty logging takes up a surprising amount of it.  You have several options to free up space:
 
 1. Follow the instructions on QMK's [Squeezing AVR](https://docs.qmk.fm/squeezing_avr) page, which will free up a lot.
-1. Remove `KEYCODE_STRING_ENABLE = yes` from your rules.mk file.  This will make your keycodes much harder to read, but will free ~1,850 bytes.
+1. Add `KEYCODE_STRING_ENABLE = no` to your rules.mk file.  This will make your keycodes much harder to read, but will free ~1,850 bytes.
 1. Temporarily comment out parts of your keymap, like LED functionality, that you can live without until you're done debugging.
 
 ### My Keycodes are Truncated
@@ -144,24 +116,24 @@ To avoid being too busy, Lumberjack limits its palette to five colours.  The sam
 
 ## Appendix A: Full list of Parameters and Options
 
-#### In rules.mk
-
-<table>
-<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
-<tr><td><tt>CONSOLE_ENABLE = yes</tt></td><td>Mandatory. Enables use of the console.</td></tr>
-<tr><td><tt>KEYCODE_STRING_ENABLE = yes</tt></td><td>Enables human-readable keycodes at the cost of larger firmware size.</td></tr>
-</table>
-
 #### In config.h
 
 <table>
 <tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
-<tr><td><tt>LUMBERJACK_LOG_KEYS</tt></td><td>Mandatory. Enables Lumberjack.</td></tr>
 <tr><td><tt>LUMBERJACK_COLOR</tt></td><td>Enables coloured logging at the cost of larger firmware size.  Requires use of command-line console.</td></tr>
+<tr><td><tt>LUMBERJACK_OFF_AT_BOOT</tt></td><td>Turns logging off by default.  Turn it on with <tt>lumberjack_on()</tt> or by pressing a <tt>LUMBERJ</tt> key.</td></tr>
 <tr><td><tt>LUMBERJACK_KEYCODE_LENGTH</tt></td><td>Adjusts the width of the first log column.  Keycodes longer than this length will be truncated.</td></tr>
-<tr><td><tt>LUMBERJACK_MAX_TRACKED_KEYS</tt></td><td>Adjusts the maximum number of simultaneously tracked keypresses.  Additional simultaneous keypresses beyond the maximum are logged without hold times and with the message "Not Tracked".</td></tr>
-<tr><td><tt>LUMBERJACK_DISABLE_ON_BOOT</tt></td><td>Temporarily disables logging when the keyboard boots, until it is enabled by enable_lumberjack() or by pressing a LUMBERJ key.</td></tr>
+<tr><td><tt>LUMBERJACK_MAX_TRACKED_KEYS</tt></td><td>Adjusts the maximum number of simultaneously tracked keypresses.  Additional simultaneous keypresses beyond the maximum are logged without hold times and with the message <tt>NOT TRACKED</tt>.</td></tr>
+</table>
 
+#### In rules.mk
+
+<table>
+<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
+<tr><td><tt>LUMBERJACK_ENABLE = no</tt></td><td>Disables Lumberjack and recoups  98% of its firmware space.  An easier alternative to repeatedly un-installing and re-installing.
+<br><br>
+You can not subsequently re-enable Lumberjack without recompiling.  If you want to toggle logging on and off at runtime, use <tt>LUMBERJACK_OFF_AT_BOOT</tt> instead.</td></tr>
+<tr><td><tt>KEYCODE_STRING_ENABLE = no</tt></td><td>Disables human-readable keycodes to reduce firmware size.</td></tr>
 </table>
 
 ## Appendix B: Resource Requirements

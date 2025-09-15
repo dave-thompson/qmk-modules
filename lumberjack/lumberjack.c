@@ -1,4 +1,4 @@
-#if defined(CONSOLE_ENABLE) && defined(LUMBERJACK_LOG_KEYS)
+#ifdef LUMBERJACK_ENABLE
 
 #include "quantum.h"
 #include "lumberjack_utils.h"
@@ -27,25 +27,25 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#ifndef LUMBERJACK_DISABLE_ON_BOOT
-    static bool lumberjack_enabled = true;
+#ifndef LUMBERJACK_OFF_AT_BOOT
+    static bool is_logging = true;
 #else
-    static bool lumberjack_enabled = false;
+    static bool is_logging = false;
 #endif
 
-void disable_lumberjack(void) {
-    lumberjack_enabled = false;
+void lumberjack_off(void) {
+    is_logging = false;
 }
 
-void enable_lumberjack(void) {
-    lumberjack_enabled = true;
+void lumberjack_on(void) {
+    is_logging = true;
 }
 
 
 // xprintf wrapper; used for all lumberjack printing
-#define lj_printf(fmt, ...)                                       \
-        do {                                                      \
-            if (lumberjack_enabled) xprintf(fmt, ##__VA_ARGS__);  \
+#define lj_printf(fmt, ...)                                   \
+        do {                                                  \
+            if (is_logging) xprintf(fmt, ##__VA_ARGS__);      \
         } while (0)
 
 
@@ -54,7 +54,7 @@ bool process_record_lumberjack(uint16_t current_keycode,
                                keyrecord_t *record) {
     if (current_keycode == LUMBERJ) {
         if (record->event.pressed) {
-            lumberjack_enabled = !lumberjack_enabled;
+            is_logging = !is_logging;
         }
         return false;
     }
@@ -357,4 +357,4 @@ void housekeeping_task_lumberjack(void) {
 }
 
 
-#endif // CONSOLE_ENABLE && LUMBERJACK_LOG_KEYS
+#endif // LUMBERJACK_ENABLE

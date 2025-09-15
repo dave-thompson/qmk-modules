@@ -10,14 +10,14 @@
 /**
  * @brief Turn on lumberjack's logging
  * 
- * Logging is on by default.  You do not need to call this unless you called
- * disable_lumberjack() previously.
+ * Logging is on by default.  You do not need to call this unless you disabled
+ * logging previously.
  * 
  */
-void enable_lumberjack(void);
+void lumberjack_on(void);
 
 
 /**
  * @brief Turn off lumberjack's logging
  */
-void disable_lumberjack(void);
+void lumberjack_off(void);
