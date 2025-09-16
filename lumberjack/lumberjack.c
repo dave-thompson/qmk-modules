@@ -293,10 +293,10 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     if (!state.active && record->event.pressed) { // 
         // log without a delta
         if (!lumberjack_color()) {
-            lj_printf("%s  |  DOWN  |                    |\n",
+            lj_printf("%s  |  DOWN  |  Delta:      - ms  |\n",
                       keycode_string);
         } else {
-            lj_printf("%s%s  %s--DOWN--%s                    %s%s\n",
+            lj_printf("%s%s  %s--DOWN--%s  Delta:      - ms  %s%s\n",
                       keypress_data.color, keycode_string, pipe, pipe, pipe,
                       RESET_COLOR);
         }
