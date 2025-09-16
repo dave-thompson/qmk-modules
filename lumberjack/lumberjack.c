@@ -77,10 +77,10 @@ bool process_record_lumberjack(uint16_t current_keycode,
 // (typically white / black).
 void keyboard_post_init_lumberjack(void) {
     if (lumberjack_color()) {
-        lumberjack_add_color_to_queue("\033[32m");  // Green 
-        lumberjack_add_color_to_queue("\033[33m");  // Yellow
-        lumberjack_add_color_to_queue("\033[34m");  // Blue
         lumberjack_add_color_to_queue("\033[35m");  // Magenta
+        lumberjack_add_color_to_queue("\033[32m");  // Green
+        lumberjack_add_color_to_queue("\033[33m");  // Yellow
+        lumberjack_add_color_to_queue("\033[34m");  // Purple
         lumberjack_add_color_to_queue("\033[36m");  // Cyan
     }
 }
