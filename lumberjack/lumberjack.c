@@ -305,21 +305,12 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     }
 
     // convert delta to string
-    char delta_string[6+1]; // 5 digits, 1 minus sign, 1 terminating NULL
-    if (delta > 61000) { // if well over 60s, must be negative
-        // note: negative deltas only arise in process_record, not in
-        // pre_process_record
-        delta = -(int)delta;
-        lumberjack_uint_to_string(delta_string, (int)delta);
-        lumberjack_prepend_char(delta_string, '-');
-    }
-    else {
-        lumberjack_uint_to_string(delta_string, delta);
-    }
+    char delta_string[5+1]; // 5 digits
+    lumberjack_uint_to_string(delta_string, delta);
     
     // prettify delta string (i.e. pad it for alignment)
-    char padded_delta_string[6+1];
-    lumberjack_right_align_string(padded_delta_string, 6+1, delta_string);
+    char padded_delta_string[5+1];
+    lumberjack_right_align_string(padded_delta_string, 5+1, delta_string);
 
     // log normally
     if (record->event.pressed) {
@@ -352,7 +343,7 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
 void housekeeping_task_lumberjack(void) {
     if (state.active) {
         uint16_t delta = timer_read() - state.last_event_time;
-        if (delta > 60000 && delta < 62000) state.active = false;
+        if (delta > 60000) state.active = false;
     }
 }
 

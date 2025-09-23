@@ -26,10 +26,12 @@ extern "C" {
  * C standard library.
  * 
  * @param str Pointer to null-terminated string
+ * @param max_len Maximum length to examine before giving up
  * 
  * @return Length of the string in characters (excluding null terminator)
+ *         If longer than max_len, max_len is returned instead
  */
-uint8_t lumberjack_str_len(const char* str);
+uint8_t lumberjack_str_len(const char* str, uint8_t max_len);
 
 
 /**
@@ -47,22 +49,6 @@ uint8_t lumberjack_str_len(const char* str);
  */
 void lumberjack_right_align_string(char* dest, uint8_t dest_size,
                                    const char* src);
-
-
-/**
- * @brief Prepend a character to the beginning of a string
- * 
- * Shifts the existing string one position to the right and inserts the
- * specified character at the beginning. The string is modified in-place.
- * 
- * @param str Null-terminated string to modify
- * @param ch Character to prepend to the string
- * 
- * @warning The string buffer must have at least one extra byte of space
- *          available beyond the current string length to accommodate the
- *          new character
- */
-void lumberjack_prepend_char(char* str, char ch);
 
 
 /**

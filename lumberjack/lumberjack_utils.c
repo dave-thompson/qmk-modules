@@ -7,9 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Get string length
-uint8_t lumberjack_str_len(const char* str) {
+uint8_t lumberjack_str_len(const char* str, uint8_t max_len) {
     uint8_t len = 0;
-    while (str[len] != '\0') len++;
+    while (str[len] != '\0' && len < max_len) len++;
     return len;
 }
 
@@ -23,7 +23,7 @@ uint8_t lumberjack_str_len(const char* str) {
 // Copy src to dest & align to right
 void lumberjack_right_align_string(char* dest, uint8_t dest_size,
                                    const char* src) {
-    uint8_t src_len = lumberjack_str_len(src);
+    uint8_t src_len = lumberjack_str_len(src, dest_size);
     uint8_t i;
     
     // If source is longer than destination, truncate from left
@@ -42,23 +42,6 @@ void lumberjack_right_align_string(char* dest, uint8_t dest_size,
         }
     }
     dest[dest_size - 1] = '\0';
-}
-
-// Prepend a character to a string
-// @note Uses a lightweight memmove implementation to safely handle
-//       overlapping memory regions
-// @warning Caller must ensure buffer has sufficient space
-void lumberjack_prepend_char(char* str, char ch) {
-    uint8_t len = lumberjack_str_len(str);
-    
-    // Shift everything right by 1, starting from the end (including null
-    // terminator)
-    for (uint8_t i = len + 1; i > 0; i--) {
-        str[i] = str[i - 1];
-    }
-    
-    // Insert new character at beginning
-    str[0] = ch;
 }
 
 
