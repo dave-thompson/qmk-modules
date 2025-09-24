@@ -1,0 +1,166 @@
+#include "lumberjack_utils.h"
+#include "lumberjack_config.h"
+#include "lumberjack_tracking.h"
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Hook to Config
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// xprintf wrapper; used for all lumberjack printing
+#define lj_printf(fmt, ...)                                            \
+    do {                                                               \
+        if (lumberjack_is_logging()) xprintf(fmt, ##__VA_ARGS__);      \
+    } while (0)
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Pretty String Manipulation
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Get non-coloured pipe for use within a coloured log entry
+// (dest return buffer must be at least MAX_PIPE_LEN+1 chars)
+#define MAX_PIPE_LEN 17 // 9 char ANSI color, 1 char pipe, 7 char RESET_COLOR
+static void non_colored_pipe(char* dest, const char* color) {
+    uint8_t pipe_len =  lumberjack_str_len(RESET_COLOR, MAX_PIPE_LEN)
+                        + lumberjack_str_len(color, MAX_PIPE_LEN) + 1;
+    if (pipe_len <= MAX_PIPE_LEN) {
+        strcpy(dest, RESET_COLOR);
+        strcat(dest, "|");
+        strcat(dest, color);
+    }
+    else { // in case of overflow, use naked pipe instead
+        strcpy(dest, "|");
+    }
+}
+
+
+// Get right-aligned 5-char string for integer delta, e.g. "  243"
+// (UINT16_MAX interpreted as no delta, returns "    -")
+static void prettify_delta(char* dest, uint16_t delta) {
+    if (delta == UINT16_MAX) {
+        strcpy(dest, "    -");
+    }
+    else {
+        char delta_string[5+1]; // uint16_t max is 65536 (= 5 chars)
+        lumberjack_uint_to_string(delta_string, delta);
+        lumberjack_right_align_string(dest, 5+1, delta_string);
+    }
+}
+
+
+// Get human-readable, right-aligned string for a given keycode
+// (dest return buffer must be at least LUMBERJACK_KEYCODE_LENGTH+1 chars)
+static void prettify_keycode(char* dest, uint16_t keycode) {
+    #ifdef KEYCODE_STRING_ENABLE
+        lumberjack_right_align_string(dest, LUMBERJACK_KEYCODE_LENGTH+1,
+                                      get_keycode_string(keycode));
+    #else
+        char hex_string[6+1]; // "0x" + 4 hex digits
+        lumberjack_keycode_to_hex_string(hex_string, keycode);
+        lumberjack_right_align_string(dest, LUMBERJACK_KEYCODE_LENGTH+1,
+                                      hex_string);
+    #endif
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Writing to Log
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Log single line (DOWN, colour)
+static void log_down_color(const char* keycode_string,
+                           const char* delta_string, const char* color) {
+    char pipe[17+1]; // sized as required for non_colored_pipe()
+    non_colored_pipe(pipe, color);
+    lj_printf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n",
+              color, keycode_string, pipe, pipe, delta_string, pipe,
+              RESET_COLOR);
+}
+
+
+// Log single line (DOWN, monochrome)
+static void log_down_mono(const char* keycode_string,
+                          const char* delta_string) {
+    // monochrome versions have different text, for better readability
+    lj_printf("%s  |  DOWN  |  Delta: %s ms  |\n",
+              keycode_string, delta_string);
+}
+
+
+// Log single line (UP, colour)
+static void log_up_color(const char* keycode_string, const char* delta_string,
+                         uint16_t duration, const char* color) {
+    char pipe[17+1]; // sized as required for non_colored_pipe()
+    non_colored_pipe(pipe, color);
+    lj_printf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n",
+              color, keycode_string, delta_string, pipe, duration,
+              RESET_COLOR);
+}
+
+
+// Log single line (UP, monochrome)
+static void log_up_mono(const char* keycode_string, const char* delta_string,
+                        uint16_t duration) {
+    // monochrome versions have different text, for better readability
+    lj_printf("%s  |  UP    |  Delta: %s ms  |  Hold: %u ms\n",
+              keycode_string, delta_string, duration);
+}
+
+
+// Log single line (untracked)
+static void log_untracked(const char* keycode_string) {
+    lj_printf("%s - NOT TRACKED\n", keycode_string);
+}
+
+
+// Triages a normal key event out to the logging functions
+static void log_event_normally(const keypress_t* keypress_data,
+                               const char* keycode_string,
+                               const char* delta_string, bool pressed) {
+    if (pressed) {
+        if (lumberjack_color()) {
+            log_down_color(keycode_string, delta_string, keypress_data->color);
+        }
+        else {
+            log_down_mono(keycode_string, delta_string);
+        }
+    } else {
+        uint16_t duration = keypress_data->up_time - keypress_data->down_time;
+        if (lumberjack_color()) {
+            log_up_color(keycode_string, delta_string, duration,
+                         keypress_data->color);
+        }
+        else {
+            log_up_mono(keycode_string, delta_string, duration);
+        }
+    }
+}
+
+
+// Log a key event (DOWN or UP) to the console
+void lumberjack_log_event(const keypress_t* keypress_data,
+                                 uint16_t keycode, uint16_t delta,
+                                 bool pressed) {
+
+    // Convert keycode & delta to pretty strings
+    char keycode_string[LUMBERJACK_KEYCODE_LENGTH+1];
+    prettify_keycode(keycode_string, keycode);
+
+    char delta_string[5+1]; // max value ~60000 (5 chars)
+    prettify_delta(delta_string, delta);
+
+    // if key press was not tracked, log warning
+    if (keypress_data->keycode == 0) {
+        log_untracked(keycode_string);
+        return;
+    }
+
+    // otherwise log normally
+    log_event_normally(keypress_data, keycode_string, delta_string, pressed);    
+}

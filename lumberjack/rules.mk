@@ -5,7 +5,10 @@ ifeq ($(strip $(LUMBERJACK_ENABLE)),yes)
 
 	# add source files
 	SRC += lumberjack_utils.c
-	SRC += lumberjack_colors.c
+	SRC += lumberjack_color_queue.c
+	SRC += lumberjack_config.c
+	SRC += lumberjack_tracking.c
+	SRC += lumberjack_logging.c
 
 	# enable required features
 	CONSOLE_ENABLE = yes # compulsory

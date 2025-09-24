@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lumberjack</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-23</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-24</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -76,7 +76,9 @@ Enable colours by adding the following to your `config.h`:
 
 ### Toggling On / Off at Runtime
 
-You can add keycode `LUMBERJ` to any key in your keymap, then use that key to toggle lumberjack on / off anytime.  To toggle lumberjack programmatically, use the functions `lumberjack_on()` and `lumberjack_off()` in your code.
+You can add keycode `LUMBERJ` to any key in your keymap, then use that key to toggle lumberjack on / off anytime.
+
+To toggle lumberjack programmatically, add `#include "lumberjack.h"` at the top of your keymap.c, then use the functions `lumberjack_on()` and `lumberjack_off()` in your code.
 
 Note that lumberjack is **on** by default when your keyboard boots.  If you would like it to be **off** by default, add the following line to your config.h:
 
@@ -155,7 +157,7 @@ So if you're short on RAM and confident you'll never have more than, say, five k
 
 ## Appendix C: Running Tests
 
-The `lumberjack_utils` and `lumberjack_colors` libraries comes with unit tests.  To run them, navigate to the `tests` directory in your terminal and enter `make test`.
+The `lumberjack_utils` and `lumberjack_color_queue` libraries comes with unit tests.  To run them, navigate to the `tests` directory in your terminal and enter `make test`.
 
 <p align="right">
 <i>Lumberjack: he likes logs</i>

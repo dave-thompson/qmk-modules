@@ -1,5 +1,5 @@
 #include "unity.h"
-#include "../lumberjack_colors.h"
+#include "../lumberjack_color_queue.h"
 #include <string.h>
 
 

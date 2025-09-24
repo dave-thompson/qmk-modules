@@ -1,5 +1,5 @@
 /**
- * @file lumberjack_colors.h
+ * @file lumberjack_color_queue.h
  * @brief FIFO queue for ANSI colour codes
  * 
  * This library provides a simple FIFO queue for storing and cycling through
@@ -90,18 +90,6 @@ const char* lumberjack_next_color(void);
  * Removes all colours from the queue
  */
 void lumberjack_reset_colors(void);
-
-
-/**
- * @brief Convenience method for access to LUMBERJACK_COLOR config parameter
- */
-inline bool lumberjack_color(void) {
-    #ifdef LUMBERJACK_COLOR
-        return true;
-    #else
-        return false;
-    #endif
-}
 
 
 #ifdef __cplusplus

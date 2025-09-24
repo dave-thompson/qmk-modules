@@ -7,9 +7,9 @@ void setUp(void) {}
 void tearDown(void) {}
 
 void test_str_len_should_return_correct_length(void) {
-    TEST_ASSERT_EQUAL(0, lumberjack_str_len(""));
-    TEST_ASSERT_EQUAL(10, lumberjack_str_len("lumberjack"));
-    TEST_ASSERT_EQUAL(1, lumberjack_str_len("1"));
+    TEST_ASSERT_EQUAL(0, lumberjack_str_len("", 50));
+    TEST_ASSERT_EQUAL(10, lumberjack_str_len("lumberjack", 50));
+    TEST_ASSERT_EQUAL(1, lumberjack_str_len("1", 50));
 }
 
 void test_right_align_string_should_pad_correctly(void) {
@@ -23,14 +23,7 @@ void test_right_align_string_should_truncate_long_strings(void) {
     char buffer[7+1];
 
     lumberjack_right_align_string(buffer, 7+1, "lumberjack");
-    TEST_ASSERT_EQUAL_STRING("berjack", buffer);
-}
-
-void test_prepend_char_should_add_character_at_start(void) {
-    char buffer[10+1] = "umberjack";
-    
-    lumberjack_prepend_char(buffer, 'l');
-    TEST_ASSERT_EQUAL_STRING("lumberjack", buffer);
+    TEST_ASSERT_EQUAL_STRING("lumberj", buffer);
 }
 
 void test_keycode_to_hex_string_should_format_correctly(void) {
@@ -62,7 +55,6 @@ int main(void) {
     RUN_TEST(test_str_len_should_return_correct_length);
     RUN_TEST(test_right_align_string_should_pad_correctly);
     RUN_TEST(test_right_align_string_should_truncate_long_strings);
-    RUN_TEST(test_prepend_char_should_add_character_at_start);
     RUN_TEST(test_keycode_to_hex_string_should_format_correctly);
     RUN_TEST(test_uint_to_string_should_convert_correctly);
     

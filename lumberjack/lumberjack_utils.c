@@ -7,7 +7,9 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 // Get string length
+// Returns num of chars before '\0' terminator (OR max_len, if smaller)
 uint8_t lumberjack_str_len(const char* str, uint8_t max_len) {
+    if (!str) return 0;
     uint8_t len = 0;
     while (str[len] != '\0' && len < max_len) len++;
     return len;
@@ -16,20 +18,23 @@ uint8_t lumberjack_str_len(const char* str, uint8_t max_len) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// String Manipulation
+// String Alignment
 //
 ///////////////////////////////////////////////////////////////////////////////
 
 // Copy src to dest & align to right
 void lumberjack_right_align_string(char* dest, uint8_t dest_size,
                                    const char* src) {
+    if (!dest || !src || dest_size == 0) return;
+
+    // Set source length to smaller of src or dest, to prevent buffer overrun
     uint8_t src_len = lumberjack_str_len(src, dest_size);
+
     uint8_t i;
-    
-    // If source is longer than destination, truncate from left
+    // If source is longer than destination, truncate end
     if (src_len >= dest_size) {
         for (i = 0; i < dest_size - 1; i++) {
-            dest[i] = src[src_len - dest_size + 1 + i];
+            dest[i] = src[i];
         }
     } else {
         // Add spaces for left padding
@@ -80,7 +85,7 @@ void lumberjack_uint_to_string(char* dest, uint16_t value) {
     }
     
     // Convert digits in reverse order
-    char temp[6]; // Enough for 16-bit unsigned int
+    char temp[5+1]; // max 16-bit uint is 65535 (5 chars)
     while (value > 0) {
         temp[len++] = '0' + (value % 10);
         value /= 10;

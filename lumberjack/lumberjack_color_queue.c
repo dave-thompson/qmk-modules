@@ -1,6 +1,6 @@
 #include <string.h>
 #include <stdio.h>
-#include "lumberjack_colors.h"
+#include "lumberjack_color_queue.h"
 
 
 // State
@@ -10,10 +10,8 @@ static uint8_t queue_rear = 0;
 static uint8_t queue_count = 0;
 
 
-/**
- * Adds the supplied string to the bottom of the queue
- * Does nothing if the queue is full
- */
+// Adds the supplied string to the bottom of the queue
+// Does nothing if the queue is full
 void lumberjack_add_color_to_queue(const char* color) {
     if (queue_count >= LUMBERJACK_MAX_COLORS) {
         return; // queue full
@@ -25,10 +23,8 @@ void lumberjack_add_color_to_queue(const char* color) {
 }
 
 
-/**
- * Returns the item at the top of the queue (and removes it from the queue)
- * Returns an empty string if the queue is empty
- */
+// Returns the item at the top of the queue (and removes it from the queue)
+// Returns an empty string if the queue is empty
 const char* lumberjack_next_color(void) {
     if (queue_count == 0) {
         return "";
@@ -41,9 +37,7 @@ const char* lumberjack_next_color(void) {
 }
 
 
-/**
- * Resets the colour queue, for use in unit tests
- */
+// Resets the colour queue, for use in unit tests
 void lumberjack_reset_colors(void) {
     queue_front = 0;
     queue_rear = 0;
