@@ -97,6 +97,8 @@ bool lumberjack_toggle_if_lumberj_key(uint16_t current_keycode,
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define RESET_COLOR "\033[0m"
+#define LUMBERJACK_RESET_COLOR "\033[0m"
+#define LUMBERJACK_RESET_COLOR_LEN 7
+#define LUMBERJACK_MAX_ANSI_COLOR_CODE_LEN 9
 
 void lumberjack_init_colors(void);
