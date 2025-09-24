@@ -84,7 +84,10 @@ static keypress_t track_released_key(uint16_t keycode,
 
             // release key press's colour for future re-use
             if (lumberjack_color()) {
-                lumberjack_add_color_to_queue(depressed_keys[i].color);
+                // but only if it HAS a colour
+                if (!(keypress.color == NULL || *keypress.color == '\0')) {
+                    lumberjack_add_color_to_queue(depressed_keys[i].color);
+                }
             }
 
             // remove key from depressed_keys list
