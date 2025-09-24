@@ -26,14 +26,12 @@ static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
     
     // if not a key press DOWN, return empty keypress
     if (!record->event.pressed) {
-        keypress_t empty_keypress = {0};
-        return empty_keypress;    
+        return (keypress_t){0};
     }
 
     // if no tracking space left, return empty keypress
     if (num_depressed_keys >= LUMBERJACK_MAX_TRACKED_KEYS) {
-        keypress_t empty_keypress = {0};
-        return empty_keypress;
+        return (keypress_t){0};
     }
 
     // record the keycode and key DOWN time
@@ -61,8 +59,7 @@ static keypress_t track_released_key(uint16_t keycode,
     
     // if not a key release UP, return empty keypress
     if (record->event.pressed) {
-        keypress_t empty_keypress = {0};
-        return empty_keypress;
+        return (keypress_t){0};
     }
 
     // search for the key DOWN data
@@ -101,8 +98,7 @@ static keypress_t track_released_key(uint16_t keycode,
     }
 
     // if key DOWN data not found, return empty keypress
-    keypress_t empty_keypress = {0};
-    return empty_keypress;
+    return (keypress_t){0};
 }
 
 

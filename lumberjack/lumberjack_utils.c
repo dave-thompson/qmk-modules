@@ -58,6 +58,8 @@ void lumberjack_right_align_string(char* dest, uint8_t dest_size,
 
 // Convert keycode to hex string, e.g. 0x320B
 void lumberjack_keycode_to_hex_string(char* dest, uint16_t value) {
+    if (!dest) return;
+    
     const char hex_chars[] = "0123456789ABCDEF";
     uint8_t i;
         
