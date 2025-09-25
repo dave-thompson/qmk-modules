@@ -36,6 +36,13 @@ static void update_state_if_idle(void) {
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// For logging, hook early into QMK's key processing architecture, to get
+// the (almost) unfiltered physical keys pressed.
+//
+// This hook is called for every key event, _before_ QMK core processes it.
+// Deltas here are never negative.  (In contrast, process_record is called
+// after core processing but before feature handlers.  Its events are often
+// out of sequence, meaning negative deltas.)
 bool pre_process_record_lumberjack(uint16_t current_keycode,
                                    keyrecord_t *record) {
 
@@ -53,11 +60,14 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     }
 
     // calculate delta since last event
+    // - event.time wraps every 65536ms
+    // - the wrap is fine, e.g.: 200ms - 65500ms = -65300ms => 236ms as uint16
+    // - delta correct as long as delta < 65536 (idle timer fires at 60000)
     uint16_t delta = record->event.time - state.last_event_time;
     state.last_event_time = record->event.time;
     // if returning from idle, do not log delta (as likely overflowed)
     if (!state.active) {
-        delta = UINT16_MAX;
+        delta = UINT16_MAX; // = no delta
         state.active = true;
     }
 
@@ -68,7 +78,7 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
     return true;
 }
 
-
+// Hook in normally for toggling logging with the LUMBERJ key
 bool process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record) {
     return !lumberjack_toggle_if_lumberj_key(current_keycode, record);
 }
