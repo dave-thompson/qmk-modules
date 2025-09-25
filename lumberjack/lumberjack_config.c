@@ -52,6 +52,8 @@ bool lumberjack_toggle_if_lumberj_key(uint16_t current_keycode,
 // (typically white / black).
 void lumberjack_init_colors(void) {
     if (lumberjack_color()) {
+        // all ANSI codes below must be shorter than
+        // LUMBERJACK_MAX_ANSI_CODE_LEN in lumberjack_config.h
         lumberjack_add_color_to_queue("\033[35m");  // Magenta
         lumberjack_add_color_to_queue("\033[32m");  // Green
         lumberjack_add_color_to_queue("\033[33m");  // Yellow

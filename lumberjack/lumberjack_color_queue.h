@@ -44,19 +44,25 @@ extern "C" {
 /**
  * @brief Add a colour code to the FIFO queue
  * 
- * Adds the supplied string pointer to the back of the queue.
- * 
  * @param color Pointer to the colour code string to add
  * 
- * @note This function stores the pointer, not a copy of the string.
- *       The string must remain valid for as long as it might be in the queue.
+ * @warning This function stores the pointer, not a copy of the string.
+ *          The string must remain valid for the program's lifetime.
+ *          Only use string literals or static strings.
+ * 
  * @note If the queue is full, this function silently does nothing.
  * 
  * Example usage:
  * @code
- * lumberjack_add_color_to_queue("\033[91m");  // Add bright red
- * lumberjack_add_color_to_queue("\033[92m");  // Add bright green
+ * lumberjack_add_color_to_queue("\033[91m");  // Safe
  * @endcode
+ * 
+ * BAD usage:
+ * @code
+ * char buffer[10]; sprintf(buffer, "\033[91m");
+ * lumberjack_add_color_to_queue(buffer);  // DON'T DO THIS
+ * @endcode
+ * 
  */
 void lumberjack_add_color_to_queue(const char* color);
 
