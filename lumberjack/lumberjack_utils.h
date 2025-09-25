@@ -58,9 +58,11 @@ void lumberjack_right_align_string(char* dest, uint8_t dest_size,
  * "0x####" where #### represents 4 uppercase hexadecimal digits.
  * 
  * @param dest Destination buffer (must be at least 7 bytes: "0x1234\0")
+ * @param dest_size Size of destination buffer including null terminator
  * @param value 16-bit unsigned integer to convert (such as a QMK keycode)
  */
-void lumberjack_keycode_to_hex_string(char* dest, uint16_t value);
+void lumberjack_keycode_to_hex_string(char* dest, uint8_t dest_size,
+                                      uint16_t value);
 
 
 /**
@@ -70,9 +72,13 @@ void lumberjack_keycode_to_hex_string(char* dest, uint16_t value);
  * 
  * @param dest Destination buffer (must be at least 6 bytes for max value
  *             65535: 5 chars + 1 null terminator)
+ * @param dest_size Size of destination buffer including null terminator
  * @param value Unsigned 16-bit integer to convert (0-65535)
+ * 
+ * @note if dest_size is too small, value will be truncated to fit
  */
-void lumberjack_uint_to_string(char* dest, uint16_t value);
+void lumberjack_uint_to_string(char* dest, uint8_t dest_size,
+                               uint16_t value);
 
 
 #ifdef __cplusplus

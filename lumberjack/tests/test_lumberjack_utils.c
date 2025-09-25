@@ -29,23 +29,23 @@ void test_right_align_string_should_truncate_long_strings(void) {
 void test_keycode_to_hex_string_should_format_correctly(void) {
     char buffer[6+1];
     
-    lumberjack_keycode_to_hex_string(buffer, 0x1234);
+    lumberjack_keycode_to_hex_string(buffer, 6+1, 0x1234);
     TEST_ASSERT_EQUAL_STRING("0x1234", buffer);
     
-    lumberjack_keycode_to_hex_string(buffer, 0xABCD);
+    lumberjack_keycode_to_hex_string(buffer, 6+1, 0xABCD);
     TEST_ASSERT_EQUAL_STRING("0xABCD", buffer);
 }
 
 void test_uint_to_string_should_convert_correctly(void) {
     char buffer[5+1];
     
-    lumberjack_uint_to_string(buffer, 0);
+    lumberjack_uint_to_string(buffer, 5+1, 0);
     TEST_ASSERT_EQUAL_STRING("0", buffer);
     
-    lumberjack_uint_to_string(buffer, 1038);
+    lumberjack_uint_to_string(buffer, 5+1, 1038);
     TEST_ASSERT_EQUAL_STRING("1038", buffer);
     
-    lumberjack_uint_to_string(buffer, 65535);
+    lumberjack_uint_to_string(buffer, 5+1, 65535);
     TEST_ASSERT_EQUAL_STRING("65535", buffer);
 }
 

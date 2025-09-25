@@ -57,9 +57,10 @@ void lumberjack_right_align_string(char* dest, uint8_t dest_size,
 ///////////////////////////////////////////////////////////////////////////////
 
 // Convert keycode to hex string, e.g. 0x320B
-void lumberjack_keycode_to_hex_string(char* dest, uint16_t value) {
-    if (!dest) return;
-    
+void lumberjack_keycode_to_hex_string(char* dest, uint8_t dest_size,
+                                      uint16_t value) {
+    if (!dest || dest_size < 7) return;  // Need at least "0x1234\0"
+
     const char hex_chars[] = "0123456789ABCDEF";
     uint8_t i;
         
@@ -75,26 +76,34 @@ void lumberjack_keycode_to_hex_string(char* dest, uint16_t value) {
 }
 
 // Convert unsigned int to string
-void lumberjack_uint_to_string(char* dest, uint16_t value) {
-    uint8_t len = 0;
-    uint8_t i;
+void lumberjack_uint_to_string(char* dest, uint8_t dest_size,
+                               uint16_t value) {
+    if (!dest || dest_size == 0) return;
     
     // Handle zero case
     if (value == 0) {
-        dest[0] = '0';
-        dest[1] = '\0';
+        if (dest_size >= 2) {  // Need space for "0\0"
+            dest[0] = '0';
+            dest[1] = '\0';
+        }
         return;
     }
     
-    // Convert digits in reverse order
-    char temp[5+1]; // max 16-bit uint is 65535 (5 chars)
-    while (value > 0) {
+    // Write digits to temp in reverse order
+    char temp[6];  //  Max 16-bit uint is 65535 (5 chars) + null
+    uint8_t len = 0;    
+    while (value > 0 && len < 5) {
         temp[len++] = '0' + (value % 10);
         value /= 10;
     }
     
-    // Copy digits in correct order (reverse from temp)
-    for (i = 0; i < len; i++) {
+    // If supplied buffer too small, reduce len to truncate value
+    if (dest_size < len + 1) {
+        len = dest_size - 1;
+    }
+    
+    // Reverse digits from temp into dest buffer
+    for (uint8_t i = 0; i < len; i++) {
         dest[i] = temp[len - 1 - i];
     }
     dest[len] = '\0';

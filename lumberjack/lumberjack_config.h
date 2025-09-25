@@ -88,7 +88,7 @@ bool lumberjack_is_logging(void);
  * @return true if keycode was LUMBERJ, otherwise false
  */
 bool lumberjack_toggle_if_lumberj_key(uint16_t current_keycode,
-                                      keyrecord_t *record);
+                                      const keyrecord_t *record);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -97,8 +97,10 @@ bool lumberjack_toggle_if_lumberj_key(uint16_t current_keycode,
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-#define LUMBERJACK_RESET_COLOR "\033[0m"
-#define LUMBERJACK_RESET_COLOR_LEN 7
-#define LUMBERJACK_MAX_ANSI_COLOR_CODE_LEN 9
+#define LUMBERJACK_ANSI_RESET "\033[0m" // update both together
+#define LUMBERJACK_ANSI_RESET_LEN 7     //       on change
+
+#define LUMBERJACK_MAX_ANSI_CODE_LEN 9 // for codes in lumberjack_config.c
+
 
 void lumberjack_init_colors(void);

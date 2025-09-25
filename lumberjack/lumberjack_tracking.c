@@ -22,7 +22,8 @@ static uint8_t num_depressed_keys = 0;
 // Tracks a DOWN key press
 // Returns keypress_t with the keypress details, or an empty keypress_t if
 //         the press wasn't recorded (i.e. MAX_TRACKED_KEYS exceeded)
-static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
+static keypress_t track_pressed_key(uint16_t keycode,
+                                    const keyrecord_t *record) {
     
     // if not a key press DOWN, return empty keypress
     if (!record->event.pressed) {
@@ -55,7 +56,7 @@ static keypress_t track_pressed_key(uint16_t keycode, keyrecord_t *record) {
 // Returns keypress_t with the keypress details, or an empty keypress_t if
 //         the corresponding DOWN press wasn't recorded
 static keypress_t track_released_key(uint16_t keycode,
-                                        keyrecord_t *record) {
+                                     const keyrecord_t *record) {
     
     // if not a key release UP, return empty keypress
     if (record->event.pressed) {
@@ -103,7 +104,7 @@ static keypress_t track_released_key(uint16_t keycode,
 
 
 // Triages key track requests
-keypress_t lumberjack_track_key(uint16_t keycode, keyrecord_t *record) {
+keypress_t lumberjack_track_key(uint16_t keycode, const keyrecord_t *record) {
     if (record->event.pressed) {
         return track_pressed_key(keycode, record);
     } else {

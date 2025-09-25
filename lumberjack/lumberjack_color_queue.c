@@ -13,6 +13,7 @@ static uint8_t queue_count = 0;
 // Adds the supplied string to the bottom of the queue
 // Does nothing if the queue is full
 void lumberjack_add_color_to_queue(const char* color) {
+    if (!color) return;
     if (queue_count >= LUMBERJACK_MAX_COLORS) {
         return; // queue full
     }
@@ -31,6 +32,9 @@ const char* lumberjack_next_color(void) {
     }
     
     const char* color = color_queue[queue_front];
+    if (!color) {
+        color = "";  // fallback to empty string
+    }
     queue_front = (queue_front + 1) % LUMBERJACK_MAX_COLORS;
     queue_count--;
     return color;

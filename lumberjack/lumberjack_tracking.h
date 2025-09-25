@@ -34,4 +34,4 @@ typedef struct {
  *         the key wasn't tracked (i.e. MAX_TRACKED_KEYS exceeded)
  * 
  */
-keypress_t lumberjack_track_key(uint16_t keycode, keyrecord_t *record);
+keypress_t lumberjack_track_key(uint16_t keycode, const keyrecord_t *record);

@@ -21,9 +21,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Non-coloured pipe: ANSI colour + 1 char pipe + RESET_COLOR + null
-#define MAX_PIPE_LEN ( LUMBERJACK_MAX_ANSI_COLOR_CODE_LEN + 1          \
-                       + LUMBERJACK_RESET_COLOR_LEN + 1 )
+// Non-coloured pipe: ANSI colour + 1 char pipe + LUMBERJACK_ANSI_RESET + null
+#define MAX_PIPE_LEN ( LUMBERJACK_MAX_ANSI_CODE_LEN + 1                \
+                       + LUMBERJACK_ANSI_RESET_LEN + 1 )
 
 // Delta: 5 chars (uint16_t max is 65536) + null
 #define MAX_DELTA_LEN ( 5 + 1 )
@@ -44,10 +44,10 @@
 // Get non-coloured pipe for use within a coloured log entry
 // (dest return buffer must be at least MAX_PIPE_LEN+1 chars)
 static void non_colored_pipe(char* dest, const char* color) {
-    uint8_t pipe_len = lumberjack_str_len(LUMBERJACK_RESET_COLOR, MAX_PIPE_LEN)
+    uint8_t pipe_len = lumberjack_str_len(LUMBERJACK_ANSI_RESET, MAX_PIPE_LEN)
                        + 1 + lumberjack_str_len(color, MAX_PIPE_LEN);
     if (pipe_len <= MAX_PIPE_LEN) {
-        strcpy(dest, LUMBERJACK_RESET_COLOR);
+        strcpy(dest, LUMBERJACK_ANSI_RESET);
         strcat(dest, "|");
         strcat(dest, color);
     }
@@ -65,7 +65,7 @@ static void prettify_delta(char* dest, uint16_t delta) {
     }
     else {
         char delta_string[MAX_DELTA_LEN];
-        lumberjack_uint_to_string(delta_string, delta);
+        lumberjack_uint_to_string(delta_string, MAX_DELTA_LEN, delta);
         lumberjack_right_align_string(dest, MAX_DELTA_LEN, delta_string);
     }
 }
@@ -79,7 +79,8 @@ static void prettify_keycode(char* dest, uint16_t keycode) {
                                       get_keycode_string(keycode));
     #else
         char hex_string[MAX_HEX_KEYCODE_LEN];
-        lumberjack_keycode_to_hex_string(hex_string, keycode);
+        lumberjack_keycode_to_hex_string(hex_string, MAX_HEX_KEYCODE_LEN,
+                                         keycode);
         lumberjack_right_align_string(dest, MAX_KEYCODE_LEN, hex_string);
     #endif
 }
@@ -98,7 +99,7 @@ static void log_down_color(const char* keycode_string,
     non_colored_pipe(pipe, color);
     lj_printf("%s%s  %s--DOWN--%s  Delta: %s ms  %s%s\n",
               color, keycode_string, pipe, pipe, delta_string, pipe,
-              LUMBERJACK_RESET_COLOR);
+              LUMBERJACK_ANSI_RESET);
 }
 
 
@@ -118,7 +119,7 @@ static void log_up_color(const char* keycode_string, const char* delta_string,
     non_colored_pipe(pipe, color);
     lj_printf("%s%s      UP      Delta: %s ms  %s  Hold: %u ms%s\n",
               color, keycode_string, delta_string, pipe, duration,
-              LUMBERJACK_RESET_COLOR);
+              LUMBERJACK_ANSI_RESET);
 }
 
 
@@ -138,9 +139,9 @@ static void log_untracked(const char* keycode_string) {
 
 
 // Triages a normal key event out to the logging functions
-static void log_event_normally(const keypress_t* keypress_data,
-                               const char* keycode_string,
-                               const char* delta_string, bool pressed) {
+static void log_normally(const keypress_t* keypress_data,
+                         const char* keycode_string,
+                         const char* delta_string, bool pressed) {
     if (pressed) {
         if (lumberjack_color()) {
             log_down_color(keycode_string, delta_string, keypress_data->color);
@@ -149,7 +150,8 @@ static void log_event_normally(const keypress_t* keypress_data,
             log_down_mono(keycode_string, delta_string);
         }
     } else {
-        uint16_t duration = keypress_data->up_time - keypress_data->down_time;
+        const uint16_t duration
+                           = keypress_data->up_time - keypress_data->down_time;
         if (lumberjack_color()) {
             log_up_color(keycode_string, delta_string, duration,
                          keypress_data->color);
@@ -180,5 +182,5 @@ void lumberjack_log_event(const keypress_t* keypress_data,
     }
 
     // otherwise log normally
-    log_event_normally(keypress_data, keycode_string, delta_string, pressed);    
+    log_normally(keypress_data, keycode_string, delta_string, pressed);    
 }

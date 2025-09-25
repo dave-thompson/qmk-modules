@@ -28,7 +28,7 @@ bool lumberjack_is_logging(void) {
 
 // Toggle logging when LUMBERJ key tapped
 bool lumberjack_toggle_if_lumberj_key(uint16_t current_keycode,
-                                      keyrecord_t *record) {
+                                      const keyrecord_t *record) {
     if (current_keycode == LUMBERJ) {
         if (record->event.pressed) {
             is_logging = !is_logging;
