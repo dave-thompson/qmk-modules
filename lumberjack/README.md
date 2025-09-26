@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lumberjack</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-25</td></tr>
+<tr><td><b>Version</b></td><td>2025-09-26</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -78,7 +78,7 @@ Enable colours by adding the following to your `config.h`:
 
 You can add keycode `LUMBERJ` to any key in your keymap, then use that key to toggle lumberjack on / off anytime.
 
-To toggle lumberjack programmatically, add `#include "lumberjack.h"` at the top of your keymap.c, then use the functions `lumberjack_on()` and `lumberjack_off()` in your code.
+To toggle lumberjack programmatically, use the functions `lumberjack_on()` and `lumberjack_off()` in your code.
 
 Note that lumberjack is **on** by default when your keyboard boots.  If you would like it to be **off** by default, add the following line to your config.h:
 
