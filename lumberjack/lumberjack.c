@@ -98,7 +98,7 @@ bool process_record_lumberjack(uint16_t current_keycode,
 }
 
 
-// Optionally log PPR events
+// Optionally log post-PR events
 void post_process_record_lumberjack(uint16_t current_keycode,
                                     keyrecord_t *record) {
     #ifdef LUMBERJACK_PPR

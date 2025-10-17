@@ -37,6 +37,31 @@
 
 ///////////////////////////////////////////////////////////////////////////////
 //
+// Handedness
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Weak declaration to prevent linker errors if function not defined in user's
+// keyboard or keymap
+char chordal_hold_handedness(keypos_t key) __attribute__((weak));
+
+
+// Return handedness as defined in chordal_hold_handedness(), or "?" if
+// chordal_hold_handedness() not defined
+char handedness(keypos_t key) {
+    if (chordal_hold_handedness) {
+        char result = chordal_hold_handedness(key);
+        // defend against user's chordal_hold_handedness returning null
+        if (result != '\0') {
+            return result;
+        }
+    }
+    return '?';
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
 // Pretty String Manipulation
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -163,7 +188,7 @@ static void log_normally(const keypress_t* keypress_data,
 }
 
 
-// Log a key event (DOWN or UP) to the console
+// Log a (pre-PR) physical key event (DOWN or UP) to the console
 void lumberjack_log_input(const keypress_t* keypress_data,
                           uint16_t keycode, uint16_t delta,
                           bool pressed) {
@@ -188,14 +213,18 @@ void lumberjack_log_input(const keypress_t* keypress_data,
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Writing to Log (QMK Outputs)
+// Writing to Log (Internal QMK Events)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
+// Log a PR or post-PR event
 void lumberjack_log_interpreted_event(const char *prefix, uint16_t keycode,
                                       keyrecord_t *record) {
-    lj_printf("%s: %s - pressed: %u, tapcount: %u, interrupted: %u, time: %5u, "
-              "col: %2u, row: %2u\n",
+    char hand = handedness(record->event.key);
+    char hand_str[2] = {hand, '\0'};
+    
+    lj_printf("%s: %s - pressed: %u, tapcount: %u, interrupted: %u, "
+              "time: %5u, col: %2u, row: %2u%s%s\n",
               prefix,
               get_keycode_string(keycode),
               record->event.pressed,
@@ -203,5 +232,7 @@ void lumberjack_log_interpreted_event(const char *prefix, uint16_t keycode,
               record->tap.interrupted,
               record->event.time,
               record->event.key.col,
-              record->event.key.row);
+              record->event.key.row,
+              hand == '?' ? "" : ", hand: ",
+              hand == '?' ? "" : hand_str);
 }
