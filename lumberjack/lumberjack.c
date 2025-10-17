@@ -32,7 +32,7 @@ static void update_state_if_idle(void) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// QMK Hooks: Processing Keys
+// QMK Hooks: Physical Keypresses
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -71,16 +71,39 @@ bool pre_process_record_lumberjack(uint16_t current_keycode,
         state.active = true;
     }
 
-    // log event
-    lumberjack_log_event(&keypress_data, log_keycode, delta,
+    // log physical key event
+    lumberjack_log_input(&keypress_data, log_keycode, delta,
                          record->event.pressed);
 
     return true;
 }
 
-// Hook in normally for toggling logging with the LUMBERJ key
-bool process_record_lumberjack(uint16_t current_keycode, keyrecord_t *record) {
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// QMK Hooks: Interpreted keypresses after QMK Processing
+//
+///////////////////////////////////////////////////////////////////////////////
+
+// Optionally log PR events (and toggle logging with LUMBERJ key)
+bool process_record_lumberjack(uint16_t current_keycode,
+                               keyrecord_t *record) {
+
+    #ifdef LUMBERJACK_PR
+        lumberjack_log_interpreted_event("PR", current_keycode, record);
+    #endif
+
+    // if this is a lumberj key, toggle logging
     return !lumberjack_toggle_if_lumberj_key(current_keycode, record);
+}
+
+
+// Optionally log PPR events
+void post_process_record_lumberjack(uint16_t current_keycode,
+                                    keyrecord_t *record) {
+    #ifdef LUMBERJACK_PPR
+        lumberjack_log_interpreted_event("PPR", current_keycode, record);
+    #endif
 }
 
 

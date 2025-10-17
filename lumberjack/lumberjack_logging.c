@@ -88,7 +88,7 @@ static void prettify_keycode(char* dest, uint16_t keycode) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Writing to Log
+// Writing to Log (Physical Keypresses)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -164,9 +164,9 @@ static void log_normally(const keypress_t* keypress_data,
 
 
 // Log a key event (DOWN or UP) to the console
-void lumberjack_log_event(const keypress_t* keypress_data,
-                                 uint16_t keycode, uint16_t delta,
-                                 bool pressed) {
+void lumberjack_log_input(const keypress_t* keypress_data,
+                          uint16_t keycode, uint16_t delta,
+                          bool pressed) {
 
     // Convert keycode & delta to pretty strings
     char keycode_string[MAX_KEYCODE_LEN];
@@ -183,4 +183,25 @@ void lumberjack_log_event(const keypress_t* keypress_data,
 
     // otherwise log normally
     log_normally(keypress_data, keycode_string, delta_string, pressed);    
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Writing to Log (QMK Outputs)
+//
+///////////////////////////////////////////////////////////////////////////////
+
+void lumberjack_log_interpreted_event(const char *prefix, uint16_t keycode,
+                                      keyrecord_t *record) {
+    lj_printf("%s: %s - pressed: %u, tapcount: %u, interrupted: %u, time: %5u, "
+              "col: %2u, row: %2u\n",
+              prefix,
+              get_keycode_string(keycode),
+              record->event.pressed,
+              record->tap.count,
+              record->tap.interrupted,
+              record->event.time,
+              record->event.key.col,
+              record->event.key.row);
 }

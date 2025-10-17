@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lumberjack</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-26</td></tr>
+<tr><td><b>Version</b></td><td>2025-10-17</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -126,6 +126,8 @@ To avoid being too busy, Lumberjack limits its palette to five colours.  The sam
 <tr><td><tt>LUMBERJACK_OFF_AT_BOOT</tt></td><td>Turns logging off by default.  Turn it on with <tt>lumberjack_on()</tt> or by pressing a <tt>LUMBERJ</tt> key.</td></tr>
 <tr><td><tt>LUMBERJACK_KEYCODE_LENGTH</tt></td><td>Adjusts the width of the first log column.  Keycodes longer than this length will be truncated.</td></tr>
 <tr><td><tt>LUMBERJACK_MAX_TRACKED_KEYS</tt></td><td>Adjusts the maximum number of simultaneously tracked keypresses.  Additional simultaneous keypresses beyond the maximum are logged without hold times and with the message <tt>NOT TRACKED</tt>.</td></tr>
+<tr><td><tt>LUMBERJACK_PR</tt></td><td>Logs the <tt>process_record</tt> data (= interpreted keypresses after <b><i>QMK core</i></b> processing has completed).  This can be useful if you're writing and debugging code, but it will make your log rather noisy.</td></tr>
+<tr><td><tt>LUMBERJACK_PPR</tt></td><td>Logs the <tt>post_process_record</tt> data (= interpreted keypresses after <b>all</b> processing has completed).  Also rather noisy.</td></tr>
 </table>
 
 #### In rules.mk
