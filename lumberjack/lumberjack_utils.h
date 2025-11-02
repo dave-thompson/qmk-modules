@@ -33,6 +33,20 @@ extern "C" {
  */
 uint8_t lumberjack_str_len(const char* str, uint8_t max_len);
 
+/**
+ * @brief Copy string to fixed-size destination buffer
+ * 
+ * Copies the source string to the destination buffer, truncating it if
+ * necessary.
+ * 
+ * @param dest Destination buffer (must be different from src)
+ * @param dest_size Size of destination buffer including null terminator
+ * @param src Source null-terminated string to copy
+ * 
+ * @warning dest and src must be different
+ */
+void lumberjack_safe_copy(char* dest, uint8_t dest_size, const char* src);
+
 
 /**
  * @brief Copy string to fixed-size destination buffer with right alignment

@@ -28,11 +28,27 @@
 // Delta: 5 chars (uint16_t max is 65536) + null
 #define MAX_DELTA_LEN ( 5 + 1 )
 
+// Handedness: " [L]" + null 
+#define MAX_HANDEDNESS_LEN ( 4 + 1 )
+
 // Hex Keycode: "0x" + 4 hex digits (for 16-bit keycode: 2^16 = 16^4) + null
 #define MAX_HEX_KEYCODE_LEN ( 2 + 4 + 1 )
 
 // Pretty Keycode: LUMBERJACK_KEYCODE_LENGTH + null
 #define MAX_KEYCODE_LEN LUMBERJACK_KEYCODE_LENGTH + 1
+
+// Handedness + Keycode: subtract extra null terminator
+#define MAX_HANDED_KEYCODE_LEN ( MAX_HANDEDNESS_LEN + MAX_KEYCODE_LEN - 1 )
+
+// MAX_KEYCODE_LEN + MAX_HANDEDNESS_LEN must fit in a uint8_t
+#if MAX_KEYCODE_LEN > 200 + 1
+    #error "Maximum LUMBERJACK_KEYCODE_LENGTH is 200 chars"
+#endif
+// MAX_KEYCODE_LEN must be at least as big as MAX_HEX_KEYCODE_LENGTH to avoid
+// possible buffer overflow in prettify_handed_keycode()
+#if MAX_KEYCODE_LEN < MAX_HEX_KEYCODE_LEN
+    #error "Minimum LUMBERJACK_KEYCODE_LENGTH is 6 chars"
+#endif
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -41,21 +57,18 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Weak declaration to prevent linker errors if function not defined in user's
-// keyboard or keymap
-char chordal_hold_handedness(keypos_t key) __attribute__((weak));
+char chordal_hold_handedness(keypos_t key);
+char lightshift_handedness(keypos_t key);
 
-
-// Return handedness as defined in chordal_hold_handedness(), or "?" if
-// chordal_hold_handedness() not defined
+// Return either lightshift or chordal hold's handedness, or '?' if neither
+// in use
 char handedness(keypos_t key) {
-    if (chordal_hold_handedness) {
-        char result = chordal_hold_handedness(key);
-        // defend against user's chordal_hold_handedness returning null
-        if (result != '\0') {
-            return result;
-        }
-    }
+    #ifdef LIGHTSHIFT_ENABLE
+        return lightshift_handedness(key);
+    #elif CHORDAL_HOLD
+        return chordal_hold_handedness(key);
+    #endif
+    
     return '?';
 }
 
@@ -82,6 +95,51 @@ static void non_colored_pipe(char* dest, const char* color) {
 }
 
 
+// Get 4-char string for handedness, e.g. " [L]"
+static void prettify_handedness(char* dest, char handedness) {
+    // if no handedness, return empty string
+    if (handedness == '?') dest[0] = '\0';
+
+    
+    dest[0] = '<';
+    dest[1] = handedness;
+    dest[2] = '>';
+    dest[3] = ' ';
+    dest[4] = '\0';
+}
+
+
+// Get human-readable string for a given keycode
+// (dest buffer must be at least MAX_KEYCODE_LEN chars)
+static void prettify_keycode(char* dest, uint16_t keycode) {
+    #ifdef KEYCODE_STRING_ENABLE
+        lumberjack_safe_copy(dest, MAX_KEYCODE_LEN,
+                             get_keycode_string(keycode));
+    #else
+        lumberjack_keycode_to_hex_string(dest, MAX_KEYCODE_LEN, keycode);
+    #endif
+}
+
+
+// Get human-readable, right-aligned string for a given hand & keycode
+// (dest buffer must be at least MAX_KEYCODE_LEN + MAX_HANDEDNESS_LEN chars)
+static void prettify_handed_keycode(char* dest, char hand, uint16_t keycode) {
+    
+    // prettify handedness and call it combined_string
+    char combined_string[MAX_HANDED_KEYCODE_LEN];
+    prettify_handedness(combined_string, hand);
+    
+    // prettify keycode and concatenate it to combined_string
+    char keycode_string[MAX_KEYCODE_LEN];
+    prettify_keycode(keycode_string, keycode);
+    strcat(combined_string, keycode_string);
+    
+    // right align & copy to dest
+    lumberjack_right_align_string(dest, MAX_HANDED_KEYCODE_LEN,
+                                  combined_string);
+}
+
+
 // Get right-aligned 5-char string for integer delta, e.g. "  243"
 // (UINT16_MAX interpreted as no delta, returns "    -")
 static void prettify_delta(char* dest, uint16_t delta) {
@@ -96,24 +154,9 @@ static void prettify_delta(char* dest, uint16_t delta) {
 }
 
 
-// Get human-readable, right-aligned string for a given keycode
-// (dest return buffer must be at least MAX_KEYCODE_LEN chars)
-static void prettify_keycode(char* dest, uint16_t keycode) {
-    #ifdef KEYCODE_STRING_ENABLE
-        lumberjack_right_align_string(dest, MAX_KEYCODE_LEN,
-                                      get_keycode_string(keycode));
-    #else
-        char hex_string[MAX_HEX_KEYCODE_LEN];
-        lumberjack_keycode_to_hex_string(hex_string, MAX_HEX_KEYCODE_LEN,
-                                         keycode);
-        lumberjack_right_align_string(dest, MAX_KEYCODE_LEN, hex_string);
-    #endif
-}
-
-
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Writing to Log (Physical Keypresses)
+// Writing to Log (Pre-PR, i.e. Physical Keypresses)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -193,10 +236,12 @@ void lumberjack_log_input(const keypress_t* keypress_data,
                           uint16_t keycode, uint16_t delta,
                           bool pressed) {
 
-    // Convert keycode & delta to pretty strings
-    char keycode_string[MAX_KEYCODE_LEN];
-    prettify_keycode(keycode_string, keycode);
+    // convert hand & keycode to pretty string
+    char hand = handedness(keypress_data->key);
+    char keycode_string[MAX_KEYCODE_LEN + MAX_HANDEDNESS_LEN];
+    prettify_handed_keycode(keycode_string, hand, keycode);
 
+    // convert delta to pretty string
     char delta_string[MAX_DELTA_LEN];
     prettify_delta(delta_string, delta);
 
@@ -207,32 +252,33 @@ void lumberjack_log_input(const keypress_t* keypress_data,
     }
 
     // otherwise log normally
-    log_normally(keypress_data, keycode_string, delta_string, pressed);    
+    log_normally(keypress_data, keycode_string, delta_string, pressed);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Writing to Log (Internal QMK Events)
+// Writing to Log (PR & Post-PR)
 //
 ///////////////////////////////////////////////////////////////////////////////
 
 // Log a PR or post-PR event
 void lumberjack_log_interpreted_event(const char *prefix, uint16_t keycode,
                                       keyrecord_t *record) {
-    char hand = handedness(record->event.key);
-    char hand_str[2] = {hand, '\0'};
-    
+
+    // convert keycode to pretty string
+    char keycode_string[MAX_KEYCODE_LEN];
+    prettify_keycode(keycode_string, keycode);
+
+    // log
     lj_printf("%s: %s - pressed: %u, tapcount: %u, interrupted: %u, "
-              "time: %5u, col: %2u, row: %2u%s%s\n",
+              "time: %5u, col: %2u, row: %2u\n",
               prefix,
-              get_keycode_string(keycode),
+              keycode_string,
               record->event.pressed,
               record->tap.count,
               record->tap.interrupted,
               record->event.time,
               record->event.key.col,
-              record->event.key.row,
-              hand == '?' ? "" : ", hand: ",
-              hand == '?' ? "" : hand_str);
+              record->event.key.row);
 }

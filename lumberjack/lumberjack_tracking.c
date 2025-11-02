@@ -36,8 +36,7 @@ static keypress_t track_pressed_key(uint16_t keycode,
     }
 
     // record the keycode and key DOWN time
-    depressed_keys[num_depressed_keys].row = record->event.key.row;
-    depressed_keys[num_depressed_keys].col = record->event.key.col;
+    depressed_keys[num_depressed_keys].key = record->event.key;
     depressed_keys[num_depressed_keys].keycode = keycode;
     depressed_keys[num_depressed_keys].down_time = record->event.time;
 
@@ -65,8 +64,7 @@ static keypress_t track_released_key(uint16_t keycode,
 
     // search for the key DOWN data
     for (uint8_t i = 0; i < num_depressed_keys; i++) {
-        if (depressed_keys[i].row == record->event.key.row
-            && depressed_keys[i].col == record->event.key.col) {
+        if (KEYEQ(depressed_keys[i].key, record->event.key)) {
             
             // record the key UP time        
             depressed_keys[i].up_time = record->event.time;

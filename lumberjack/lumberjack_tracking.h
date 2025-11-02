@@ -12,8 +12,7 @@
  * @brief Struct representing a single keypress, from press DOWN to release UP
  */
 typedef struct {
-    uint8_t row;         // key pressed: row
-    uint8_t col;         // key pressed: column
+    keypos_t key;      // key position
     uint16_t keycode;    // keycode reported by QMK (sometimes differs on
                          // DOWN and UP)
     uint16_t down_time;  // time it was pressed DOWN
