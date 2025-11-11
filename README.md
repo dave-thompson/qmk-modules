@@ -6,8 +6,9 @@
 
 | Module                                    | Description                                           |
 |-------------------------------------------|-------------------------------------------------------|
-| [Lumberjack](./lumberjack/)    | **See which keys you pressed and when.**  Helps you debug timing-dependent features.</br></br>                    |
-| [Switcher](./switcher/)        | **Supercharge your app switcher.**  Send Cmd-Tab or Alt-Tab with a single keypress, map navigation and power features to the home row, and a whole lot more.</br></br>                |
+| [Lightshift](./lightshift/)    | **Fast & accurate home-row shifts.**  Makes HRM shifts near-flawless while typing, asking in exchange only a tiny bit of care with modifier chords.</br></br>                  |
+| [Lumberjack](./lumberjack/)    | **See which keys you pressed and when.**  Helps you debug timing-dependent features.</br></br>                                                                                 |
+| [Switcher](./switcher/)        | **Supercharge your app switcher.**  Send Cmd-Tab or Alt-Tab with a single keypress, map navigation and power features to the home row, and a whole lot more.</br></br>         |
 
 ## License
 

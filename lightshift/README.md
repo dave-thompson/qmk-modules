@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lightshift</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-11-07</td></tr>
+<tr><td><b>Version</b></td><td>2025-11-11</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -19,9 +19,11 @@
 
 ## Home-Row Shifts at Speed
 
-Home-row mods have improved a lot, but **shift** remains a problem — it's used too quickly, too often, and usually mid-flow. Chordal Hold helps, but it works best with a slower, staccato typing style, and that takes time to learn.
+Home-row mods have improved a lot, yet **shift** is still a problem — it's used too quickly, too frequently, and usually mid-flow.
 
-Lightshift makes your home-row shifts fast and flawless, no matter how you type.
+**Lightshift** transforms your home-row shift keys, using Chordal Hold's handedness concept but with much stricter rules that work **even at speed**.  It delivers near-flawless shifting while typing, and asks in exchange only a tiny [bit of care](#important-chording) with modifier chords.
+
+[Setup](#quick-start) is zero-config.  You can use it standalone or stacked with Chordal Hold, Flow Tap and so on — it plays nicely with QMK at large.
 
 ## Misshifts Fixed
 
@@ -315,7 +317,9 @@ If you really need non-shift mods while typing, [Chordal Hold](https://docs.qmk.
 
 ### Chordal Hold
 
-Lightshift's Extended Tapping Term is a reimagined [Chordal Hold](https://docs.qmk.fm/tap_hold#chordal-hold).  Lightshift uses Chordal Hold's handedness concept (and algorithms), but acts only on the Shift keys.  This allows it to be more aggressive in eliminating misshifts, at the price that shift must explicitly be pressed last during modifier chords.
+Lightshift's Extended Tapping Term is an evolution of the excellent [Chordal Hold](https://docs.qmk.fm/tap_hold#chordal-hold), part of Pascal Getreuer's [extensive library of work](https://getreuer.info/posts/keyboards/index.html).
+
+Lightshift uses Chordal Hold's handedness concept (and algorithms), but acts only on the shift keys.  This allows it to be more aggressive in eliminating misshifts, at the price that shift must explicitly be pressed last during modifier chords.
 
 Chordal Hold lets through more misshifts, requires a slower typing style, and has a bit of a learning curve, but it's the most popular solution, it goes beyond shift to tackle all HRMs, and it chords modifiers with ease.
 
