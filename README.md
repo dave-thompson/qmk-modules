@@ -1,19 +1,18 @@
 # @dave-thompson's QMK community modules
 
 
-![](doc/banner.png)
+![](./banner.png)
 **Lumberjack**, one of the library's modules, shows you every key you pressed and when.  It helps you debug home-row-mods and other timing-dependent features.</br></br>
 
 | Module                                    | Description                                           |
 |-------------------------------------------|-------------------------------------------------------|
-| [Lightshift](./lightshift/)    | **Fast & accurate home-row shifts.**  Makes HRM shifts near-flawless while typing, asking in exchange only a tiny bit of care with modifier chords.</br></br>                  |
-| [Lumberjack](./lumberjack/)    | **See which keys you pressed and when.**  Helps you debug timing-dependent features.</br></br>                                                                                 |
-| [Switcher](./switcher/)        | **Supercharge your app switcher.**  Send Cmd-Tab or Alt-Tab with a single keypress, map navigation and power features to the home row, and a whole lot more.</br></br>         |
+| [Lightshift](./lightshift/README.md)    | **Fast & accurate home-row shifts.**  Makes HRM shifts near-flawless while typing, asking in exchange only a tiny bit of care with modifier chords.</br></br>                  |
+| [Lumberjack](./lumberjack/README.md)    | **See which keys you pressed and when.**  Helps you debug timing-dependent features.</br></br>                                                                                 |
+| [Switcher](./switcher/README.md)        | **Supercharge your app switcher.**  Send Cmd-Tab or Alt-Tab with a single keypress, map navigation and power features to the home row, and a whole lot more.</br></br>         |
 
 ## License
 
-This repo uses the GNU GPLv3 except where otherwise indicated. See the
-[LICENSE file](LICENSE.txt) for details.
+This repo uses the GNU GPLv3 except where otherwise indicated. See the [LICENSE file](LICENSE.txt) for details.
 
 ## Prerequisites
 
@@ -42,7 +41,7 @@ Whichever option you choose, your directory structure should then look like this
     <qmk_firmware or qmk_userspace>
     └── modules
         └── dave-thompson
-            ├── doc
+            ├── lightshift
             ├── lumberjack
             ├── switcher
-            └── ...
+            └── ...
