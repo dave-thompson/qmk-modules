@@ -24,10 +24,10 @@ Download the code to your computer using one of the two options below, then foll
 
 ### Option 1
 
-Open a terminal and run the following three commands.  Change `/path/to/qmk_firmware` to the path of your `qmk_firmware` folder (or if you're using [external userspace](https://docs.qmk.fm/newbs_external_userspace), to the path of your `qmk_userspace` folder).
+Open a terminal and run the following three commands.  Change `/path/to/qmk_userspace` to the path of your `qmk_userspace`.  (If you don't have an [external userspace](https://docs.qmk.fm/newbs_external_userspace), you can **theoretically** use your `qmk_firmware` folder instead — but an external userspace makes life much easier in the long run.)
 
 ```sh
-cd /path/to/qmk_firmware
+cd /path/to/qmk_userspace
 git submodule add https://github.com/dave-thompson/qmk-modules.git modules/dave-thompson
 git submodule update --init --recursive
 ```
@@ -38,7 +38,7 @@ Download [qmk-modules-main](https://github.com/dave-thompson/qmk-modules/archive
 
 Whichever option you choose, your directory structure should then look like this:
 
-    <qmk_firmware or qmk_userspace>
+    <qmk_userspace or qmk_firmware>
     └── modules
         └── dave-thompson
             ├── lightshift
