@@ -65,7 +65,7 @@ char lightshift_handedness(keypos_t key);
 char handedness(keypos_t key) {
     #ifdef LIGHTSHIFT_ENABLE
         return lightshift_handedness(key);
-    #elif CHORDAL_HOLD
+    #elifdef CHORDAL_HOLD
         return chordal_hold_handedness(key);
     #endif
     
