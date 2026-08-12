@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/switcher</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-09-11</td></tr>
+<tr><td><b>Version</b></td><td>2026-08-12</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
@@ -92,7 +92,7 @@ Opening Exposé inside the MacOS app manager is normally six actions: Cmd Down >
 ## Quick Start
 Follow the steps below to set up Switcher.
 
-For a real-world example, see my [personal keymap](https://github.com/dave-thompson/qmk-userspace/tree/main/keyboards/zsa/ergodox_ez/m32u4/glow/keymaps/dave-thompson).  For fully coded examples of different use cases, see [Full Examples](#full-examples) below.
+For a real-world example, see my [personal keymap](https://github.com/dave-thompson/qmk-userspace/tree/main/keyboards/ergodox_ez/glow/keymaps/dave-thompson).  For fully coded examples of different use cases, see [Full Examples](#full-examples) below.
 
 ### a. keymap.json
 
