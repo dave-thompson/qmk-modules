@@ -28,7 +28,7 @@
 // Delta: 5 chars (uint16_t max is 65536) + null
 #define MAX_DELTA_LEN ( 5 + 1 )
 
-// Handedness: " [L]" + null 
+// Handedness: "<L> " + null
 #define MAX_HANDEDNESS_LEN ( 4 + 1 )
 
 // Hex Keycode: "0x" + 4 hex digits (for 16-bit keycode: 2^16 = 16^4) + null
@@ -95,12 +95,14 @@ static void non_colored_pipe(char* dest, const char* color) {
 }
 
 
-// Get 4-char string for handedness, e.g. " [L]"
+// Get 4-char string for handedness, e.g. "<L> "
 static void prettify_handedness(char* dest, char handedness) {
     // if no handedness, return empty string
-    if (handedness == '?') dest[0] = '\0';
+    if (handedness == '?') {
+        dest[0] = '\0';
+        return;
+    }
 
-    
     dest[0] = '<';
     dest[1] = handedness;
     dest[2] = '>';
