@@ -21,9 +21,9 @@
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Non-coloured pipe: ANSI colour + 1 char pipe + LUMBERJACK_ANSI_RESET + null
-#define MAX_PIPE_LEN ( LUMBERJACK_MAX_ANSI_CODE_LEN + 1                \
-                       + LUMBERJACK_ANSI_RESET_LEN + 1 )
+// Non-coloured pipe buffer: RESET + 1 char pipe + ANSI colour + null
+#define MAX_PIPE_LEN ( LUMBERJACK_ANSI_RESET_LEN + 1                   \
+                       + LUMBERJACK_MAX_ANSI_CODE_LEN + 1 )
 
 // Delta: 5 chars (uint16_t max is 65536) + null
 #define MAX_DELTA_LEN ( 5 + 1 )
@@ -80,10 +80,10 @@ char handedness(keypos_t key) {
 ///////////////////////////////////////////////////////////////////////////////
 
 // Get non-coloured pipe for use within a coloured log entry
-// (dest return buffer must be at least MAX_PIPE_LEN+1 chars)
+// (dest return buffer must be at least MAX_PIPE_LEN chars)
 static void non_colored_pipe(char* dest, const char* color) {
     uint8_t pipe_len = lumberjack_str_len(LUMBERJACK_ANSI_RESET, MAX_PIPE_LEN)
-                       + 1 + lumberjack_str_len(color, MAX_PIPE_LEN);
+                       + 1 + lumberjack_str_len(color, MAX_PIPE_LEN) + 1;
     if (pipe_len <= MAX_PIPE_LEN) {
         strcpy(dest, LUMBERJACK_ANSI_RESET);
         strcat(dest, "|");

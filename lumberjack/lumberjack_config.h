@@ -98,9 +98,11 @@ bool lumberjack_toggle_if_lumberj_key(uint16_t current_keycode,
 ///////////////////////////////////////////////////////////////////////////////
 
 #define LUMBERJACK_ANSI_RESET "\033[0m" // update both together
-#define LUMBERJACK_ANSI_RESET_LEN 7     //       on change
+#define LUMBERJACK_ANSI_RESET_LEN 4     //       on change
 
-#define LUMBERJACK_MAX_ANSI_CODE_LEN 9 // for codes in lumberjack_config.c
+// Longest palette colour code accepted, i.e. a 24-bit truecolor SGR
+// sequence such as "\033[38;2;255;255;255m" (19 chars).
+#define LUMBERJACK_MAX_ANSI_CODE_LEN 19 // for codes in lumberjack_config.c
 
 
 void lumberjack_init_colors(void);
