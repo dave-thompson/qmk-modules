@@ -25,7 +25,7 @@
 /**
  * @brief Convenience method for access to DROPSHIFT_ENABLE parameter
  */
-inline bool lghts_dropshift(void) {
+static inline bool lghts_dropshift(void) {
     #ifdef DROPSHIFT_ENABLE
         return true;
     #else

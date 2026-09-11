@@ -35,7 +35,7 @@
 /**
  * @brief Convenience method for access to LUMBERJACK_COLOR config parameter
  */
-inline bool lumberjack_color(void) {
+static inline bool lumberjack_color(void) {
     #ifdef LUMBERJACK_COLOR
         return true;
     #else

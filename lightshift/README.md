@@ -2,7 +2,7 @@
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/lightshift</tt></td></tr>
-<tr><td><b>Version</b></td><td>2025-11-11</td></tr>
+<tr><td><b>Version</b></td><td>2026-09-11</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>

@@ -80,7 +80,7 @@ ASSERT_COMMUNITY_MODULES_MIN_API_VERSION(1, 0, 0);
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-inline bool using_macos_switcher(void) {
+static inline bool using_macos_switcher(void) {
     #ifdef SWITCHER_MACOS_APP_SWITCHER
         return true;
     #else
@@ -88,7 +88,7 @@ inline bool using_macos_switcher(void) {
     #endif
 }
 
-inline bool switcher_secondary_keys_enabled(void) {
+static inline bool switcher_secondary_keys_enabled(void) {
     #ifdef SWITCHER_ENABLE_SECONDARY_KEYS
         return true;
     #else
