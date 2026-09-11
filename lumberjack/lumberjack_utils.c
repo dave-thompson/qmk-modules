@@ -11,7 +11,7 @@
 uint8_t lumberjack_str_len(const char* str, uint8_t max_len) {
     if (!str) return 0;
     uint8_t len = 0;
-    while (str[len] != '\0' && len < max_len) len++;
+    while (len < max_len && str[len] != '\0') len++;
     return len;
 }
 
@@ -49,7 +49,8 @@ void lumberjack_right_align_string(char* dest, uint8_t dest_size,
     uint8_t src_len = lumberjack_str_len(src, dest_size);
 
     uint8_t i;
-    // If source is longer than destination, truncate end
+    // Source too long to fit alongside a terminator: keep the head and
+    // truncate the end.  Only "==" can fire; src_len cannot exceed dest_size
     if (src_len >= dest_size) {
         for (i = 0; i < dest_size - 1; i++) {
             dest[i] = src[i];

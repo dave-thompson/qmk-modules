@@ -53,7 +53,7 @@ void lumberjack_safe_copy(char* dest, uint8_t dest_size, const char* src);
  * 
  * Copies the source string to the destination buffer, right-aligning it by
  * padding with spaces on the left. If the source string is longer than the
- * destination buffer, it will instead be truncated from the left.
+ * destination buffer, its head is kept and it is truncated from the right.
  * 
  * @param dest Destination buffer (must be different from src)
  * @param dest_size Size of destination buffer including null terminator
