@@ -2,26 +2,13 @@
 #include "lightshift_debug.h"
 #include "lightshift_tracking.h"
 #include "lightshift_state.h"
-#include "lightshift_drop.h"
 
 ASSERT_COMMUNITY_MODULES_MIN_API_VERSION(1, 0, 0);
 
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Low Lightshift Tapping Term (vs. Missed Opposite Side Shifts)
-//
-// Fixes:
-// ------
-//     opp-side  s-i    :  'si'  ->  'I'       (Graphite)
-//
-///////////////////////////////////////////////////////////////////////////////
-//
-// Extended Tapping Term (vs. Accidental Same-Side Shifts)
-//
-// Fixes:
-// ------
-//     s-t-r  :  'Tring' -> 'string'   (Graphite)
+// Lightshift Tapping Term vs. Extended Tapping Term
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -43,34 +30,6 @@ uint16_t calculate_term(uint16_t keycode, const keyrecord_t *record) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Dropshift (vs. Accidental Double Shifts)
-//
-// Fixes:
-// ------
-//     s-i-t   :  'IT'  ->  'It'   (Graphite)
-//
-///////////////////////////////////////////////////////////////////////////////
-
-static void clear_any_double_shift(uint16_t keycode,
-                                   const keyrecord_t* record) {
-    // leave shifts active if:
-    if (!record->event.pressed // event is a release, not a press
-            || lghts_is_layer_or_mod(keycode, record) // layer switch / mod key
-            || lightshift_allow_double(keycode, record) // double shift allowed
-            || lghts_non_shift_mods_active()) { // other mods active (shortcut)
-        return;
-    }
-
-    // clear any already used shift
-    uint16_t shift_keycode = lghts_set_double_inactive(keycode);
-    if (shift_keycode != KC_NO) {
-        lghts_clear_modtap_mods(shift_keycode);
-    }
-}
-
-
-///////////////////////////////////////////////////////////////////////////////
-//
 // QMK Hooks
 //
 ///////////////////////////////////////////////////////////////////////////////
@@ -83,13 +42,9 @@ bool pre_process_record_lightshift(uint16_t keycode, keyrecord_t *record) {
 }
 
 // Called after QMK decides TAP or HOLD
-bool process_record_lightshift(uint16_t keycode, keyrecord_t* record) {
-    if (lghts_dropshift()) {
-        // if this key may not be double shifted, clear any double shift
-        clear_any_double_shift(keycode, record);
-        // track lightshift state
-        lghts_track_pr(keycode, record);
-    }
+bool process_record_lightshift(uint16_t keycode, keyrecord_t *record) {
+    // track lightshift state
+    lghts_track_pr(keycode, record);
     return true;
 }
 

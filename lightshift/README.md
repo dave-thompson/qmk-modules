@@ -11,19 +11,19 @@
 
 **Core** • [Misshifts Fixed](#misshifts-fixed) • [How It Works](#how-it-works) • [Chording](#important-chording)
 
-**Configuration** • [Quick Start](#quick-start) • [Caps Word](#caps-word) • [Tapping Terms](#lightshift-tapping-terms) • [Dropshift](#dropshift-1) • [Handedness](#handedness)
+**Configuration** • [Quick Start](#quick-start) • [Suggested Setup](#suggested-setup) • [Tapping Term](#lightshift-tapping-term) • [Handedness](#handedness)
 
-**Other Modules** • [Interfaces](#interfaces) • [Compatibility](#compatibility) • [Suggested Setup](#suggested-hrm-setup) • [Alternatives](#alternatives)
+**Other Modules** • [Interfaces](#interfaces) • [Chordal Hold](#comparison-to-chordal-hold) • [Other Alternatives](#other-alternatives)
 
 **Reference** • [Troubleshooting](#troubleshooting) • [Appendices](#appendix-a-full-list-of-parameters-and-options)
 
 ## Home-Row Shifts at Speed
 
-Home-row mods have improved a lot, yet **shift** is still a problem — it's used too quickly, too frequently, and usually mid-flow.
+Home-row mods have improved a lot, yet **shift** is still a problem — it's used too quickly, too frequently, and in the middle of the typing flow.
 
 **Lightshift** transforms your home-row shift keys, using Chordal Hold's handedness concept but with much stricter rules that work **even at speed**.  It delivers near-flawless shifting while typing, and asks in exchange only a tiny [bit of care](#important-chording) with modifier chords.
 
-[Setup](#quick-start) is zero-config.  You can use it standalone or stacked with Chordal Hold, Flow Tap and so on — it plays nicely with QMK at large.
+[Initial setup](#quick-start) is zero-config.  You can use Lightshift standalone or stacked with Chordal Hold, Flow Tap and so on — it plays nicely with QMK at large.
 
 ## Misshifts Fixed
 
@@ -34,7 +34,7 @@ Home-row mods have improved a lot, yet **shift** is still a problem — it's use
         <img width="100%" src="doc/graphite-light.svg" alt="Graphite Layout">
     </picture>
     <br>
-    <i><b>Graphite:</b> A modern layout with frequently used keys on the home-row, making it vulnerable to misshifts</i>
+    <i><b>Graphite:</b> A modern layout with frequently used keys on the home row, making it vulnerable to misshifts</i>
 </div>
 
 ### 1. Accidental Same-Side Shifts
@@ -45,19 +45,13 @@ Modern layouts put the most used letters on the home row.  Common trigrams, like
 
 Core home-row solutions like Chordal Hold require the use of high tapping terms and a measured, staccato typing style.  When typing speed goes up, those tapping terms are missed and that measured style is lost.  Then **"I"** becomes **"si".**
 
-### 3. Double Shifts
-
-Double shifts aren't specific to home-row mods, but let's fix them anyway.  When typing "Jump", the short pinky is slow to J and the long ring finger is quick to U.  Releasing shift between them doesn't always go to plan.  Then **"Jump"** becomes **"JUmp".**
-
 ## How it Works
-
-### Extended Tapping Term
 
 The fundamental problem is that certain **same-side** **taps** naturally take longer than **opposite-side** **holds**.  That's just the hand's biomechanics.  No single tapping term can fix this — the ranges overlap.
 
-Lightshift combats this with two different tapping terms.  The main **Lightshift Tapping Term** is short at 150ms, eliminating Missed Opposite-Side Shifts.
+Lightshift combats this with two different tapping terms.  A very short **Lightshift Tapping Term** of 140ms eliminates Missed Opposite-Side Shifts.
 
-<div style="text-align: center;">
+<div align="center">
     <picture>
         <source media="(prefers-color-scheme: light)" srcset="doc/opp-light.svg">
         <source media="(prefers-color-scheme: dark)" srcset="doc/opp-dark.svg">
@@ -67,7 +61,7 @@ Lightshift combats this with two different tapping terms.  The main **Lightshift
 
 However, if you press another same-side key within the tapping term, as in a roll like "str", the **Extended Tapping Term** kicks in.  This is an enormous 65,535ms, eliminating Accidental Same-Side Shifts.
 
-<div style="text-align: center;">
+<div align="center">
     <picture>
         <source media="(prefers-color-scheme: light)" srcset="doc/same-light.svg">
         <source media="(prefers-color-scheme: dark)" srcset="doc/same-dark.svg">
@@ -75,35 +69,21 @@ However, if you press another same-side key within the tapping term, as in a rol
     </picture>
 </div>
 
-### Dropshift
-
-Once a lightshift resolves to Shifting, it acts like a normal shift.  You can shift-click and type punctuation as usual.
-
-But when you capitalise a letter, Dropshift kicks in.  It consumes the shift, so that no second letter is shifted, even with shift still held down.  This solves the Double Shift Problem.
-
 ## Important: Chording
 
 **Lightshift takes no mercy on misshifts — not even for modifier chords.**
 
 ✅ **:** Ctrl → Shift → N
 
-❌ **:** Shift → Ctrl → N **[ ==> types "hen" ]**
+❌ **:** Shift → Ctrl → N **[ ==> types "hin" ]**
 
-If chording a lightshift with other (same-side) modifiers, the lightshift must always be the **last** modifier pressed, otherwise you will type letters instead.  It's a quick adjustment, and well worth it for home-row-shifts at speed.
+If chording a lightshift with other (same-side) modifiers, the lightshift must always be the ***last*** modifier pressed, otherwise you will type letters instead.  It's a quick adjustment, and well worth it for home-row shifts at speed.
 
-**Pro Tip:** Put shift on your **index** finger — chorded mods become an easy inward roll.
+**Tip:** Put shift on your **index** finger — chorded mods become an easy inward roll.
 
 ## Quick Start
 
-Add `dave-thompson/lightshift` to your `keymap.json` and all your mod-tap shifts become lightshifts straightaway.  Take her for a test flight — type as quickly and messily as you can!
-
-```json
-{
-  "modules": ["dave-thompson/lumberjack", "dave-thompson/lightshift"]
-}
-```
-
-(If you don't yet have a `keymap.json`, create one with the below content in the same folder as your `keymap.c` file.)
+Add `dave-thompson/lightshift` to your `keymap.json` and all your mod-tap shifts become lightshifts straightaway.  Take her for a test flight!
 
 ```json
 {
@@ -111,84 +91,21 @@ Add `dave-thompson/lightshift` to your `keymap.json` and all your mod-tap shifts
 }
 ```
 
+(If you don't yet have a `keymap.json`, create one with the above content in the same folder as your `keymap.c` file.)
+
 ## Configuration Guide
 
-### Caps Word
+### Suggested Setup
 
-Caps Word is near mandatory when using Dropshift, since you can't capitalise multiple letters by holding shift.  If you don't have Caps Word already, just assign the `CW_TOGG` keycode to a key (or combo) in your keymap — or for more options, see [Caps Word](https://docs.qmk.fm/features/caps_word).
+Lightshift is best used as part of a wider HRM setup — see the [suggested setup](../README.md#suggested-hrm-setup) in the repo root.
 
-### Lightshift Tapping Terms
+Lightshift avoids direct manipulation of the event flow, making it compatible with a wide range of QMK features and modules, including Combos, Speculative Hold, Sentence Case, Custom Shift, Flow Tap, Chordal Hold and Permissive Hold.
 
-The `LIGHTSHIFT_TAPPING_TERM` and `LIGHTSHIFT_EXTENDED_TAPPING_TERM` are configurable in `config.h`.  (Find the best tapping term for you with [Lumberjack](../lumberjack), a keylogger that measures your typing style.)
-
-```c
-#define LIGHTSHIFT_TAPPING_TERM 140            // default is 150
-#define LIGHTSHIFT_EXTENDED_TAPPING_TERM 250   // default is 65535
-```
-
-### Dropshift
-
-Dropshift categorises keys pressed during a shift into singles and doubles.  The first shiftable key is always a single.  Once that single is 'consumed', all subsequent keys are considered doubles.  By default, only letters (A-Z) consume the single shift.
-
-<div style="text-align: center;">
-    <picture>
-        <source media="(prefers-color-scheme: light)" srcset="doc/hello-light.svg">
-        <source media="(prefers-color-scheme: dark)" srcset="doc/hello-dark.svg">
-        <img width="100%" src="doc/hello-light.svg" alt="Dropshift Singles & Doubles">
-    </picture>
-</div>
-
-
-On ***letter*** doubles, shift is dropped until re-pressed.
-
-<div style="text-align: center;">
-    <picture>
-        <source media="(prefers-color-scheme: light)" srcset="doc/its-light.svg">
-        <source media="(prefers-color-scheme: dark)" srcset="doc/its-dark.svg">
-        <img width="100%" src="doc/its-light.svg" alt="Dropshift Singles & Doubles">
-    </picture>
-</div>
-
-On ***non-letter*** doubles, shift continues.
-
-<div style="text-align: center;">
-    <picture>
-        <source media="(prefers-color-scheme: light)" srcset="doc/q-light.svg">
-        <source media="(prefers-color-scheme: dark)" srcset="doc/q-dark.svg">
-        <img width="100%" src="doc/q-light.svg" alt="Double Dropping">
-    </picture>
-</div>
-
-You can change which keys consume the single, and which keys drop shift on a double, by defining `lightshift_consume_single()` and / or `lightshift_allow_double()` in `keymap.c`.
+### Lightshift Tapping Term
+Set `LIGHTSHIFT_TAPPING_TERM` in `config.h`: aim for the highest value that ***never*** causes a missed opposite-side shift.  Use [Lumberjack](../lumberjack) to find your personal opposite-side shift times.
 
 ```c
-bool lightshift_consume_single(uint16_t keycode, const keyrecord_t *record) {
-
-	// consume shift when typing @, preventing @Jess when intending @jess
-	// (@ is a shifted KC_2)
-	if (keycode == KC_2) return true;
-
-	// fallback to the default implementation for other keycodes
-   return lightshift_consume_single_raw(keycode, record);
-}
-```
-
-```c
-bool lightshift_allow_double(uint16_t keycode, const keyrecord_t *record) {
-	
-	// prevent accidental double-quote when typing: I"ve
-	// (double quote is a shifted single quote, aka KC_QUOTE)
-	if (keycode == KC_QUOTE) return false;
-
-	// fallback to the default implementation for other keycodes
-   return lightshift_allow_double_raw(keycode, record);
-}
-```
-
-Or if you'd rather not use Dropshift at all, disable it in `rules.mk`:
-
-```makefile
-DROPSHIFT_ENABLE = no
+#define LIGHTSHIFT_TAPPING_TERM 120            // default is 140
 ```
 
 ### Handedness
@@ -213,7 +130,7 @@ To customise handedness, define `chordal_hold_layout[][]` in your `keymap.c`, ba
 // - add 'L' or 'R' for each of your keys (or '*' for keys you use with both hands)
 const char chordal_hold_layout[MATRIX_ROWS][MATRIX_COLS] PROGMEM =
   LAYOUT_MY_KEYBOARD(
-  	 'L',    'L',    'L',    'L',    'L',     'R',    'R',    'R',    'R',    'R',
+     'L',    'L',    'L',    'L',    'L',     'R',    'R',    'R',    'R',    'R',
      'L',    'L',    'L',    'L',    'L',     'R',    'R',    'R',    'R',    'R',
      'L',    'L',    'L',    'L',    'L',     'R',    'R',    'R',    'R',    'R',
 
@@ -234,12 +151,12 @@ Lightshift hooks into several parts of QMK to implement Extended Tapping Term �
 
 ### Per-Key Tapping Terms
 
-If you have a custom `get_tapping_term()` implementation, define `LIGHTSHIFT_USER_TAPPING_TERM ` in `config.h`, then update your implementation to call lightshift's Extended Tapping Term hook.
+If you have a custom `get_tapping_term()` implementation, define `LIGHTSHIFT_USER_TAPPING_TERM` in `config.h`, then update your implementation to call lightshift's Extended Tapping Term hook.
 
 ```c
 uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
 
-	// add this line at the top
+    // add this line at the top
     if (is_lightshift(keycode)) return get_lightshift_term(keycode, record);
 
     // your custom code goes here
@@ -254,11 +171,11 @@ If you have a custom `get_flow_tap_term()` implementation, define `LIGHTSHIFT_US
 ```c
 uint16_t get_flow_tap_term(uint16_t keycode, keyrecord_t* record, uint16_t prev_keycode) {
                       
-        // add this line at the top (so flow tap remains disabled on lightshift keys)
-        if (is_lightshift(keycode)) return 0;
-        
-        // your custom code goes here
-        ...
+    // add this line at the top (so flow tap remains disabled on lightshift keys)
+    if (is_lightshift(keycode)) return 0;
+
+    // your custom code goes here
+    ...
 }
 ```
 
@@ -295,41 +212,22 @@ bool get_permissive_hold(uint16_t keycode, keyrecord_t *record) {
 }
 ```
 
-## Compatibility
+## Comparison to Chordal Hold
 
-### Compatible Modules
+Lightshift was inspired by the excellent [Chordal Hold](https://docs.qmk.fm/tap_hold#chordal-hold). Chordal Hold aims to fix accidental same-side shifts, and is usually paired with Permissive Hold which aims to fix missed opposite-side shifts.
 
-Lightshift avoids direct manipulation of the event flow, making it compatible with a wide range of QMK features and modules, including Combos, Speculative Hold, Sentence Case, Custom Shift and more.  Lightshift pairs well with Flow Tap, Chordal Hold and Permissive Hold — they won't interfere with your lightshift keys but will control your other mod-taps as usual.
+Chordal Hold prioritises easy modifier chording over shifting accuracy.  It lets through some misshifts as a result, but it allows Ctrl / Cmd / Alt while typing and requires no change to the way you press modifier chords.
 
-### Suggested HRM Setup
+<div align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="doc/table-dark.svg">
+    <img width="90%" src="doc/table-light.svg" alt="Comparison to Chordal Hold">
+  </picture>
+</div>
 
-#### 1. Shift Keys
+## Other Alternatives
 
-Lightshift, [Caps Word](https://docs.qmk.fm/features/caps_word), and [Sentence Case](https://getreuer.info/posts/keyboards/sentence-case/index.html).
-
-#### 2. Other HRMs
-
-Use a high `TAPPING_TERM` (250ms) and [Flow Tap](https://docs.qmk.fm/tap_hold#flow-tap) with a high `FLOW_TAP_TERM` (200ms) to ensure HRMs don't activate while typing.  Create **custom hotkeys** for typing-related shortcuts like copy / paste so you can still use them in the midst of a fast flow.  Use [Speculative Hold](https://getreuer.info/posts/keyboards/speculative-hold/) to activate your HRMs immediately on mod-clicks.
-
-If you really need non-shift mods while typing, [Chordal Hold](https://docs.qmk.fm/tap_hold#chordal-hold) will dull the pain. [Permissive Hold](https://docs.qmk.fm/tap_hold#permissive-hold) is popular too, but unfortunately does cause **extra** misfires which weren't there before.
-
-## Alternatives
-
-### Chordal Hold
-
-Lightshift's Extended Tapping Term is an evolution of the excellent [Chordal Hold](https://docs.qmk.fm/tap_hold#chordal-hold), part of Pascal Getreuer's [extensive library of work](https://getreuer.info/posts/keyboards/index.html).
-
-Lightshift uses Chordal Hold's handedness concept (and algorithms), but acts only on the shift keys.  This allows it to be more aggressive in eliminating misshifts, at the price that shift must explicitly be pressed last during modifier chords.
-
-Chordal Hold lets through more misshifts, requires a slower typing style, and has a bit of a learning curve, but it's the most popular solution, it goes beyond shift to tackle all HRMs, and it chords modifiers with ease.
-
-### SMTD
-
-[SMTD](https://github.com/stasmarkin/sm_td) makes the tap-hold decision using key **release** timing, rather than key **hold** timing and **handedness**.  It's popular with people without split boards who don't want to worry about using the correct-sided shift key.
-
-Rather than extending QMK's standard MT keys, it reinvents mod-tap from the ground up. This fully custom approach buys good accuracy at the price of complex setup and low compatibility with other QMK features.  There are some issues with combos, high-speed typing, and rolled keys.
-
-### Others
+[SMTD](https://github.com/stasmarkin/sm_td) makes the tap-hold decision using key **release** timing, rather than key **hold** timing and **handedness**.  It's popular with people without split boards who don't want to worry about using the correct-sided shift key.  Rather than extending QMK's standard MT keys, it reinvents mod-tap from the ground up. This fully custom approach buys good accuracy at the price of complex setup and low compatibility with other QMK features.  There are some issues with combos, high-speed typing, and rolled keys.
 
 There's also [Predictive Tap-Hold](https://github.com/jgandert/qmk_modules/tree/main/predictive_tap_hold), which runs a trained decision tree in your firmware!
 
@@ -340,7 +238,7 @@ There's also [Predictive Tap-Hold](https://github.com/jgandert/qmk_modules/tree/
 The best thing to do, before twiddling a thousand settings, is to work out why.  Install [Lumberjack](../lumberjack), a keylogger that tracks exactly which keys you pressed and when, and leave it running in the background while you type.  Then next time you have a misshift, check it to see what happened.
 
 #### a. Missed Opposite-Side Shifts
-Did you **hold** shift for less than `LIGHTSHIFT_TAPPING_TERM`?  If so, reduce `LIGHTSHIFT_TAPPING_TERM` to a value that would have triggered (but below 140ms is pushing it).
+Did you **hold** shift for less than `LIGHTSHIFT_TAPPING_TERM`?  If so, reduce `LIGHTSHIFT_TAPPING_TERM` to just under that hold time.
 
 #### b. Accidental Same-Side Shifts
 Was the **delta** between the shift press and the subsequent, same-side press greater than `LIGHTSHIFT_TAPPING_TERM`?  This is unusual, but if you're new to typing and slow, you may need to temporarily increase `LIGHTSHIFT_TAPPING_TERM` until you speed up.
@@ -348,8 +246,10 @@ Was the **delta** between the shift press and the subsequent, same-side press gr
 #### c. Missing Letters at the End of Words, or with Thumb Keys
 An accidental same-side shift in disguise!  Do you have Space on a thumb key?  Is its handedness `L/R` or `*`?  Pressing a home-row key then a same-side thumb key causes the home-row key to be pressed longer than usual — it should be treated as a same-side roll.  If your thumb key has `*` handedness, change it to `L/R`.
 
+(If you're using Lightshift and Chordal Hold together, and want to use `L/R` for lightshift but `*` for Chordal Hold, then define both `lightshift_handedness()` and `chordal_hold_handedness()`.  Each module will use its own handedness definition.)
+
 #### d. Misshifts just after Layer Switching
-Does Lumberjack show a non-shift keycode that you thought was a shift key?  If you shift within ~200ms of layer switching with an LT key, QMK passes Lightshift the wrong keycode, so Lightshift ignores it.  Fix this by ensuring all MT Shift keys on the switched to layer are also MT Shift keys on the switched ***from*** layer.
+Does Lumberjack show a non-shift keycode that you thought was a shift key?  If you shift within ~200ms of layer switching with an LT key, QMK passes Lightshift the wrong keycode, so Lightshift ignores it.  Fix this by ensuring all MT Shift keys on the switched-to layer are also MT Shift keys on the switched ***from*** layer.
 
 ## Appendix A: Full list of Parameters and Options
 
@@ -358,7 +258,7 @@ Does Lumberjack show a non-shift keycode that you thought was a shift key?  If y
 <table>
 <tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
 
-<tr><td><tt>LIGHTSHIFT_TAPPING_TERM</tt></td><td>Adjusts the opposite-side tapping term.  Default: 150ms.</td></tr>
+<tr><td><tt>LIGHTSHIFT_TAPPING_TERM</tt></td><td>Adjusts the opposite-side tapping term.  Default: 140ms.</td></tr>
 <tr><td><tt>LIGHTSHIFT_EXTENDED_TAPPING_TERM</tt></td><td>Adjusts the extended (same side) tapping term.  Default: 65,535ms.</td></tr>
 
 <tr><td><tt>LIGHTSHIFT_USER_TAPPING_TERM</tt></td><td>Allows a custom implementation of <tt>get_tapping_term()</tt>.</td></tr>
@@ -368,39 +268,26 @@ Does Lumberjack show a non-shift keycode that you thought was a shift key?  If y
 
 </table>
 
-#### In rules.mk
-
-<table>
-<tr><td><b>Parameter</b></td><td><b>Effect</b></td></tr>
-<tr><td><tt>DROPSHIFT_ENABLE = no</tt></td><td>Disables Dropshift and recoups its firmware space.</td></tr>
-</table>
-
 ## Appendix B: Resource Requirements
 
 ### Firmware Sizes
-Lightshift is ~1,100 bytes, of which Extended Tapping Term is ~650 bytes, and Dropshift is ~450 bytes.  Caps Word (automatically enabled with Dropshift) is ~400 bytes and its useful `CAPS_WORD_INVERT_ON_SHIFT` option is ~200bytes.
-
-Handedness configurations can affect firmware size by up to 300 bytes.  For the smallest possible firmware, define a custom `chordal_hold_handedness()`.
+Lightshift is ~975 bytes.  Handedness configurations can affect firmware size by up to 300 bytes.  For the smallest possible firmware, define a custom `chordal_hold_handedness()`.
 
 ### RAM Usage
-Lightshift uses ~15 bytes of static RAM, and ~30 bytes of stack.
+Lightshift uses ~11 bytes of static RAM, and ~30 bytes of stack.
 
 ## Appendix C: Development
 
 ### State Machine
-The state machine is documented in [lightshift_tracking.c](./lightshift_tracking.c).  State transitions occur in `pre_process_record()` for Extended Tapping Term, and `process_record()` for Dropshift.
+The state machine is documented in [lightshift_tracking.c](./lightshift_tracking.c).
 
 ### Debugging
-For debug output including state transitions, tapping term decisions and shift drop decisions, define `LIGHTSHIFT_DEBUG` in `config.h`.  Also install Lumberjack to log pre\_process\_record events, and define `LUMBERJACK_PR` in `config.h` if you want process\_record events too.
+For debug output including state transitions, tapping term decisions and hold resolutions, define `LIGHTSHIFT_DEBUG` in `config.h`.  Lumberjack is also useful to log pre\_process\_record events.
+
+Debugging is RAM intensive (~100 bytes).  An AVR board which misbehaves on enabling debug is likely experiencing stack overflow: temporarily uninstall other features to free up RAM until you finish debugging.
 
 ### Linking from Other Modules
-Check for the `LIGHTSHIFT_ENABLE` definition to see if Lightshift is installed, or `DROPSHIFT_ENABLE` for the Dropshift sub-module.
-
-## Epilogue: History
-
-Having forever struggled with home-row shift, I used [Lumberjack](../lumberjack) to categorise every one of my misshifts for weeks, discovering they were not as complicated as they seemed — there were only three different misshifts, just repeated **hundreds of times**.
-
-Enlightened by data, I realised Chordal Hold didn't quite do what I needed.  It treated shift as just another home-row-mod, not a thing of its own.  Lightshift was born.
+Check for the `LIGHTSHIFT_ENABLE` definition to see if Lightshift is installed.
 
 <p align="right">
 <i>lightshift: zero mercy for misshifts</i>

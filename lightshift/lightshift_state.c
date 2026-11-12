@@ -12,7 +12,7 @@
                              // even rarer to press > 2 at the same time
                              
 // array of current shift presses
-static shift_t shift_keys[MAX_TRACKED_SHIFTS];
+static lightshift_t shift_keys[MAX_TRACKED_SHIFTS];
 static uint8_t shifts_count = 0;
 
 // sentinel value, in case requested shift data not in state array
@@ -36,8 +36,7 @@ _Static_assert(MAX_TRACKED_SHIFTS < SHIFT_NO,
       "LIGHTSHIFT TT",
       "EXTENDED TT",
       "RELEASED, EXTENDED",
-      "SINGLE SHIFTING",
-      "DOUBLE SHIFTING",
+      "SHIFTING",
     };
 
     // @brief Generates a text representation for a given enum state
@@ -66,10 +65,10 @@ _Static_assert(MAX_TRACKED_SHIFTS < SHIFT_NO,
 ///////////////////////////////////////////////////////////////////////////////
 
 // Returns tracking data for the lightshift at index
-shift_t get_lghts(uint8_t index) {
+lightshift_t get_lghts(uint8_t index) {
     // Return not a valid index, return INACTIVE shift
     if (index >= shifts_count) {
-        shift_t inactive = {0};
+        lightshift_t inactive = {0};
         inactive.keycode = KC_NO;
         inactive.state = SHIFT_INACTIVE;
         return inactive;        
@@ -195,7 +194,7 @@ void lghts_set_state(keypos_t key, lightshift_state_t state) {
 
     // debug logging
     if (shift_index != SHIFT_NO) {
-        lghts_dprintf("%s - state: %s", get_keycode_string(keycode),
+        lghts_dprintf("%s - l_state: %s", get_keycode_string(keycode),
                       state_debug_text(state));
     }
 }

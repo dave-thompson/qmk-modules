@@ -9,7 +9,7 @@
 #include "quantum.h"
 
 #ifndef LIGHTSHIFT_TAPPING_TERM
-	#define LIGHTSHIFT_TAPPING_TERM 150
+	#define LIGHTSHIFT_TAPPING_TERM 140
 #endif
 #if LIGHTSHIFT_TAPPING_TERM > UINT16_MAX
     #error "LIGHTSHIFT_TAPPING_TERM must be no more than 65,535ms"
@@ -21,17 +21,6 @@
 #if LIGHTSHIFT_EXTENDED_TAPPING_TERM > UINT16_MAX
     #error "LIGHTSHIFT_EXTENDED_TAPPING_TERM must be no more than 65,535ms"
 #endif
-
-/**
- * @brief Convenience method for access to DROPSHIFT_ENABLE parameter
- */
-static inline bool lghts_dropshift(void) {
-    #ifdef DROPSHIFT_ENABLE
-        return true;
-    #else
-        return false;
-    #endif
-}
 
 /**
  * @brief Returns the correct tapping term for a lightshift key press

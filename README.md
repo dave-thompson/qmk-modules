@@ -1,22 +1,34 @@
 # @dave-thompson's QMK community modules
 
-
 ![](./banner.png)
-**Lumberjack**, one of the library's modules, shows you every key you pressed and when.  It helps you debug home-row-mods and other timing-dependent features.</br></br>
+**Lumberjack**, one of the library's modules, shows you every key you pressed and when.  It helps you debug home-row mods and other timing-dependent features.<br><br>
+
+### HRM Collection
+
+The stuff you're here for. Find the causes of your home-row misfires, install the right modules to fix them, and work out the config settings that are best for you.
 
 | Module                                    | Description                                           |
 |-------------------------------------------|-------------------------------------------------------|
-| [Lightshift](./lightshift/README.md)    | **Fast & accurate home-row shifts.**  Makes HRM shifts near-flawless while typing, asking in exchange only a tiny bit of care with modifier chords.</br></br>                  |
-| [Lumberjack](./lumberjack/README.md)    | **See which keys you pressed and when.**  Helps you debug timing-dependent features.</br></br>                                                                                 |
-| [Switcher](./switcher/README.md)        | **Supercharge your app switcher.**  Send Cmd-Tab or Alt-Tab with a single keypress, map navigation and power features to the home row, and a whole lot more.</br></br>         |
+| [Lumberjack](./lumberjack/README.md)    | **See which keys you pressed and when.**  Essential for debugging timing-dependent features and finding the right config for your HRMs.<br><br>                                                                                 |
+| [Lightshift](./lightshift/README.md)    | **Fast & accurate home-row shifts.**  Easily beats Chordal Hold for typing (but demands care with keyboard shortcuts in return).<br><br>                  |
+| [Dropshift](./dropshift/README.md)      | **No more double shifts.**  Turns "THe" into "The". Works with any held shift key.<br><br>                    |
 
-## License
+#### Suggested HRM Setup
+- **Shift HRMs:** Use [Lightshift](./lightshift) and [Sentence Case](https://getreuer.info/posts/keyboards/sentence-case/index.html). Optionally add [Dropshift](./dropshift) and [Caps Word](https://docs.qmk.fm/features/caps_word).
+- **Other HRMs:** Use [Flow Tap](https://docs.qmk.fm/tap_hold#flow-tap) with a high `TAPPING_TERM` (250ms) and a high `FLOW_TAP_TERM` (200ms) so non-shift HRMs never fire while typing. Create **custom hotkeys** for shortcuts like copy/paste that you ***do*** use while typing.
+- **Mod-clicks:** Use [Speculative Hold](https://getreuer.info/posts/keyboards/speculative-hold/), configured to your specific system.
 
-This repo uses the GNU GPLv3 except where otherwise indicated. See the [LICENSE file](LICENSE.txt) for details.
+**Fine Tuning:** Install [Lumberjack](./lumberjack) and leave it running in the background. On your next misfire, check the Lumberjack log for the cause and adjust the relevant setting (often `LIGHTSHIFT_TAPPING_TERM`) accordingly.
+
+### Other Stuff
+
+| Module                                    | Description                                           |
+|-------------------------------------------|-------------------------------------------------------|
+| [Switcher](./switcher/README.md)        | **Supercharge your app switcher.**  Fixes the Mac app switcher's many issues. Send Cmd-Tab or Alt-Tab with a single keypress, map navigation and power features to the home row, and a whole lot more.<br><br>         |
 
 ## Prerequisites
 
-Your keyboard must support **Community Modules**, meaning it must be using **QMK Firmware 0.28.0** (released 2025-02-27) or later.  If (and only if) your qmk_firmware folder has a 'modules' folder inside it, then you're good to go.
+Your keyboard must be using **QMK Firmware 0.29.0** (released 2025-05-25) or later.
 
 ## Installation
 
@@ -41,7 +53,12 @@ Whichever option you choose, your directory structure should then look like this
     <qmk_userspace or qmk_firmware>
     └── modules
         └── dave-thompson
+            ├── dropshift
             ├── lightshift
             ├── lumberjack
             ├── switcher
             └── ...
+
+## License
+
+This repo uses the GNU GPLv3 except where otherwise indicated. See the [LICENSE file](LICENSE.txt) for details.

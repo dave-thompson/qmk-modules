@@ -1,7 +1,6 @@
 #include "lightshift_state.h"
 #include "lightshift_tracking.h"
 #include "lightshift_debug.h"
-#include "lightshift_drop.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 //
@@ -10,68 +9,67 @@
 ///////////////////////////////////////////////////////////////////////////////
 
 /**
-*     
-*                                  ┌─────────────────┐
-*                                  │     INACTIVE    │
-*                                  └────────┬────────┘
-*                                           │
-*                                      [pp] shift
-*                                        pressed
-*                                           │
-*                                           v      
-*                                  ┌─────────────────┐
-*          ┌───────────────────────│    UNRESOLVED   │─────────────────┐
-*          │                       └────────┬────────┘                 │
-*          │                                │                          │
-*          │                    ┌───────────┴───────────┐              │
-*          │                    │                       │              │
-*       tapping          [pp] opp-side           [pp] same-side    [pp] shift
-*        term                  key                     key          released
-*          │                    │                       │            (=tap)
-*          │                    v                       v              │
-*          │         ┌─────────────────────┐    ┌───────────────┐      │
-*          │         │    LIGHTSHIFT TT    │    │  EXTENDED TT  │      │
-*          │         └───┬─────────────┬───┘    └───────┬───────┘      │
-*          │             │             │                │              │
-*          │          tapping     [pp] shift       [pp] shift          │
-*          │           term        released         released           │
-*          │             │          (=tap)           (=tap)            │
-*          │             │             │                │              │
-*          │             │             │                │              │
-*          v             v             │                v              │
-*    ┌────────────────────────────┐    │        ┌───────────────┐      │
-*    │      SINGLE SHIFTING       │    │        │   RELEASED,   │      │
-*    └─────┬─────────────┬────────┘    │        │   EXTENDED    │      │
-*          │             │             │        └───────┬───────┘      │
-*      consuming         └─── shift ───┐                │              │
-*      shiftable             released  │                │              │
-*      keypress                        │                │              │
-*          │                           │                │              │
-*          v                           │                │              │
-*    ┌────────────────────────────┐    │                │              │
-*    │      DOUBLE SHIFTING       │    │                │              │
-*    └──────┬────────────┬────────┘    │                │              │
-*           │            │             │                │              │
-*      disallowed        └─── shift ───┐          [pp] any next        │
-*       shiftable            released  │            key event          │
-*       keypress                       │                │              │
-*           │                          │                │              │
-*           v                          v                v              v
-*    ┌─────────────────────────────────────────────────────────────────────┐
-*    │                            INACTIVE                                 │
-*    └─────────────────────────────────────────────────────────────────────┘
+*
+*                          ┌─────────────────┐
+*                          │     INACTIVE    │
+*                          └────────┬────────┘
+*                                   │
+*                                 shift
+*                                pressed
+*                                   │
+*                                   v
+*                          ┌─────────────────┐
+*        ┌─────────────────│    UNRESOLVED   │─────────────────┐
+*        │                 └────────┬────────┘                 │
+*        │                          │                          │
+*        │              ┌───────────┴───────────┐              │
+*        │              │                       │              │
+*     tapping        opp-side               same-side        shift
+*      term            key                     key          released
+*     (=hold)           │                       │            (=tap)
+*        │              │                       │              │
+*        │              v                       v              │
+*        │      ┌───────────────┐       ┌───────────────┐      │
+*        │      │ LIGHTSHIFT TT │       │  EXTENDED TT  │      │
+*        │      └───┬─────────┬─┘       └───────┬───────┘      │
+*        │          │         │                 │              │
+*        │       tapping    shift             shift            │
+*        │        term     released          released          │
+*        │       (=hold)    (=tap)            (=tap)           │
+*        │          │         │                 │              │
+*        v          v         │                 v              │
+*    ┌───────────────────┐    │         ┌───────────────┐      │
+*    │     SHIFTING      │    │         │   RELEASED,   │      │
+*    └─────────┬─────────┘    │         │   EXTENDED    │      │
+*              │              │         └───────┬───────┘      │
+*              │              │                 │              │
+*            shift            │              any next          │
+*           released          │             key event          │
+*              │              │                 │              │
+*              v              v                 v              v
+*    ┌───────────────────────────────────────────────────────────────┐
+*    │                             INACTIVE                          │
+*    └───────────────────────────────────────────────────────────────┘
 *
 *    Transition Triggers:
 *    --------------------
-*    [pp]   => pre_process_record  (for Extended Tapping Term)
-*    others => process_record      (for Dropshift)
+*    tapping term => process_record      (QMK has resolved to HOLD)
+*    all others   => pre_process_record
 *
-* 
-*    NB: EXTENDED_TT -> SINGLE_SHIFTING is also possible, should the
-*        Extended Tapping Term expire. The default ETT of 65,535ms renders
-*        this impossible in real-world use, but shorter, custom ETTs may
+*    NB: EXTENDED TT -> SHIFTING is also possible, should the Extended
+*        Tapping Term expire.  The default ETT of 65,535ms renders this
+*        impossible in real-world use, but shorter, custom ETTs may
 *        allow for it.
-* 
+*
+*    NB: SHIFTING doesn't change Lightshift's behaviour, as QMK stops
+*        asking for the tapping term once it resolves a HOLD.  It is
+*        tracked so that the state machine (and debug output) show when
+*        a lightshift is shifting.
+*
+*    NB: RELEASED, EXTENDED exists because QMK decides a released
+*        mod-tap only after pre_process_record, so the Extended TT must
+*        persist until then.
+*
 */
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -82,20 +80,11 @@
 
 // Is this a layer / modifier key (excluding MT / LT keys)?
 // For use in pre_process_record, where MT / LT keys are not yet resolved
-bool is_layer_or_mod_ppr(uint16_t keycode) {
+static bool is_layer_or_mod_ppr(uint16_t keycode) {
     return IS_MODIFIER_KEYCODE(keycode) // KC_LEFT_CTRL to KC_RIGHT_GUI
            || (keycode >= QK_LAYER_MOD
                && keycode <= QK_PERSISTENT_DEF_LAYER_MAX) // layers & OSM
            || (keycode == QK_LAYER_LOCK); // layer lock
-}
-
-
-// Is this a layer / modifier key (including MT / LT keys)?
-// Only call with data from process_record(), not from pre_process_record()
-bool lghts_is_layer_or_mod(uint16_t keycode, const keyrecord_t *record) {
-    return is_layer_or_mod_ppr(keycode)
-           ||((IS_QK_MOD_TAP(keycode) || IS_QK_LAYER_TAP(keycode))
-               && record->tap.count == 0);  // held MT / LT
 }
 
 
@@ -159,7 +148,7 @@ bool lghts_is_layer_or_mod(uint16_t keycode, const keyrecord_t *record) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Extended Tapping Term
+// PPR Tracking
 //
 ///////////////////////////////////////////////////////////////////////////////
 
@@ -184,7 +173,7 @@ static void decide_tapping_term(uint16_t keycode, const keyrecord_t *record) {
     
     // otherwise, resolve any UNRESOLVEDs
     for (uint8_t i = 0; i < num_active_lghts(); i++) {
-        shift_t shift = get_lghts(i);
+        lightshift_t shift = get_lghts(i);
         if (shift.state == SHIFT_UNRESOLVED) {
             bool same_hand = lightshift_handedness(record->event.key)
                            == lightshift_handedness(shift.key);
@@ -195,8 +184,8 @@ static void decide_tapping_term(uint16_t keycode, const keyrecord_t *record) {
 }
 
 
-// Update State: Non-held lightshift released
-static void release_non_held_shift(const keyrecord_t *record) {
+// Update State: Lightshift released
+static void release_shift(const keyrecord_t *record) {
     keypos_t key = record->event.key;
     switch (lghts_get_state(key)) {
 
@@ -207,9 +196,10 @@ static void release_non_held_shift(const keyrecord_t *record) {
                 lghts_set_state(key, SHIFT_RELEASED_EXTENDED);
                 break;
 
-            // other non-held releases: set INACTIVE
+            // other releases: set INACTIVE
             case SHIFT_UNRESOLVED:
             case SHIFT_LIGHTSHIFT_TT:
+            case SHIFT_SHIFTING:
                 lghts_set_state(key, SHIFT_INACTIVE);
                 break;
 
@@ -222,7 +212,7 @@ static void release_non_held_shift(const keyrecord_t *record) {
 // Update State: Stop tracking any outstanding RELEASED EXTENDEDs
 static void update_expired_states(void) {
     for (uint8_t i = 0; i < num_active_lghts(); i++) {
-        shift_t shift = get_lghts(i);
+        lightshift_t shift = get_lghts(i);
         if (shift.state == SHIFT_RELEASED_EXTENDED) {
             lghts_set_state(shift.key, SHIFT_INACTIVE);
         }
@@ -230,8 +220,8 @@ static void update_expired_states(void) {
 }
 
 
-// Extended TT: Hook from pre_process_record()
-// Updates: new shift presses; handedness decisions; releasing non-held shifts
+// Hook from pre_process_record()
+// Updates: new shift presses/releases; handedness decisions
 void lghts_track_ppr(uint16_t keycode, const keyrecord_t *record) {
     keypos_t key = record->event.key;
 
@@ -239,11 +229,11 @@ void lghts_track_ppr(uint16_t keycode, const keyrecord_t *record) {
     update_expired_states();
 
     // UNRESOLVED => INACTIVE, LIGHTSHIFT TT => INACTIVE,
-    // EXTENDED TT => RELEASED EXTENDED
+    // SHIFTING => INACTIVE, EXTENDED TT => RELEASED EXTENDED
     if (!record->event.pressed && is_tracked_lghts(key)) {
-        // QMK Non-held lightshifts: Tracking ceases here (in
-        // pre_process_record) to ensure ceasation when used in combos, etc.
-        release_non_held_shift(record);
+        // Tracking ceases here (in pre_process_record) to ensure
+        // ceasation when used in combos, etc.
+        release_shift(record);
     }
 
     // UNRESOLVED => LIGHTSHIFT TT, UNRESOLVED => EXTENDED TT
@@ -258,102 +248,30 @@ void lghts_track_ppr(uint16_t keycode, const keyrecord_t *record) {
 
 ///////////////////////////////////////////////////////////////////////////////
 //
-// Dropshift
+// PR Tracking
 //
 ///////////////////////////////////////////////////////////////////////////////
 
-// Stops tracking any (first found) SHIFT_DOUBLE_SHIFTING key, and returns
-// its keycode
-// DOUBLE SHIFTING => INACTIVE (2 of 2)
-uint16_t lghts_set_double_inactive(uint16_t keycode) {
-    for (uint8_t i = 0; i < num_active_lghts(); i++) {
-        shift_t shift = get_lghts(i);
-        if (shift.state == SHIFT_DOUBLE_SHIFTING) {
-            // set state to INACTIVE (= stop tracking)
-            lghts_dprintf("Shift dropped by disallowed %s double",
-                          get_keycode_string(keycode));
-            lghts_set_state(shift.key, SHIFT_INACTIVE);
-            return shift.keycode;
-        }
+// Hook from process_record()
+// Updates: tapping term expiries
+void lghts_track_pr(uint16_t keycode, const keyrecord_t *record) {
+
+    // only pressed & held lightshifts (i.e. tapping term just expired)
+    if (!record->event.pressed || record->tap.count
+                               || !is_lightshift(keycode)) {
+        return;
     }
-    return KC_NO;
-}
 
-
-// Update State: Held lightshift released
-static void release_held_shift(const keyrecord_t *record) {
-    // Released shift => SHIFT_INACTIVE
+    // UNRESOLVED => SHIFTING, LIGHTSHIFT TT => SHIFTING,
+    // EXTENDED TT => SHIFTING
     keypos_t key = record->event.key;
     switch (lghts_get_state(key)) {
-            case SHIFT_SINGLE_SHIFTING:
-            case SHIFT_DOUBLE_SHIFTING:
-                lghts_set_state(key, SHIFT_INACTIVE);
-                break;
-            default:
-                break;
-        }
-}
-
-
-// Update State: Consume single shifts, if this keypress was shifted by them
-static void consume_single_shifts(uint16_t keycode,
-                                  const keyrecord_t *record) {
-    // don't mark shift as used if...
-    if (!record->event.pressed // release rather than press
-        || lghts_is_layer_or_mod(keycode, record) // layer switch or mod
-        || !lightshift_consume_single(keycode, record)) { // should not consume
-            return;
+        case SHIFT_UNRESOLVED:
+        case SHIFT_LIGHTSHIFT_TT:
+        case SHIFT_EXTENDED_TT: // include Extended for short, custom ETTs
+            lghts_set_state(key, SHIFT_SHIFTING);
+            break;
+        default:
+            break;
     }
-
-    // future shift uses are now doubles
-    for (uint8_t i = 0; i < num_active_lghts(); i++) {
-        shift_t shift = get_lghts(i);
-        if (shift.state == SHIFT_SINGLE_SHIFTING) {
-                lghts_dprintf("Single consumed by %s",
-                              get_keycode_string(keycode));
-                lghts_set_state(shift.key, SHIFT_DOUBLE_SHIFTING);
-        }
-    }
-}
-
-
-// Update State: Tapping term expired
-static void handle_tapping_term_expiries(uint16_t keycode,
-                                         const keyrecord_t *record) {
-    // if a pressed and held lightshift (i.e. tapping_term just expired)
-    if (is_lightshift(keycode) && record->event.pressed
-                               && !record->tap.count) {
-        keypos_t key = record->event.key;
-        switch (lghts_get_state(key)) {
-            case SHIFT_UNRESOLVED:
-            case SHIFT_LIGHTSHIFT_TT:
-            case SHIFT_EXTENDED_TT: // include Extended for short, custom ETTs
-                lghts_set_state(key, SHIFT_SINGLE_SHIFTING);
-                break;
-            default:
-                break;
-        }
-    }
-}
-
-
-// Dropshift: Hook from process_record()
-// Update: tapping_term expiries; consuming singles; releasing held shifts
-void lghts_track_pr(uint16_t keycode, const keyrecord_t *record) {
-    keypos_t key = record->event.key;
-
-    // SINGLE SHIFTING => INACTIVE, DOUBLE SHIFTING => INACTIVE (1 of 2)
-    if (!record->event.pressed && is_tracked_lghts(key))
-    {
-        // QMK Held lightshifts: Tracking ceases here (in process_record)
-        // to ensure all potentially shifted keys are processed before
-        // tracking ends (pre-process record is too early)
-        release_held_shift(record);
-    }
-
-    // SINGLE SHIFTING => DOUBLE SHIFTING
-    consume_single_shifts(keycode, record);
-
-    // UNRESOLVED => SINGLE SHIFTING, LIGHTSHIFT TT => SINGLE SHIFTING
-    handle_tapping_term_expiries(keycode, record);
 }

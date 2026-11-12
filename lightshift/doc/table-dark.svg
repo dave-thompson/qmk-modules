@@ -1,0 +1,87 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="1108" viewBox="0 -32 960 1108" role="img" aria-labelledby="t d">
+  <title id="t">Chordal Hold &amp; Permissive Hold vs Lightshift</title>
+  <desc id="d">Comparison of CH &amp; PH and Lightshift: priority (simple modifier chords vs flawless shifting), approach to missed opposite-side shifts and accidental same-side shifts, non-intervention tapping terms, modifier use, and shift decision accuracy on a Graphite layout (84/100 vs 99/100).</desc>
+  <style>
+    text { font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI","Helvetica Neue",Arial,sans-serif; fill:#fff; }
+    rect { stroke:#EEEEEE; stroke-width:2; }
+    .cell { fill:#000; }
+    .blue { fill:#4582A8; }
+    .yellow { fill:#C4A030; }
+    .onblue { fill:#fff; }
+    .onyellow { fill:#000; }
+    .hd { font-size:22px; font-weight:700; letter-spacing:.01em; }
+    .sec { font-size:12px; font-weight:700; letter-spacing:.12em; }
+    .rule { stroke:#EEEEEE; stroke-width:1; opacity:.35; }
+    .lab { font-size:15px; font-weight:600; }
+    .val { font-size:15px; }
+    .val.b { font-weight:700; }
+    .lab.muted { font-size:13.5px; font-weight:400; opacity:.62; }
+    .val.muted { font-size:13.5px; opacity:.62; }
+    .val.mono { font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; font-size:15.5px; }
+    .chk { fill:none; stroke:#fff; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; }
+  </style>
+  <rect class="blue" x="260" y="18" width="335" height="58" rx="11"/>
+  <rect class="blue" x="605" y="18" width="335" height="58" rx="11"/>
+  <text dy=".35em" class="hd onblue" x="427.5" y="47.0" text-anchor="middle">CH &amp; PH</text>
+  <text dy=".35em" class="hd onblue" x="772.5" y="47.0" text-anchor="middle">Lightshift</text>
+  <text dy=".35em" class="sec" x="24" y="115">PRIORITY</text>
+  <line class="rule" x1="112" y1="115" x2="940" y2="115"/>
+  <text dy=".35em" class="lab" x="24" y="176.0" text-anchor="start">Chording vs. Shifting</text>
+  <rect class="cell" x="260" y="140" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="427.5" y="176.0" text-anchor="middle">Simple Modifier Chords</text>
+  <rect class="cell" x="605" y="140" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="772.5" y="176.0" text-anchor="middle">Flawless Shifting</text>
+  <text dy=".35em" class="sec" x="24" y="255">APPROACH</text>
+  <line class="rule" x1="121" y1="255" x2="940" y2="255"/>
+  <text dy=".35em" class="lab" x="24" y="305.0" text-anchor="start">Missed</text>
+  <text dy=".35em" class="lab" x="24" y="327.0" text-anchor="start">Opposite-Side Shifts</text>
+  <rect class="cell" x="260" y="280" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="427.5" y="305.0" text-anchor="middle">Permissive Hold</text>
+  <text dy=".35em" class="val muted" x="427.5" y="327.0" text-anchor="middle">(when needed)</text>
+  <rect class="cell" x="605" y="280" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="772.5" y="305.0" text-anchor="middle">Very Low Tapping Term</text>
+  <text dy=".35em" class="val muted" x="772.5" y="327.0" text-anchor="middle">(always)</text>
+  <text dy=".35em" class="lab" x="24" y="389.0" text-anchor="start">Accidental</text>
+  <text dy=".35em" class="lab" x="24" y="411.0" text-anchor="start">Same-Side Shifts</text>
+  <rect class="cell" x="260" y="364" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="427.5" y="389.0" text-anchor="middle">Chordal Hold</text>
+  <text dy=".35em" class="val muted" x="427.5" y="411.0" text-anchor="middle">(when needed)</text>
+  <rect class="cell" x="605" y="364" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="772.5" y="389.0" text-anchor="middle">Extended Tapping Term</text>
+  <text dy=".35em" class="val muted" x="772.5" y="411.0" text-anchor="middle">(when needed)</text>
+  <text dy=".35em" class="sec" x="24" y="479">STANDARD TAPPING TERMS</text>
+  <line class="rule" x1="255" y1="479" x2="940" y2="479"/>
+  <text dy=".35em" class="lab" x="24" y="540.0" text-anchor="start">Shift</text>
+  <rect class="cell" x="260" y="504" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val mono" x="427.5" y="540.0" text-anchor="middle">200ms</text>
+  <rect class="cell" x="605" y="504" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val mono" x="772.5" y="540.0" text-anchor="middle">140ms</text>
+  <text dy=".35em" class="lab" x="24" y="624.0" text-anchor="start">Other Mods</text>
+  <rect class="cell" x="260" y="588" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val mono" x="427.5" y="624.0" text-anchor="middle">200ms</text>
+  <rect class="cell" x="605" y="588" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val mono" x="772.5" y="624.0" text-anchor="middle">250ms</text>
+  <text dy=".35em" class="sec" x="24" y="703">MODIFIER USE</text>
+  <line class="rule" x1="159" y1="703" x2="940" y2="703"/>
+  <text dy=".35em" class="lab" x="24" y="764.0" text-anchor="start">Chording</text>
+  <rect class="cell" x="260" y="728" width="335" height="72" rx="11"/>
+  <path class="chk" d="M419.5 764.0 L425.0 770.0 L435.5 758.0"/>
+  <rect class="cell" x="605" y="728" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="772.5" y="764.0" text-anchor="middle">Must press Shift last</text>
+  <text dy=".35em" class="lab" x="24" y="837.0" text-anchor="start">Ctrl / Cmd / Alt</text>
+  <text dy=".35em" class="lab" x="24" y="859.0" text-anchor="start">while Fast Typing</text>
+  <rect class="cell" x="260" y="812" width="335" height="72" rx="11"/>
+  <path class="chk" d="M419.5 848.0 L425.0 854.0 L435.5 842.0"/>
+  <rect class="cell" x="605" y="812" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val" x="772.5" y="837.0" text-anchor="middle">Use Custom Hotkeys</text>
+  <text dy=".35em" class="val muted" x="772.5" y="859.0" text-anchor="middle">(or wait 200ms to use HRMs)</text>
+  <text dy=".35em" class="sec" x="24" y="927">SHIFT DECISION</text>
+  <line class="rule" x1="178" y1="927" x2="940" y2="927"/>
+  <text dy=".35em" class="lab" x="24" y="966.0" text-anchor="start">Accuracy</text>
+  <text dy=".35em" class="lab muted" x="24" y="988.0" text-anchor="start">(Clean MonkeyType Quote Tests,</text>
+  <text dy=".35em" class="lab muted" x="24" y="1010.0" text-anchor="start"> Graphite @ average ~90wpm)</text>
+  <rect class="blue" x="260" y="952" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val onblue b" x="427.5" y="988.0" text-anchor="middle">84 / 100</text>
+  <rect class="blue" x="605" y="952" width="335" height="72" rx="11"/>
+  <text dy=".35em" class="val onblue b" x="772.5" y="988.0" text-anchor="middle">99 / 100</text>
+</svg>

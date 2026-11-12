@@ -13,8 +13,7 @@ typedef enum {
     SHIFT_LIGHTSHIFT_TT,           // Pressed, use Lightshift TT
     SHIFT_EXTENDED_TT,             // Pressed, use Extended TT
     SHIFT_RELEASED_EXTENDED,       // Just released, use Extended TT
-    SHIFT_SINGLE_SHIFTING,         // Held; not yet consumed
-    SHIFT_DOUBLE_SHIFTING,         // Held; already consumed, only doubles left
+    SHIFT_SHIFTING,                // QMK has resolved to HOLD
     LIGHTSHIFT_STATE_COUNT,
   // Update debug messages in lightshift_state.c when changing
 } lightshift_state_t;
@@ -24,7 +23,7 @@ typedef struct {
     keypos_t key;             ///< physical key location
     uint16_t keycode;         ///< keycode
     lightshift_state_t state; ///< current state: pressed? which tt?
-} shift_t;
+} lightshift_t;
 
 /**
  * @brief Returns state data for the active lightshift at index
@@ -34,11 +33,11 @@ typedef struct {
  * @return state data, including state, keycode and key
  *         (or SHIFT_INACTIVE, KC_NO if no lightshift at index)
  */
-shift_t get_lghts(uint8_t index);
+lightshift_t get_lghts(uint8_t index);
 
 
 /**
- * @brief Returns the number of active (pressed & not cleared) lightshifts
+ * @brief Returns the number of active (pressed) lightshifts
  *
  * @return number of currently active lightshifts
  */
