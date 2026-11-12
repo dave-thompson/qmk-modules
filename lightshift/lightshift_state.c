@@ -184,19 +184,17 @@ void lghts_set_state(keypos_t key, lightshift_state_t state) {
         shift_index = add_shift(key, keycode);
     }
 
-    // stop tracking old shift presses
-    else if (state == SHIFT_INACTIVE) {
-        remove_shift(shift_index);
-    }
-
-    // update state normally
+    // already tracked shifts
     else {
-        shift_keys[shift_index].state = state;
+        keycode = shift_keys[shift_index].keycode; // before remove_shift()
+        // stop tracking old shift presses
+        if (state == SHIFT_INACTIVE) remove_shift(shift_index);
+        // update state normally
+        else shift_keys[shift_index].state = state;
     }
 
     // debug logging
     if (shift_index != SHIFT_NO) {
-        keycode = shift_keys[shift_index].keycode;
         lghts_dprintf("%s - state: %s", get_keycode_string(keycode),
                       state_debug_text(state));
     }
