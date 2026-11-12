@@ -4,7 +4,12 @@
         if (is_lightshift(keycode)) {
             return get_lightshift_term(keycode, record);
         }
-        return TAPPING_TERM;
+        // fall back to QMK core implementation, from action_tapping.c
+        #ifdef DYNAMIC_TAPPING_TERM_ENABLE
+            return g_tapping_term;
+        #else
+            return TAPPING_TERM;
+        #endif
     }
 #endif
 
