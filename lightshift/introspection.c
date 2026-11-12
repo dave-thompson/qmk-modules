@@ -24,8 +24,8 @@
                       keyrecord_t* tap_hold_record,
                       uint16_t other_keycode,
                       keyrecord_t* other_record) {
-        if (is_lightshift(tap_hold_keycode)) return false;
-        return true;
+        if (is_lightshift(tap_hold_keycode)) return true;
+        return get_chordal_hold_default(tap_hold_record, other_record);
     }
 #endif
 

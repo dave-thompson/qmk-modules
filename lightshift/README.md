@@ -273,7 +273,7 @@ bool get_chordal_hold(uint16_t tap_hold_keycode,
                       keyrecord_t* other_record) {
                       
     // add this line at the top (so chordal hold remains disabled on lightshift keys)
-    if (is_lightshift(tap_hold_keycode)) return false;
+    if (is_lightshift(tap_hold_keycode)) return true;
     
     // your custom code goes here
     ...
