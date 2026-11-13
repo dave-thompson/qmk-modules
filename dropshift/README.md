@@ -1,13 +1,17 @@
-# Dropshift
+<div align="center">
+    <picture>
+        <img width="100%" src="doc/dropshift.png" alt="Singles & Doubles">
+    </picture>
+</div>
+
+## Contents
 
 <table>
 <tr><td><b>Module</b></td><td><tt>dave-thompson/dropshift</tt></td></tr>
-<tr><td><b>Version</b></td><td>2026-11-12</td></tr>
+<tr><td><b>Version</b></td><td>2026-11-13</td></tr>
 <tr><td><b>Maintainer</b></td><td>Dave Thompson (@dave-thompson)</td></tr>
 <tr><td><b>License</b></td><td><a href="../LICENSE.txt">GNU GPLv3</a></td></tr>
 </table>
-
-## Contents
 
 **Core** • [Fixing Double Shifts](#fixing-double-shifts) • [How it Works](#how-it-works)
 
